@@ -4,13 +4,27 @@ import db from '../backend/db_connections.js';
 
 const router = express.Router();
 
+// Helper getActiveYear dihapus karena tidak lagi digunakan untuk filter akses
+
 // @route   GET /api/users
-// @desc    Ambil semua user (tanpa password)
 router.get('/', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT id, nama, username, role, created_at FROM users ORDER BY nama DESC');
+    const [rows] = await db.query(`
+      SELECT 
+        u.id, 
+        u.nama, 
+        u.username, 
+        u.password, 
+        u.role, 
+        u.created_at,
+        ca.* FROM users u
+      LEFT JOIN client_access ca ON u.id = ca.user_id
+      ORDER BY u.nama ASC
+    `);
+
     res.json(rows);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server Error' });
   }
 });
@@ -18,7 +32,20 @@ router.get('/', async (req, res) => {
 // @route   GET /api/users/:id
 router.get('/:id', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT id, nama, username, role, created_at FROM users WHERE id = ?', [req.params.id]);
+    const [rows] = await db.query(`
+      SELECT 
+        u.id, 
+        u.nama, 
+        u.username, 
+        u.password, 
+        u.role, 
+        u.created_at,
+        ca.*
+      FROM users u
+      LEFT JOIN client_access ca ON u.id = ca.user_id
+      WHERE u.id = ?
+    `, [req.params.id]);
+
     if (rows.length === 0) return res.status(404).json({ message: 'User tidak ditemukan' });
     res.json(rows[0]);
   } catch (err) {
@@ -27,27 +54,31 @@ router.get('/:id', async (req, res) => {
 });
 
 // @route   POST /api/users
-// @desc    Tambah user baru (dengan Hash Password)
 router.post('/', async (req, res) => {
   const { nama, username, password, role } = req.body;
-
+  
   try {
-    // Cek username
     const [existing] = await db.query('SELECT id FROM users WHERE username = ?', [username]);
-    if (existing.length > 0) return res.status(400).json({ message: 'Username sudah digunakan' });
+    if (existing.length > 0) {
+      return res.status(400).json({ message: 'Username sudah digunakan' });
+    }
 
-    // Hash Password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    await db.query(
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const [result] = await db.query(
       'INSERT INTO users (nama, username, password, role) VALUES (?, ?, ?, ?)',
       [nama, username, hashedPassword, role || 'client']
     );
 
-    res.status(201).json({ message: 'User berhasil dibuat' });
+    res.status(201).json({ 
+      status: 'success',
+      message: 'User berhasil dibuat',
+      id: result.insertId 
+    });
+
   } catch (err) {
-    res.status(500).json({ message: 'Gagal menambah user' });
+    console.error("Error Post User:", err);
+    res.status(500).json({ message: 'Gagal menambah user', error: err.message });
   }
 });
 
@@ -60,10 +91,8 @@ router.put('/:id', async (req, res) => {
     let query = 'UPDATE users SET nama = ?, username = ?, role = ?';
     let params = [nama, username, role];
 
-    // Jika ganti password juga
     if (password) {
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
+      const hashedPassword = await bcrypt.hash(password, 10);
       query += ', password = ?';
       params.push(hashedPassword);
     }
@@ -81,6 +110,8 @@ router.put('/:id', async (req, res) => {
 // @route   DELETE /api/users/:id
 router.delete('/:id', async (req, res) => {
   try {
+    // Pastikan di database sudah menggunakan ON DELETE CASCADE 
+    // agar data di client_access otomatis terhapus saat user dihapus.
     await db.query('DELETE FROM users WHERE id = ?', [req.params.id]);
     res.json({ message: 'User berhasil dihapus' });
   } catch (err) {

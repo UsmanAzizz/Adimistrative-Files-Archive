@@ -6,9 +6,13 @@ import cors from 'cors';
 import db from './db_connections.js';
 
 // Import Routes
+import globalRoutes from '../routes/globalSettings.js';
 import loginRoutes from '../routes/login.js';
-import userRoutes from '../routes/users.js'; // 1. Tambahkan import ini
+import userRoutes from '../routes/users.js'; 
+import getArchive from '../routes/getArchive.js';
+import accessRoutes from '../routes/defineAccess.js';
 import errorMiddleware from './errorMiddleware.js';
+
 
 dotenv.config();
 const app = express();
@@ -22,8 +26,11 @@ app.get('/', (req, res) => {
 });
 
 // 2. Daftarkan route users di sini
+app.use('/api/global', globalRoutes);
 app.use('/api/login', loginRoutes);
-app.use('/api/users', userRoutes); 
+app.use('/api/users', userRoutes);
+app.use('/api/define-access', accessRoutes); 
+app.use('/api/archive-years', getArchive); 
 
 // --- ERROR HANDLING ---
 app.use((req, res, next) => {

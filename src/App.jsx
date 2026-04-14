@@ -2,22 +2,37 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import MainLayout from './components/MainLayout';
 import Login from './pages/login';
 import Dashboard from './pages/dashboard';
-import Users from './pages/users'; // Import halaman yang baru dibuat
+import Users from './pages/users';
+import ArchivePage from './pages/archive/archivePage'; // Pastikan path file ArchivePage benar
 
 function App() {
   return (
     <Router>
       <Routes>
+        {/* Rute Publik */}
         <Route path="/login" element={<Login />} />
 
+        {/* Rute Terproteksi (Dalam Layout Utama) */}
         <Route element={<MainLayout />}>
+          {/* Dashboard Utama */}
           <Route path="/dashboard" element={<Dashboard />} />
+          
+          {/* Manajemen User */}
           <Route path="/users" element={<Users />} />
-          <Route path="/archives" element={<div>Halaman Arsip</div>} />
-          {/* Rute lainnya... */}
+          
+          {/* Manajemen Arsip - Menggunakan halaman yang baru dibuat */}
+          <Route path="/archives" element={<ArchivePage />} />
+          
+          {/* Placeholder untuk rute lain agar navigasi tidak pecah */}
+          <Route path="/reports" element={<div className="p-8">Halaman Laporan Tahunan (Coming Soon)</div>} />
+          <Route path="/settings" element={<div className="p-8">Halaman Pengaturan (Coming Soon)</div>} />
         </Route>
 
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        {/* Redirect default ke dashboard */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        
+        {/* Fallback rute jika halaman tidak ditemukan (404) */}
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
   );
