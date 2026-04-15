@@ -4,6 +4,7 @@ import Login from './pages/login';
 import Dashboard from './pages/dashboard';
 import Users from './pages/users';
 import ArchivePage from './pages/archive/archivePage'; // Pastikan path file ArchivePage benar
+import Settings from './pages/settings';
 
 function App() {
   return (
@@ -25,7 +26,7 @@ function App() {
           
           {/* Placeholder untuk rute lain agar navigasi tidak pecah */}
           <Route path="/reports" element={<div className="p-8">Halaman Laporan Tahunan (Coming Soon)</div>} />
-          <Route path="/settings" element={<div className="p-8">Halaman Pengaturan (Coming Soon)</div>} />
+           <Route path="/settings" element={<Settings />} />
         </Route>
 
         {/* Redirect default ke dashboard */}

@@ -2,18 +2,65 @@ import express from 'express';
 const router = express.Router();
 import db from '../backend/db_connections.js';
 
+// --- 1. GET ALL DATA & COLUMNS ---
 router.get('/', async (req, res) => {
   try {
-    // Karena tahun_pelajaran dihilangkan dari filter query utama, 
-    // kita langsung mengambil semua data akses.
     const [rows] = await db.execute('SELECT * FROM client_access');
-    
-    res.status(200).json({
-      status: 'success',
-      data: rows
-    });
+    res.status(200).json({ status: 'success', data: rows });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+// --- TAMBAH KOLOM BARU ---
+router.post('/column', async (req, res) => {
+  try {
+    const { name } = req.body; 
+    if (!name) return res.status(400).json({ message: 'Nama kolom wajib' });
+
+    // Format: lowercase dan ganti spasi dengan underscore
+    const formattedName = name.toLowerCase().trim().replace(/\s+/g, '_');
+
+    const query = `ALTER TABLE client_access ADD COLUMN \`${formattedName}\` TINYINT(1) DEFAULT 0`;
+    await db.execute(query);
+
+    res.status(200).json({ status: 'success', message: `Kolom ${formattedName} ditambahkan` });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+// --- EDIT/RENAME KOLOM ---
+router.put('/column', async (req, res) => {
+  try {
+    const { oldName, newName } = req.body;
+    const formattedNewName = newName.toLowerCase().trim().replace(/\s+/g, '_');
+
+    const query = `ALTER TABLE client_access CHANGE \`${oldName}\` \`${formattedNewName}\` TINYINT(1) DEFAULT 0`;
+    await db.execute(query);
+
+    res.status(200).json({ status: 'success', message: 'Struktur berhasil diubah' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+// --- 4. HAPUS KOLOM (ALTER TABLE DROP) ---
+router.delete('/column/:name', async (req, res) => {
+  try {
+    const { name } = req.params;
+
+    // Proteksi agar user_id tidak terhapus secara tidak sengaja
+    if (name === 'user_id') {
+      return res.status(400).json({ message: 'Kolom user_id adalah kunci utama dan tidak boleh dihapus' });
+    }
+
+    // Perintah ini akan menghapus kolom beserta seluruh record data di dalamnya
+    const query = `ALTER TABLE client_access DROP COLUMN \`${name}\``;
+    await db.execute(query);
+
+    res.status(200).json({ status: 'success', message: `Kolom ${name} dan seluruh datanya telah dihapus` });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: `Gagal hapus kolom: ${error.message}` });
   }
 });
 
@@ -69,6 +116,15 @@ router.put('/update', async (req, res) => {
   } catch (error) {
     console.error("Database Error:", error);
     res.status(500).json({ status: 'error', message: `Database Error: ${error.message}` });
+  }
+});
+router.delete('/user/:user_id', async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    await db.execute('DELETE FROM client_access WHERE user_id = ?', [user_id]);
+    res.status(200).json({ status: 'success', message: 'Record user berhasil dihapus' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
   }
 });
 

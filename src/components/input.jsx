@@ -42,11 +42,11 @@ const Input = ({ label, icon: Icon, type, value, onChange, placeholder, required
             ${Icon ? 'pl-14 pr-6' : 'px-6'}
             ${isFocused 
               ? 'border-emerald-500 bg-white text-slate-900 shadow-[0_10px_25px_-5px_rgba(16,185,129,0.1)]' 
-              : 'border-slate-100 bg-slate-50 text-slate-600'
+              : 'border-slate-400 bg-slate-50 text-slate-600'
             }
             
             /* Placeholder lebih soft */
-            placeholder:text-slate-300 placeholder:font-medium placeholder:tracking-normal
+            placeholder:text-slate-400 placeholder:font-medium placeholder:tracking-normal
           `}
         />
       </div>

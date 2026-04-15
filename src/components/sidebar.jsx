@@ -8,7 +8,7 @@ const Sidebar = () => {
     { id: 'dashboard', label: 'Dashboard', icon: FiHome, path: '/dashboard' },
     { id: 'archives', label: 'Arsip Dokumen', icon: FiFolder, path: '/archives' },
     { id: 'users', label: 'Manajemen User', icon: FiUsers, path: '/users' },
-    { id: 'reports', label: 'Laporan Tahunan', icon: FiFileText, path: '/reports' },
+    // { id: 'reports', label: 'Laporan Tahunan', icon: FiFileText, path: '/reports' },
     { id: 'settings', label: 'Pengaturan', icon: FiSettings, path: '/settings' },
   ];
 
