@@ -66,12 +66,13 @@ const MainArchive = () => {
             {/* Header & Navigasi Balik */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100">
                 <div className="flex items-center gap-5">
-                    <button 
-                        onClick={() => navigate('/archive')}
-                        className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm"
-                    >
-                        <FiArrowLeft size={20} />
-                    </button>
+                  <button 
+    // Ganti dari '/archive' ke '/archives' agar kembali ke daftar tahun
+    onClick={() => navigate('/archives')} 
+    className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm"
+>
+    <FiArrowLeft size={20} />
+</button>
                     <div>
                         <div className="flex items-center gap-2">
                             <FiHardDrive className="text-emerald-600" size={18} />

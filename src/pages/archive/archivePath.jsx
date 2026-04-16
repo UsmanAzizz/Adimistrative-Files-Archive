@@ -118,7 +118,7 @@ const ArchivePath = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#FBFBFB] p-4 md:p-8 space-y-6">
+        <div className="min-h-screen bg-[#FBFBFB] p-4 md:p-2 space-y-6">
 
             {/* HEADER & CONTROLS */}
             <div className="bg-white p-5 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -177,23 +177,48 @@ const ArchivePath = () => {
                 </div>
             ) : viewMode === 'grid' ? (
                 /* GRID VIEW */
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {items.map((item, idx) => (
-                        <div key={item.id || idx} onClick={() => item.isFolder && handleFolderClick(item.name)} className="group bg-white p-6 rounded-[2.5rem] border border-transparent hover:border-emerald-500/20 hover:shadow-2xl transition-all cursor-pointer text-center relative">
-                            <div className="absolute top-4 right-0 z-20" ref={activeMenu === idx ? menuRef : null}>
-                                <button onClick={(e) => { e.stopPropagation(); setActiveMenu(activeMenu === idx ? null : idx); }} className="p-2 text-slate-300 hover:text-slate-600 hover:bg-slate-50 rounded-xl">
-                                    <FiMoreVertical size={16} />
-                                </button>
-                                {activeMenu === idx && <ActionMenu item={item} setModalType={setModalType} setSelectedItem={setSelectedItem} setFolderNameInput={setFolderNameInput} setShowModal={setShowModal} setActiveMenu={setActiveMenu} handleDelete={handleDelete} />}
-                            </div>
-                            <div className={`mx-auto w-16 h-16 rounded-3xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-500 ${item.isFolder ? 'bg-amber-50 text-amber-500 shadow-inner' : 'bg-blue-50 text-blue-500'}`}>
-                                {item.isFolder ? <FiFolder size={32} fill="currentColor" /> : <FiFile size={32} />}
-                            </div>
-                            <p className="font-bold text-slate-700 text-xs truncate uppercase tracking-tight px-2">{item.name}</p>
-                            <p className="text-[9px] font-black text-slate-300 mt-1 uppercase">{item.isFolder ? 'Folder' : item.size}</p>
-                        </div>
-                    ))}
-                </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+    {items.map((item, idx) => (
+        <div 
+            key={item.id || idx} 
+            onClick={() => item.isFolder && handleFolderClick(item.name)} 
+            /* Radius dikurangi menjadi 3xl, shadow-sm untuk dimensi awal */
+            className="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:border-amber-500/20 hover:shadow-xl transition-all duration-300 cursor-pointer text-center relative"
+        >
+            <div className="absolute top-4 right-0 z-20" ref={activeMenu === idx ? menuRef : null}>
+                <button 
+                    onClick={(e) => { e.stopPropagation(); setActiveMenu(activeMenu === idx ? null : idx); }} 
+                    className="p-2 text-slate-300 hover:text-slate-600 hover:bg-slate-50 rounded-xl"
+                >
+                    <FiMoreVertical size={16} />
+                </button>
+                {activeMenu === idx && (
+                    <ActionMenu 
+                        item={item} 
+                        setModalType={setModalType} 
+                        setSelectedItem={setSelectedItem} 
+                        setFolderNameInput={setFolderNameInput} 
+                        setShowModal={setShowModal} 
+                        setActiveMenu={setActiveMenu} 
+                        handleDelete={handleDelete} 
+                    />
+                )}
+            </div>
+
+            {/* KEMBALI KE AMBER: bg-amber-50 dan text-amber-500 */}
+            <div className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-500 ${item.isFolder ? 'bg-amber-50 text-amber-500 shadow-inner' : 'bg-blue-50 text-blue-500'}`}>
+                {item.isFolder ? <FiFolder size={32} fill="currentColor" /> : <FiFile size={32} />}
+            </div>
+
+            <p className="font-bold text-slate-700 text-[11px] truncate uppercase tracking-tight px-2">
+                {item.name}
+            </p>
+            <p className="text-[9px] font-black text-slate-300 mt-1 uppercase">
+                {item.isFolder ? 'Folder' : item.size}
+            </p>
+        </div>
+    ))}
+</div>
             ) : (
                 /* LIST VIEW */
                 <div className="flex flex-col gap-2">
