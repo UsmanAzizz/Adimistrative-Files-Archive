@@ -11,10 +11,29 @@ router.use(isAdmin);
 // --- 1. GET ALL DATA & COLUMNS ---
 router.get('/', async (req, res) => {
   try {
+    // 1. Ambil data record (untuk mengisi checkbox/status di tabel)
     const [rows] = await db.query('SELECT * FROM client_access');
-    const filteredData = rows.map(({ created_at, updated_at, ...rest }) => rest);
 
-    res.status(200).json({ status: 'success', data: filteredData });
+    // 2. Ambil struktur kolom langsung dari MySQL agar tetap dapat "Daftar Jabatan" meski tabel kosong
+    // Ganti 'nama_database_kamu' dengan nama DB yang sebenarnya
+    const [columns] = await db.query(`
+      SELECT COLUMN_NAME 
+      FROM INFORMATION_SCHEMA.COLUMNS 
+      WHERE TABLE_NAME = 'client_access' 
+      AND TABLE_SCHEMA = DATABASE()
+    `);
+
+    // 3. Filter kolom yang bukan jabatan
+    const ignoreFields = ['user_id', 'created_at', 'updated_at'];
+    const availableRoles = columns
+      .map(col => col.COLUMN_NAME)
+      .filter(name => !ignoreFields.includes(name));
+
+    res.status(200).json({ 
+      status: 'success', 
+      data: rows,           // Ini mungkin [] jika kosong
+      roles: availableRoles // Ini akan SELALU ada isinya (daftar kolom jabatan)
+    });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
