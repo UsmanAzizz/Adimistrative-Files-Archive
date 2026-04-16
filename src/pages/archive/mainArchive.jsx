@@ -17,21 +17,20 @@ const API_URL = import.meta.env.VITE_API_BASE_URL;
   const fetchFolders = async () => {
     setLoading(true);
     try {
-        // 1. Pakai axios instance (tidak perlu API_URL lagi jika baseURL sudah benar)
-        // Jika tetap ingin pakai API_URL manual, pastikan variabelnya sinkron
-        const response = await axios.get('/define-access');
+        // 1. Tambahkan API_URL sesuai permintaan
+        const response = await axios.get(`${API_URL}/define-access`);
         
-        // 2. PASTIIN NAMA VARIABELNYA SAMA (pakai 'response', bukan 'res')
+        // 2. PERBAIKAN: Ganti 'res' menjadi 'response' agar tidak undefined
         if (response.data.status === 'success' && response.data.data.length > 0) {
             
-            // Ambil semua kunci kolom dari item pertama
+            // Ambil semua kunci kolom dari data index ke-0
             const allKeys = Object.keys(response.data.data[0]);
             
-            // Pengecualian: variabel ini bukan merupakan direktori jabatan
+            // 3. Filter field yang bukan merupakan direktori jabatan
             const ignoreFields = ['user_id', 'nama', 'tahun_pelajaran', 'created_at', 'updated_at'];
             const dynamicFolders = allKeys.filter(key => !ignoreFields.includes(key));
             
-            console.log("Folders ditemukan:", dynamicFolders); // Buat intip di console
+            // Masukkan ke state untuk di-render di UI
             setFolders(dynamicFolders);
         }
     } catch (err) {
