@@ -6,7 +6,7 @@ import path from 'path';
 const router = express.Router();
 
 // Tentukan path absolut ke folder store di project Anda
-const ROOT_STORE = "D:\\project\\DAFA\\src\\store";
+const ROOT_STORE = process.env.VITE_UPLOAD_PATH || "D:\\project\\DAFA\\src\\store";
 
 // Helper untuk membuat folder fisik jika belum ada
 const ensureDir = (dirPath) => {
