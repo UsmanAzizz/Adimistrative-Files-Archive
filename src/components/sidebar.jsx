@@ -1,9 +1,24 @@
-import { motion } from 'framer-motion';
+import React, { useState } from 'react'; // Tambah useState
+import { motion, useScroll, useMotionValueEvent } from 'framer-motion'; // Tambah useScroll & useMotionValueEvent
 import { NavLink, useNavigate } from 'react-router-dom'; 
 import { FiHome, FiFolder, FiSettings, FiLogOut, FiUsers } from 'react-icons/fi';
 
+
 const Sidebar = () => {
-  const navigate = useNavigate();
+ const navigate = useNavigate();
+  const [hidden, setHidden] = useState(false); // State untuk kontrol sembunyi/tampil
+  const { scrollY } = useScroll();
+
+  // Logika memantau arah scroll
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const previous = scrollY.getPrevious();
+    // Jika scroll ke bawah lebih dari 50px dan sedang tidak di atas sendiri
+    if (latest > previous && latest > 50) {
+      setHidden(true);
+    } else {
+      setHidden(false);
+    }
+  });
   
   // 1. Ambil data user dari localStorage
   const userInfo = JSON.parse(localStorage.getItem('user_info'));
@@ -70,23 +85,47 @@ const Sidebar = () => {
       </aside>
 
       {/* MOBILE BOTTOM NAV */}
-      <nav className="md:hidden fixed bottom-6 left-6 right-6 bg-slate-900/90 backdrop-blur-lg border border-slate-800 h-16 rounded-[2rem] z-[100] flex justify-around items-center px-2 shadow-2xl">
-        {/* Gunakan filteredMenu di sini juga */}
-        {filteredMenu.map((item) => (
-          <NavLink key={item.id} to={item.path} className="relative flex-1 flex justify-center">
-            {({ isActive }) => (
-              <div className="relative flex flex-col items-center">
-                {isActive && (
-                  <motion.div layoutId="navActive" className="absolute -inset-3 bg-emerald-600/20 rounded-2xl" />
-                )}
-                <item.icon size={22} className={isActive ? 'text-emerald-400' : 'text-slate-500'} />
-                {isActive && <div className="w-1 h-1 bg-emerald-400 rounded-full mt-1" />}
-              </div>
-            )}
-          </NavLink>
-        ))}
-        <button onClick={handleLogout} className="flex-1 text-rose-500/60 flex justify-center"><FiLogOut size={22} /></button>
-      </nav>
+   {/* MOBILE BOTTOM NAV */}
+<motion.nav 
+  variants={{
+    visible: { y: 0, opacity: 1 },
+    hidden: { y: 100, opacity: 0 }
+  }}
+  initial="visible"
+  animate={hidden ? "hidden" : "visible"}
+  transition={{ duration: 0.3, ease: "easeOut" }}
+  className="md:hidden fixed bottom-6 left-6 right-6 bg-slate-900/90 backdrop-blur-lg border border-slate-800 h-16 rounded-[2rem] z-[100] flex justify-around items-center px-2 shadow-2xl"
+>
+  {filteredMenu.map((item) => (
+    <NavLink key={item.id} to={item.path} className="relative flex-1 flex justify-center">
+      {({ isActive }) => (
+        <div className="relative flex items-center justify-center w-12 h-12"> {/* Container dikunci ukurannya */}
+          
+          {/* PEMBUNGKUS LINGKARAN */}
+          {isActive && (
+            <motion.div 
+              layoutId="navActive" 
+              className="absolute inset-0 bg-emerald-600/20 rounded-full" 
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            />
+          )}
+          
+          {/* IKON */}
+          <div className="relative z-10 flex flex-col items-center">
+            <item.icon size={22} className={isActive ? 'text-emerald-400' : 'text-slate-500'} />
+            {/* Titik kecil opsional, kalau mau benar-benar bersih bisa dihapus */}
+            {/* {isActive && <div className="w-1 h-1 bg-emerald-400 rounded-full mt-1" />} */}
+          </div>
+          
+        </div>
+      )}
+    </NavLink>
+  ))}
+  
+  <button onClick={handleLogout} className="flex-1 text-rose-500/60 flex justify-center items-center">
+    <FiLogOut size={22} />
+  </button>
+</motion.nav>
     </>
   );
 };
