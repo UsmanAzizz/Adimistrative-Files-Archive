@@ -7,14 +7,18 @@ import {
 import axios from '../../backend/axiosConfig';
 
 const ArchivePath = () => {
-    const { tapel, jabatan, "*": subPath } = useParams();
+    // 1. Ambil params dengan fallback yang aman
+    const params = useParams();
+    const { tapel, jabatan } = params;
+    const subPath = params['*'] || ""; 
+    
     const navigate = useNavigate();
     const location = useLocation();
 
     // State Utama
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' atau 'list'
+    const [viewMode, setViewMode] = useState('grid');
     
     // State Modal & UI
     const [showModal, setShowModal] = useState(false);
@@ -24,15 +28,16 @@ const ArchivePath = () => {
     const [activeMenu, setActiveMenu] = useState(null);
     const menuRef = useRef(null);
 
-    // --- LOGIKA BREADCRUMBS ---
+    // --- LOGIKA BREADCRUMBS (DIPERBAIKI) ---
     const pathSegments = [
-        { name: tapel.replace(/-/g, '/'), path: `/archive/${tapel}` },
-        { name: jabatan.replace(/_/g, ' '), path: `/archive/${tapel}/${jabatan}` }
+        { name: tapel?.replace(/-/g, '/') || '', path: `/archive/${tapel}` },
+        { name: jabatan?.replace(/_/g, ' ') || '', path: `/archive/${tapel}/${jabatan}` }
     ];
 
     if (subPath) {
-        subPath.split('/').filter(Boolean).forEach((seg, i, arr) => {
-            const fullSubPath = arr.slice(0, i + 1).join('/');
+        const segments = subPath.split('/').filter(Boolean);
+        segments.forEach((seg, i) => {
+            const fullSubPath = segments.slice(0, i + 1).join('/');
             pathSegments.push({
                 name: seg,
                 path: `/archive/${tapel}/${jabatan}/${fullSubPath}`
@@ -40,50 +45,44 @@ const ArchivePath = () => {
         });
     }
 
-  const fetchContent = async () => {
-    setLoading(true);
-    try {
-        // Gunakan nilai fallback yang jelas
-        const currentPath = subPath || ""; 
-        
-        const res = await axios.get('/folders/content', {
-            params: { 
-                tapel, 
-                jabatan, 
-                // Pastikan dikirim sebagai string, bukan undefined
-                path: currentPath 
+    // --- 2. FETCH CONTENT (DIPERBAIKI AGAR TIDAK 502) ---
+    const fetchContent = async () => {
+        setLoading(true);
+        try {
+            // Pastikan tidak ada slash di awal/akhir yang mengganggu query backend
+            const cleanPath = subPath.replace(/^\/+|\/+$/g, "");
+            
+            const res = await axios.get('/folders/content', {
+                params: { 
+                    tapel, 
+                    jabatan, 
+                    path: cleanPath 
+                }
+            });
+            
+            if (res.data.status === 'success') {
+                setItems(Array.isArray(res.data.data) ? res.data.data : []);
             }
-        });
-        
-        if (res.data.status === 'success') {
-            setItems(res.data.data);
+        } catch (err) {
+            console.error("Gagal fetch content:", err);
+            setItems([]);
+            // Jika 502 terjadi, pastikan backend tidak crash saat membaca path kosong
+        } finally {
+            setLoading(false);
         }
-    } catch (err) {
-        console.error("Gagal fetch content:", err);
-        setItems([]);
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
+    // Trigger fetch saat path berubah
     useEffect(() => {
         fetchContent();
         setActiveMenu(null);
-    }, [location.pathname]);
+    }, [tapel, jabatan, subPath]); // Dependency dipersempit ke params
 
-    // Close menu clicking outside
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (menuRef.current && !menuRef.current.contains(e.target)) setActiveMenu(null);
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    // --- 2. ACTIONS ---
+    // --- 3. ACTIONS (NAVIGASI ABSOLUT) ---
     const handleFolderClick = (folderName) => {
-        const currentSubPath = (subPath || "").replace(/\/+$/, "");
+        const currentSubPath = subPath.replace(/\/+$/, "");
         const nextPath = currentSubPath ? `${currentSubPath}/${folderName}` : folderName;
+        // Gunakan path absolut agar tidak double prefix /dafa/dafa
         navigate(`/archive/${tapel}/${jabatan}/${nextPath}`);
     };
 
@@ -102,28 +101,33 @@ const ArchivePath = () => {
         try {
             if (modalType === 'create') {
                 await axios.post('/folders/create-sub', {
-                    tapel, jabatan, parentPath: subPath || '', folderName: folderNameInput
+                    tapel, 
+                    jabatan, 
+                    parentPath: subPath || '', 
+                    folderName: folderNameInput
                 });
             } else {
                 await axios.put('/folders/rename-sub', {
-                    id: selectedItem.id, newName: folderNameInput
+                    id: selectedItem.id, 
+                    newName: folderNameInput
                 });
             }
             setShowModal(false);
             setFolderNameInput('');
+            // Refresh content setelah aksi
             fetchContent();
         } catch (err) {
-            alert("Gagal memproses folder");
+            alert("Gagal memproses folder. Periksa koneksi backend (502).");
         }
     };
 
     const handleDelete = async (item) => {
-        if (window.confirm(`Hapus folder "${item.name}" secara permanen dari sistem?`)) {
+        if (window.confirm(`Hapus folder "${item.name}" secara permanen?`)) {
             try {
                 await axios.delete(`/folders/sub/${item.id}`);
                 fetchContent();
             } catch (err) {
-                alert("Gagal menghapus folder fisik");
+                alert("Gagal menghapus folder");
             }
         }
     };
