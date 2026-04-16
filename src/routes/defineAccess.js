@@ -83,19 +83,30 @@ router.delete('/column/:name', async (req, res) => {
 // --- 5. UPDATE DATA AKSES USER ---
 router.put('/update', async (req, res) => {
   try {
- const { user_id, ...allFields } = req.body;
-    if (!user_id) return res.status(400).json({ message: 'User ID wajib diisi' });
+    // 1. BUANG semua field yang bukan merupakan KOLOM JABATAN di database
+    const { 
+        user_id, 
+        nama, 
+        tahun_pelajaran, 
+        created_at, 
+        updated_at, 
+        ...roles 
+    } = req.body;
 
-    // 2. Buang field 'nama' atau field lain yang hanya untuk display UI
-    // agar tidak ikut masuk ke daftar kolom database
-    const { nama,tahun_pelajaran, ...roles } = allFields; 
+    if (!user_id) return res.status(400).json({ message: 'User ID wajib diisi' });
 
     const roleNames = Object.keys(roles);
     if (roleNames.length === 0) return res.status(400).json({ message: 'Tidak ada data jabatan' });
 
+    // 2. Siapkan nilai (1 atau 0)
     const roleValues = roleNames.map(role => (roles[role] ? 1 : 0));
+
+    // 3. Susun kolom dan placeholders
+    // Kita pakai ` ` (backticks) untuk nama kolom jabatan agar aman dari reserved words
     const columns = ['user_id', ...roleNames].map(col => `\`${col}\``).join(', ');
     const placeholders = new Array(1 + roleNames.length).fill('?').join(', ');
+
+    // 4. Susun update statement untuk ON DUPLICATE KEY
     const updateStatement = roleNames.map(role => `\`${role}\` = VALUES(\`${role}\`)`).join(', ');
 
     const query = `
@@ -104,11 +115,16 @@ router.put('/update', async (req, res) => {
       ON DUPLICATE KEY UPDATE ${updateStatement}
     `;
 
+    // 5. Eksekusi: Masukkan user_id dan semua nilai jabatannya
     await db.query(query, [user_id, ...roleValues]);
-    res.status(200).json({ status: 'success', message: 'Hak akses berhasil diperbarui' });
+
+    res.status(200).json({ 
+        status: 'success', 
+        message: 'Hak akses berhasil disimpan/diperbarui' 
+    });
   } catch (error) {
+    console.error("Error update akses:", error);
     res.status(500).json({ status: 'error', message: 'Gagal update akses: ' + error.message });
   }
 });
-
 export default router;
