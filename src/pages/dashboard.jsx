@@ -1,7 +1,11 @@
 import { FiFileText, FiUploadCloud, FiUsers, FiClock } from 'react-icons/fi';
 
 function Dashboard() {
-  const user = JSON.parse(localStorage.getItem('user'));
+  // Ambil data user dari localStorage (yang disimpan saat handleLogin)
+  const userInfo = JSON.parse(localStorage.getItem('user_info'));
+  
+  // Ambil nama, jika tidak ada tampilkan 'User' sebagai fallback
+  const userName = userInfo?.name || 'User';
 
   const stats = [
     { label: 'Total Arsip', value: '1,284', icon: FiFileText, color: 'text-emerald-600', bg: 'bg-emerald-50' },
@@ -11,14 +15,16 @@ function Dashboard() {
 
   return (
     <div className="space-y-8 font-sans">
-      {/* Header Section */}
-    {/* Header - Center di mobile, Left di desktop */}
-        <header className="mb-5 text-center md:text-left">
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">
-            Ringkasan <span className="text-emerald-600">Data</span>
-          </h1>
-          <p className="text-slate-400 text-sm font-medium mt-1">Sistem Manajemen Arsip Digital DAFA.</p>
-        </header>
+      {/* Header Section - Nama User Dinamis */}
+      <header className="mb-5 text-center md:text-left">
+        <h1 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">
+          Halo, <span className="text-emerald-600 uppercase">{userName}</span>
+        </h1>
+        <p className="text-slate-400 text-sm font-medium mt-1">
+          Selamat datang kembali di sistem manajemen arsip DAFA.
+        </p>
+      </header>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, index) => (
@@ -85,7 +91,6 @@ function Dashboard() {
           <button className="relative z-10 mt-8 bg-white text-emerald-600 font-bold py-3 px-6 rounded-xl text-sm shadow-lg hover:bg-emerald-50 transition-colors active:scale-95">
             Mulai Upload
           </button>
-          {/* Efek dekorasi background */}
           <FiFileText className="absolute -bottom-10 -right-10 text-[12rem] text-white/10 rotate-12 group-hover:rotate-0 transition-transform duration-500" />
         </div>
       </div>

@@ -1,23 +1,23 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import db from '../backend/db_connections.js';
+import { verifyToken } from '../backend/verifyToken.js';
+import { isAdmin } from '../backend/authMiddleware.js';
 
 const router = express.Router();
 
-// Helper getActiveYear dihapus karena tidak lagi digunakan untuk filter akses
-
 // @route   GET /api/users
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, isAdmin, async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT 
         u.id, 
         u.nama, 
         u.username, 
-        u.password, 
         u.role, 
         u.created_at,
-        ca.* FROM users u
+        ca.* -- Ambil semua kolom jabatan dari client_access
+      FROM users u
       LEFT JOIN client_access ca ON u.id = ca.user_id
       ORDER BY u.nama ASC
     `);
@@ -30,17 +30,15 @@ router.get('/', async (req, res) => {
 });
 
 // @route   GET /api/users/:id
-router.get('/:id', async (req, res) => {
+router.get('/:id', verifyToken, isAdmin, async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT 
         u.id, 
         u.nama, 
         u.username, 
-        u.password, 
         u.role, 
-        u.created_at,
-        ca.*
+        u.created_at
       FROM users u
       LEFT JOIN client_access ca ON u.id = ca.user_id
       WHERE u.id = ?
@@ -54,7 +52,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // @route   POST /api/users
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, isAdmin, async (req, res) => {
   const { nama, username, password, role } = req.body;
   
   try {
@@ -83,7 +81,7 @@ router.post('/', async (req, res) => {
 });
 
 // @route   PUT /api/users/:id
-router.put('/:id', async (req, res) => {
+router.put('/:id', verifyToken, isAdmin, async (req, res) => {
   const { nama, username, role, password } = req.body;
   const userId = req.params.id;
 
@@ -108,10 +106,8 @@ router.put('/:id', async (req, res) => {
 });
 
 // @route   DELETE /api/users/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verifyToken, isAdmin, async (req, res) => {
   try {
-    // Pastikan di database sudah menggunakan ON DELETE CASCADE 
-    // agar data di client_access otomatis terhapus saat user dihapus.
     await db.query('DELETE FROM users WHERE id = ?', [req.params.id]);
     res.json({ message: 'User berhasil dihapus' });
   } catch (err) {

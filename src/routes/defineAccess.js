@@ -1,102 +1,98 @@
 import express from 'express';
-const router = express.Router();
 import db from '../backend/db_connections.js';
+import { verifyToken } from '../backend/verifyToken.js';
+import { isAdmin } from '../backend/authMiddleware.js';
+
+const router = express.Router();
+
+router.use(verifyToken);
+router.use(isAdmin);
 
 // --- 1. GET ALL DATA & COLUMNS ---
 router.get('/', async (req, res) => {
   try {
-    const [rows] = await db.execute('SELECT * FROM client_access');
-    res.status(200).json({ status: 'success', data: rows });
+    const [rows] = await db.query('SELECT * FROM client_access');
+    const filteredData = rows.map(({ created_at, updated_at, ...rest }) => rest);
+
+    res.status(200).json({ status: 'success', data: filteredData });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
 
-// --- TAMBAH KOLOM BARU ---
+// --- 2. TAMBAH KOLOM BARU ---
 router.post('/column', async (req, res) => {
   try {
-    const { name } = req.body; 
-    if (!name) return res.status(400).json({ message: 'Nama kolom wajib' });
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ message: 'Nama kolom wajib diisi' });
 
-    // Format: lowercase dan ganti spasi dengan underscore
     const formattedName = name.toLowerCase().trim().replace(/\s+/g, '_');
 
+    // Query untuk menambah kolom
     const query = `ALTER TABLE client_access ADD COLUMN \`${formattedName}\` TINYINT(1) DEFAULT 0`;
-    await db.execute(query);
+    await db.query(query);
 
-    res.status(200).json({ status: 'success', message: `Kolom ${formattedName} ditambahkan` });
+    res.status(200).json({ status: 'success', message: `Jabatan "${name}" berhasil ditambahkan` });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    console.error("Add Column Error:", error);
+    
+    // Cek jika error disebabkan karena kolom sudah ada (MySQL Error 1060)
+    if (error.errno === 1060 || error.code === 'ER_DUP_FIELDNAME') {
+      return res.status(409).json({ status: 'error', message: 'Jabatan tersebut sudah ada dalam sistem' });
+    }
+
+    res.status(500).json({ status: 'error', message: 'Gagal menambah jabatan: ' + error.message });
   }
 });
 
-// --- EDIT/RENAME KOLOM ---
+// --- 3. EDIT/RENAME KOLOM ---
 router.put('/column', async (req, res) => {
   try {
     const { oldName, newName } = req.body;
+    if (!oldName || !newName) return res.status(400).json({ message: 'Data tidak lengkap' });
+
     const formattedNewName = newName.toLowerCase().trim().replace(/\s+/g, '_');
 
     const query = `ALTER TABLE client_access CHANGE \`${oldName}\` \`${formattedNewName}\` TINYINT(1) DEFAULT 0`;
-    await db.execute(query);
+    await db.query(query);
 
-    res.status(200).json({ status: 'success', message: 'Struktur berhasil diubah' });
+    res.status(200).json({ status: 'success', message: 'Nama jabatan berhasil diubah' });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    if (error.errno === 1060 || error.code === 'ER_DUP_FIELDNAME') {
+      return res.status(409).json({ status: 'error', message: 'Nama jabatan baru sudah digunakan' });
+    }
+    res.status(500).json({ status: 'error', message: 'Gagal mengubah struktur: ' + error.message });
   }
 });
-// --- 4. HAPUS KOLOM (ALTER TABLE DROP) ---
+
+// --- 4. HAPUS KOLOM ---
 router.delete('/column/:name', async (req, res) => {
   try {
     const { name } = req.params;
+    if (name === 'user_id') return res.status(400).json({ message: 'Kolom utama tidak bisa dihapus' });
 
-    // Proteksi agar user_id tidak terhapus secara tidak sengaja
-    if (name === 'user_id') {
-      return res.status(400).json({ message: 'Kolom user_id adalah kunci utama dan tidak boleh dihapus' });
-    }
-
-    // Perintah ini akan menghapus kolom beserta seluruh record data di dalamnya
     const query = `ALTER TABLE client_access DROP COLUMN \`${name}\``;
-    await db.execute(query);
+    await db.query(query);
 
-    res.status(200).json({ status: 'success', message: `Kolom ${name} dan seluruh datanya telah dihapus` });
+    res.status(200).json({ status: 'success', message: `Jabatan "${name}" telah dihapus` });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: `Gagal hapus kolom: ${error.message}` });
+    res.status(500).json({ status: 'error', message: 'Gagal menghapus kolom: ' + error.message });
   }
 });
 
+// --- 5. UPDATE DATA AKSES USER ---
 router.put('/update', async (req, res) => {
   try {
-    // 1. Destrukturisasi: Keluarkan nama dan tahun_pelajaran agar tidak masuk ke ...roles
-    const { 
-      user_id = null, 
-      nama, 
-      tahun_pelajaran, // Dikeluarkan agar tidak ikut diproses ke database
-      ...roles 
-    } = req.body;
+    const { user_id, ...roles } = req.body;
+    if (!user_id) return res.status(400).json({ message: 'User ID wajib diisi' });
 
-    if (!user_id) {
-      return res.status(400).json({ status: 'error', message: 'User ID wajib diisi' });
-    }
-
-    // 2. Filter roles: Ambil key dan value (1 atau 0)
     const roleNames = Object.keys(roles);
+    if (roleNames.length === 0) return res.status(400).json({ message: 'Tidak ada data jabatan' });
+
     const roleValues = roleNames.map(role => (roles[role] ? 1 : 0));
-
-    if (roleNames.length === 0) {
-      return res.status(400).json({ status: 'error', message: 'Data jabatan kosong' });
-    }
-
-    // 3. Susun Kolom & Placeholders (Hanya user_id dan roles)
-    const columns = ['user_id', ...roleNames]
-      .map(col => `\`${col}\``)
-      .join(', ');
-
+    const columns = ['user_id', ...roleNames].map(col => `\`${col}\``).join(', ');
     const placeholders = new Array(1 + roleNames.length).fill('?').join(', ');
-    
-    // 4. Susun Update Statement
-    const updateStatement = roleNames
-      .map(role => `\`${role}\` = VALUES(\`${role}\`)`)
-      .join(', ');
+    const updateStatement = roleNames.map(role => `\`${role}\` = VALUES(\`${role}\`)`).join(', ');
 
     const query = `
       INSERT INTO client_access (${columns})
@@ -104,27 +100,10 @@ router.put('/update', async (req, res) => {
       ON DUPLICATE KEY UPDATE ${updateStatement}
     `;
 
-    // 5. Parameter: Hanya user_id dan roleValues
-    const params = [
-      user_id, 
-      ...roleValues
-    ];
-
-    await db.execute(query, params);
-    
-    res.status(200).json({ status: 'success', message: 'Akses diperbarui' });
+    await db.query(query, [user_id, ...roleValues]);
+    res.status(200).json({ status: 'success', message: 'Hak akses berhasil diperbarui' });
   } catch (error) {
-    console.error("Database Error:", error);
-    res.status(500).json({ status: 'error', message: `Database Error: ${error.message}` });
-  }
-});
-router.delete('/user/:user_id', async (req, res) => {
-  try {
-    const { user_id } = req.params;
-    await db.execute('DELETE FROM client_access WHERE user_id = ?', [user_id]);
-    res.status(200).json({ status: 'success', message: 'Record user berhasil dihapus' });
-  } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    res.status(500).json({ status: 'error', message: 'Gagal update akses: ' + error.message });
   }
 });
 

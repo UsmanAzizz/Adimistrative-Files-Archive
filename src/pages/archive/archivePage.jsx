@@ -3,11 +3,13 @@ import { FiFolder, FiArrowRight, FiClock, FiPlus, FiTrash2 } from 'react-icons/f
 import Card from '../../components/card'; 
 import Dialog from '../../components/dialog'; 
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+// ... didalam komponen
 
 const ArchivePage = () => {
   const [archiveYears, setArchiveYears] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newTa, setNewTa] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,7 +56,11 @@ const ArchivePage = () => {
       setIsSubmitting(false);
     }
   };
-
+const handleCardClick = (ta) => {
+    // Kita bersihkan karakter '/' agar aman di URL (misal 2024/2025 menjadi 2024-2025)
+    const slug = ta.replace(/\//g, '-');
+    navigate(`/archive/${slug}`);
+  };
   // FUNGSI DELETE
   const handleDelete = async (e, id, ta) => {
     e.stopPropagation(); // Mencegah trigger klik pada Card (jika ada)
@@ -102,41 +108,59 @@ const ArchivePage = () => {
           archiveYears.map((item, index) => {
             const theme = getTheme(index);
             return (
-              <Card key={item.id} variant="none" className="group flex flex-col min-h-[260px] bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-xl shadow-slate-200/50 hover:shadow-2xl transition-all duration-300">
-                
-                {/* TOMBOL HAPUS (POJOK KANAN ATAS) */}
-                <button 
-                  onClick={(e) => handleDelete(e, item.id, item.ta)}
-                  className="absolute top-5 right-5 p-2 rounded-xl bg-slate-50 text-slate-300 hover:bg-red-50 hover:text-red-500 transition-all duration-300 z-20 opacity-0 group-hover:opacity-100"
-                >
-                  <FiTrash2 size={18} />
-                </button>
+              <Card 
+  key={item.id} 
+  variant="none" 
+  // --- TAMBAHKAN LOGIKA NAVIGASI DI SINI ---
+  onClick={() => {
+    // Menghapus '/' agar aman di URL, misal 2024/2025 -> 2024-2025
+    const slug = item.ta.replace(/\//g, '-');
+    navigate(`/archive/${slug}`);
+  }}
+  className="group flex flex-col min-h-[260px] bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-xl shadow-slate-200/50 hover:shadow-2xl transition-all duration-300 relative cursor-pointer"
+>
+  
+  {/* TOMBOL HAPUS (POJOK KANAN ATAS) */}
+  <button 
+    onClick={(e) => {
+      e.stopPropagation(); // PENTING: Agar klik tombol hapus tidak memicu navigasi ke folder
+      handleDelete(e, item.id, item.ta);
+    }}
+    className="absolute top-5 right-5 p-2 rounded-xl bg-slate-50 text-slate-300 hover:bg-red-50 hover:text-red-500 transition-all duration-300 z-30 opacity-0 group-hover:opacity-100 shadow-sm"
+  >
+    <FiTrash2 size={18} />
+  </button>
 
-                <div className="p-7 flex-1">
-                  <div className={`p-3 w-fit rounded-2xl bg-slate-50 ${theme.light}`}>
-                    <FiFolder size={26} />
-                  </div>
-                  <div className="mt-5">
-                    <h3 className="text-2xl font-black text-slate-800">TA {item.ta}</h3>
-                  </div>
-                </div>
+  <div className="p-7 flex-1 relative z-10">
+    <div className={`p-3 w-fit rounded-2xl bg-slate-50 ${theme.light}`}>
+      <FiFolder size={26} />
+    </div>
+    <div className="mt-5">
+      <h3 className="text-2xl font-black text-slate-800">TA {item.ta}</h3>
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Daftar Arsip Digital</p>
+    </div>
+  </div>
 
-                <div className={`p-5 ${theme.bg} relative overflow-hidden`}>
-                  <div className="absolute inset-0 bg-black/5 opacity-50" />
-                  <div className="relative z-10 flex items-center justify-between text-white">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-black uppercase opacity-60">Update Terakhir</span>
-                      <div className="flex items-center gap-2 mt-1">
-                        <FiClock size={11} className="opacity-70" />
-                        <span className="text-[11px] font-bold tracking-tight">{new Date().toLocaleDateString('id-ID')}</span>
-                      </div>
-                    </div>
-                    <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 group-hover:bg-white group-hover:text-slate-900 transition-all duration-300">
-                      <FiArrowRight size={18} />
-                    </div>
-                  </div>
-                </div>
-              </Card>
+  <div className={`p-5 ${theme.bg} relative overflow-hidden`}>
+    {/* Efek Overlay Gradasi */}
+    <div className="absolute inset-0 bg-black/5 opacity-50" />
+    
+    <div className="relative z-10 flex items-center justify-between text-white">
+      <div className="flex flex-col">
+        <span className="text-[9px] font-black uppercase opacity-60">Status Akses</span>
+        <div className="flex items-center gap-2 mt-1">
+          <FiClock size={11} className="opacity-70" />
+          <span className="text-[11px] font-bold tracking-tight">Terbuka Untuk Umum</span>
+        </div>
+      </div>
+      
+      {/* Indikator Panah */}
+      <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 group-hover:bg-white group-hover:text-slate-900 transition-all duration-300 shadow-lg">
+        <FiArrowRight size={18} />
+      </div>
+    </div>
+  </div>
+</Card>
             );
           })
         )}

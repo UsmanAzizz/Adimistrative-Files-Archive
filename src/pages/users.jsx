@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiUserPlus, FiEdit2, FiTrash2, FiSearch, FiShield, FiUser, FiCheck } from 'react-icons/fi';
-import axios from 'axios';
+// 1. Gunakan axios kustom agar Cookie JWT otomatis terkirim
+import axios from '../backend/axiosConfig'; 
 import Dialog from '../components/dialog';
 
 const Users = () => {
@@ -19,48 +20,44 @@ const Users = () => {
   const [rolesData, setRolesData] = useState({});
 
   const fetchUsers = async () => {
-  setLoading(true);
-  try {
-    // 1. Ambil data Global & Users secara bersamaan (Parallel)
-    const [resUsers, resGlobal] = await Promise.all([
-      axios.get('/api/users'),
-      axios.get('/api/global')
-    ]);
+    setLoading(true);
+    try {
+      // 2. Path disingkat karena axiosConfig sudah punya baseURL: http://.../api
+      const [resUsers, resGlobal] = await Promise.all([
+        axios.get('/users'),
+        axios.get('/global')
+      ]);
 
-    // 2. Set Data Users
-    const usersData = Array.isArray(resUsers.data) ? resUsers.data : [];
-    setUsers(usersData);
+      const usersData = Array.isArray(resUsers.data) ? resUsers.data : [];
+      setUsers(usersData);
 
-    // 3. Set Tahun Pelajaran dari Tabel Global
-    if (resGlobal.data.status === 'success') {
-      const globalData = resGlobal.data.data;
-      setFormData(prev => ({ 
-        ...prev, 
-        tahun_pelajaran: globalData.active_tahun_pelajaran 
-      }));
+      if (resGlobal.data.status === 'success') {
+        const globalData = resGlobal.data.data;
+        setFormData(prev => ({ 
+          ...prev, 
+          tahun_pelajaran: globalData.active_tahun_pelajaran 
+        }));
+      }
+
+      if (usersData.length > 0) {
+        const ignoreFields = ['id', 'user_id', 'nama', 'username', 'password', 'role', 'tahun_pelajaran', 'created_at', 'updated_at'];
+        const columns = Object.keys(usersData[0]).filter(key => !ignoreFields.includes(key));
+        setAccessColumns(columns);
+      }
+      
+    } catch (err) {
+      console.error("Fetch Error:", err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // 4. Set Kolom Akses (tetap ambil dari struktur tabel users/client_access)
-    // Kita gunakan data pertama jika ada untuk mapping kolom dinamis
-    if (usersData.length > 0) {
-      const ignoreFields = ['id', 'user_id', 'nama', 'username', 'password', 'role', 'tahun_pelajaran', 'created_at', 'updated_at'];
-      const columns = Object.keys(usersData[0]).filter(key => !ignoreFields.includes(key));
-      setAccessColumns(columns);
-    }
-    
-  } catch (err) {
-    console.error("Fetch Error:", err);
-  } finally {
-    setLoading(false);
-  }
-};
   useEffect(() => { fetchUsers(); }, []);
 
-  // --- FIX: Pastikan handleDelete didefinisikan sebelum return ---
   const handleDelete = async () => {
     if (!currentUser) return;
     try {
-      await axios.delete(`/api/users/${currentUser.id}`);
+      await axios.delete(`/users/${currentUser.id}`);
       setIsDeleteOpen(false);
       fetchUsers();
     } catch (err) { 
@@ -71,7 +68,7 @@ const Users = () => {
 
   const handleOpenAdd = () => {
     setCurrentUser(null);
-    setFormData({ nama: '', username: '', password: '', role: 'client', tahun_pelajaran: formData.tahun_pelajaran });
+    setFormData({ ...formData, nama: '', username: '', password: '', role: 'client' });
     const initialRoles = {};
     accessColumns.forEach(col => { initialRoles[col] = false; });
     setRolesData(initialRoles);
@@ -91,45 +88,40 @@ const Users = () => {
     setIsModalOpen(true);
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    let targetId = currentUser?.id;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      let targetId = currentUser?.id;
 
-    if (currentUser) {
-      await axios.put(`/api/users/${targetId}`, formData);
-    } else {
-      const resUser = await axios.post('/api/users', formData);
-      
-      // DEBUG: Lihat di console browser, apa isi resUser.data?
-      console.log("Response dari Backend:", resUser.data);
+      if (currentUser) {
+        await axios.put(`/users/${targetId}`, formData);
+      } else {
+        const resUser = await axios.post('/users', formData);
+        // Menyesuaikan dengan struktur response backend: { status, message, id }
+        targetId = resUser.data.id;
+      }
 
-      // Ambil ID (Coba beberapa kemungkinan properti yang umum)
-      targetId = resUser.data.id || resUser.data.insertId || resUser.data.data?.id;
+      if (!targetId) {
+        alert("ID User tidak ditemukan. Cek response backend!");
+        return;
+      }
+
+      // Simpan akses jabatan secara terpisah
+      await axios.put('/define-access/update', {
+        user_id: targetId,
+        nama: formData.nama,
+        tahun_pelajaran: formData.tahun_pelajaran,
+        ...rolesData
+      });
+
+      setIsModalOpen(false);
+      fetchUsers();
+      alert("Data user dan akses berhasil disimpan!");
+    } catch (err) {
+      console.error("Submit Error:", err);
+      alert("Terjadi kesalahan: " + (err.response?.data?.message || err.message));
     }
-
-    // Jika targetId masih kosong, kita hentikan proses sebelum menembak API akses
-    if (!targetId) {
-      alert("ID User tidak ditemukan di response server. Cek Console Browser!");
-      return;
-    }
-
-    // Lanjut simpan akses
-    await axios.put('/api/define-access/update', {
-      user_id: targetId,
-      nama: formData.nama,
-      tahun_pelajaran: formData.tahun_pelajaran,
-      ...rolesData
-    });
-
-    setIsModalOpen(false);
-    fetchUsers();
-    alert("Berhasil disimpan!");
-  } catch (err) {
-    console.error("Submit Error:", err);
-    alert("Terjadi kesalahan: " + (err.response?.data?.message || err.message));
-  }
-};
+  };
 
   const filteredUsers = users
     .filter(u => u.nama?.toLowerCase().includes(searchTerm.toLowerCase()))

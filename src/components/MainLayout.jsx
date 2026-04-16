@@ -6,9 +6,12 @@ function MainLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
+    // UBAH: Cek 'user_info', bukan 'token'
+    const userInfo = localStorage.getItem('user_info');
+    
+    if (!userInfo) {
+      // Jika tidak ada data user, baru lempar ke login
+      navigate('/login', { replace: true });
     }
   }, [navigate]);
 
@@ -17,7 +20,7 @@ function MainLayout() {
       {/* Sidebar tetap fixed */}
       <Sidebar />
 
-      {/* PERBAIKAN: Gunakan md:ml-64 agar di mobile ml-0 */}
+      {/* Konten Utama */}
       <div className="flex-1 ml-0 md:ml-64 flex flex-col min-w-0 transition-all duration-300">
         <main className="p-4 md:p-8 flex-1">
           <Outlet />

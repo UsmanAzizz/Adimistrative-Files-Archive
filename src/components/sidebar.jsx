@@ -1,40 +1,55 @@
 import { motion } from 'framer-motion';
 import { NavLink, useNavigate } from 'react-router-dom'; 
-import { FiHome, FiFolder, FiSettings, FiLogOut, FiFileText, FiUsers } from 'react-icons/fi';
+import { FiHome, FiFolder, FiSettings, FiLogOut, FiUsers } from 'react-icons/fi';
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  
+  // 1. Ambil data user dari localStorage
+  const userInfo = JSON.parse(localStorage.getItem('user_info'));
+  const userRole = userInfo?.role; // Asumsi value-nya: 'admin', 'user', dll.
+
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: FiHome, path: '/dashboard' },
     { id: 'archives', label: 'Arsip Dokumen', icon: FiFolder, path: '/archives' },
-    { id: 'users', label: 'Manajemen User', icon: FiUsers, path: '/users' },
-    // { id: 'reports', label: 'Laporan Tahunan', icon: FiFileText, path: '/reports' },
-    { id: 'settings', label: 'Pengaturan', icon: FiSettings, path: '/settings' },
+    // 2. Filter menu berdasarkan role
+    { id: 'users', label: 'Manajemen User', icon: FiUsers, path: '/users', adminOnly: true },
+    { id: 'settings', label: 'Pengaturan', icon: FiSettings, path: '/settings', adminOnly: true },
   ];
 
+  // 3. Fungsi filter untuk menentukan menu mana yang tampil
+  const filteredMenu = menuItems.filter(item => {
+    if (item.adminOnly) {
+      return userRole === 'admin';
+    }
+    return true;
+  });
+
   const handleLogout = () => {
+    // Gunakan removeItem agar lebih spesifik atau tetap clear() jika ingin membersihkan semua
     localStorage.clear();
     navigate('/login');
   };
 
   return (
     <>
-      {/* DESKTOP SIDEBAR: Lebar Fix w-64 */}
+      {/* DESKTOP SIDEBAR */}
       <aside className="hidden md:flex w-64 h-screen bg-slate-900 text-slate-300 flex-col fixed left-0 top-0 z-50">
-       <div className="p-6 flex items-center gap-3">
-        <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-500/20">
-          D
+        <div className="p-6 flex items-center gap-3">
+          <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-500/20">
+            D
+          </div>
+          <div>
+            <h1 className="text-white font-bold leading-none">DAFA</h1>
+            <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-semibold">
+              Dipo Archive System
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-white font-bold leading-none">DAFA</h1>
-          <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-semibold">
-           Dipo  Archive System
-          </p>
-        </div>
-      </div>
 
         <nav className="flex-1 px-4 space-y-1">
-          {menuItems.map((item) => (
+          {/* Gunakan filteredMenu di sini */}
+          {filteredMenu.map((item) => (
             <NavLink key={item.id} to={item.path} className="block no-underline">
               {({ isActive }) => (
                 <div className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all ${isActive ? 'bg-emerald-600 text-white' : 'hover:bg-slate-800'}`}>
@@ -54,9 +69,10 @@ const Sidebar = () => {
         </div>
       </aside>
 
-      {/* MOBILE BOTTOM NAV: Floating & No Text */}
+      {/* MOBILE BOTTOM NAV */}
       <nav className="md:hidden fixed bottom-6 left-6 right-6 bg-slate-900/90 backdrop-blur-lg border border-slate-800 h-16 rounded-[2rem] z-[100] flex justify-around items-center px-2 shadow-2xl">
-        {menuItems.map((item) => (
+        {/* Gunakan filteredMenu di sini juga */}
+        {filteredMenu.map((item) => (
           <NavLink key={item.id} to={item.path} className="relative flex-1 flex justify-center">
             {({ isActive }) => (
               <div className="relative flex flex-col items-center">

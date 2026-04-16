@@ -1,9 +1,14 @@
 import express from 'express';
-const router = express.Router();
 import db from '../backend/db_connections.js';
+import { verifyToken } from '../backend/verifyToken.js';
+import { isAdmin } from '../backend/authMiddleware.js';
 
-// --- 1. GET SETTINGS (Sudah Ada) ---
-router.get('/', async (req, res) => {
+const router = express.Router();
+
+// --- 1. GET SETTINGS ---
+// Kita gunakan verifyToken saja agar semua user yang login bisa melihat nama sekolah/alamat
+// Namun jika Anda ingin HANYA admin yang bisa melihat, tambahkan isAdmin
+router.get('/', verifyToken, async (req, res) => {
   try {
     const [rows] = await db.execute('SELECT * FROM global_settings LIMIT 1');
     if (rows.length === 0) {
@@ -16,10 +21,10 @@ router.get('/', async (req, res) => {
 });
 
 // --- 2. UPDATE SETTINGS (Dinamis) ---
-router.put('/', async (req, res) => {
-  const updates = req.body; // Contoh: { school_name: "SMK Dipo", address: "Cipari" }
+// WAJIB menggunakan verifyToken dan isAdmin karena ini mengubah data instansi
+router.put('/', verifyToken, isAdmin, async (req, res) => {
+  const updates = req.body; 
   
-  // Ambil nama kolom (key) dari body request
   const fields = Object.keys(updates);
   
   if (fields.length === 0) {
@@ -30,14 +35,10 @@ router.put('/', async (req, res) => {
   }
 
   try {
-    /**
-     * Membangun query secara dinamis:
-     * UPDATE global_settings SET col1 = ?, col2 = ? WHERE id = (SELECT id FROM ...)
-     */
     const setQuery = fields.map(field => `${field} = ?`).join(', ');
     const values = Object.values(updates);
 
-    // Kita asumsikan update selalu ke record pertama yang ada di tabel
+    // Update record pertama di tabel global_settings
     const query = `UPDATE global_settings SET ${setQuery} LIMIT 1`;
 
     const [result] = await db.execute(query, values);

@@ -21,50 +21,61 @@
             message: ''
         });
 
-        const handleLogin = async (e) => {
-            e.preventDefault();
-            setIsLoading(true);
+       const handleLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-            try {
-                const response = await fetch(`${API_URL}api/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password }),
-                });
+    try {
+        const response = await fetch(`${API_URL}api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+            credentials: 'include', 
+        });
 
-                const result = await response.json();
+        const result = await response.json();
 
-                if (response.ok) {
-                    localStorage.setItem('token', result.token);
-                
-
-                    setDialogConfig({
-                        isOpen: true,
-                        type: 'success',
-                        title: 'Login',
-                        message: `Selamat datang kembali, ${result.user.username}.`
-                    });
-
-                    setTimeout(() => navigate('/dashboard'), 1500);
-                } else {
-                    setDialogConfig({
-                        isOpen: true,
-                        type: 'error',
-                        title: 'Login gagal',
-                        message: result.message || 'Kredensial tidak valid.'
-                    });
-                }
-            } catch (error) {
-                setDialogConfig({
-                    isOpen: true,
-                    type: 'error',
-                    title: 'Masalah Koneksi',
-                    message: 'Server tidak merespon. Pastikan backend aktif.'
-                });
-            } finally {
-                setIsLoading(false);
+        if (response.ok) {
+            // 1. Simpan data user (non-sensitif) ke localStorage
+            // Pastikan result.user ada nilainya
+            if (result.user) {
+                localStorage.setItem('user_info', JSON.stringify(result.user));
             }
-        };
+
+            // 2. Set Konfigurasi Dialog Berhasil
+            setDialogConfig({
+                isOpen: true,
+                type: 'success',
+                title: 'Login Berhasil',
+                message: `Selamat datang kembali, ${result.user?.username || 'User'}.`
+            });
+
+            // 3. Eksekusi Navigasi
+            // Berikan waktu sedikit agar user bisa melihat pesan sukses
+            setTimeout(() => {
+                setIsLoading(false); // Reset loading sebelum pindah
+                navigate('/dashboard', { replace: true }); // 'replace' mencegah user back ke login lagi
+            }, 1200);
+
+        } else {
+            setIsLoading(false);
+            setDialogConfig({
+                isOpen: true,
+                type: 'error',
+                title: 'Login gagal',
+                message: result.message || 'Kredensial tidak valid.'
+            });
+        }
+    } catch (error) {
+        setIsLoading(false);
+        setDialogConfig({
+            isOpen: true,
+            type: 'error',
+            title: 'Masalah Koneksi',
+            message: 'Gagal terhubung ke server. Pastikan backend aktif.'
+        });
+    }
+};
 
         return (
             // Background menggunakan warna emerald SMK yang solid
