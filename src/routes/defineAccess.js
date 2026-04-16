@@ -88,7 +88,7 @@ router.put('/update', async (req, res) => {
 
     // 2. Buang field 'nama' atau field lain yang hanya untuk display UI
     // agar tidak ikut masuk ke daftar kolom database
-    const { nama, ...roles } = allFields; 
+    const { nama,tahun_pelajaran, ...roles } = allFields; 
 
     const roleNames = Object.keys(roles);
     if (roleNames.length === 0) return res.status(400).json({ message: 'Tidak ada data jabatan' });
