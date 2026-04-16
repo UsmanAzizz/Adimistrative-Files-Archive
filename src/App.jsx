@@ -9,8 +9,12 @@ import ArchivePath from './pages/archive/archivePath'; // 1. Impor komponen Arch
 import Settings from './pages/settings';
 
 function App() {
+
+  const baseName = import.meta.env.VITE_ROUTER_BASE || '/';
   return (
-    <Router>
+    
+    // BENAR
+<Router basename={baseName}>
       <Routes>
         {/* Rute Publik */}
         <Route path="/login" element={<Login />} />
