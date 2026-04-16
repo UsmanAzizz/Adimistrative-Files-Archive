@@ -14,32 +14,34 @@ const MainArchive = () => {
     // 2. Mempersiapkan format tampilan Tahun Pelajaran (misal: 2025-2026 -> 2025/2026)
     const displayTapel = tapel ? tapel.replace(/-/g, '/') : '';
 
-    const fetchFolders = async () => {
-        setLoading(true);
-        try {
-            // Mengambil struktur kolom jabatan dari backend
-            const res = await axios.get('/define-access');
+const fetchFolders = async () => {
+    setLoading(true);
+    try {
+        // Mengambil struktur kolom jabatan dari backend (sekarang ada property 'roles')
+        const res = await axios.get('/define-access');
+        
+        if (res.data.status === 'success') {
+            /**
+             * PERBAIKAN:
+             * Kita tidak lagi mengambil kunci dari res.data.data[0] 
+             * karena kalau datanya kosong, UI tidak akan muncul.
+             * Sekarang kita langsung ambil dari res.data.roles yang sudah dikirim backend.
+             */
+            const dynamicFolders = res.data.roles || [];
             
-            if (res.data.status === 'success' && res.data.data.length > 0) {
-                // Ambil semua kunci kolom
-                const allKeys = Object.keys(res.data.data[0]);
-                
-                // Pengecualian: variabel ini bukan merupakan direktori jabatan
-                const ignoreFields = ['user_id', 'nama', 'tahun_pelajaran', 'created_at', 'updated_at'];
-                const dynamicFolders = allKeys.filter(key => !ignoreFields.includes(key));
-                
-                setFolders(dynamicFolders);
-            }
-        } catch (err) {
-            console.error("Gagal memuat struktur arsip:", err);
-        } finally {
-            setLoading(false);
+            console.log("Struktur folder jabatan:", dynamicFolders);
+            setFolders(dynamicFolders);
         }
-    };
+    } catch (err) {
+        console.error("Gagal memuat struktur arsip:", err);
+    } finally {
+        setLoading(false);
+    }
+};
 
-    useEffect(() => {
-        fetchFolders();
-    }, []);
+useEffect(() => {
+    fetchFolders();
+}, []);
 
     // 3. Fungsi Navigasi ke halaman berikutnya dengan membawa 2 variabel
  const handleFolderClick = (folderName) => {
