@@ -83,8 +83,12 @@ router.delete('/column/:name', async (req, res) => {
 // --- 5. UPDATE DATA AKSES USER ---
 router.put('/update', async (req, res) => {
   try {
-    const { user_id, ...roles } = req.body;
+ const { user_id, ...allFields } = req.body;
     if (!user_id) return res.status(400).json({ message: 'User ID wajib diisi' });
+
+    // 2. Buang field 'nama' atau field lain yang hanya untuk display UI
+    // agar tidak ikut masuk ke daftar kolom database
+    const { nama, ...roles } = allFields; 
 
     const roleNames = Object.keys(roles);
     if (roleNames.length === 0) return res.status(400).json({ message: 'Tidak ada data jabatan' });
