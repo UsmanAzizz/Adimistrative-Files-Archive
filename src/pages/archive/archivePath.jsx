@@ -90,7 +90,7 @@ const ArchivePath = () => {
         navigate(targetPath);
     };
 
-    const handleFolderAction = async () => {
+const handleFolderAction = async () => {
     if (!folderNameInput.trim()) return;
     try {
         if (modalType === 'create') {
@@ -102,16 +102,18 @@ const ArchivePath = () => {
                 id: selectedItem.id, newName: folderNameInput
             });
         }
-        
-        // --- POIN PENTING DISINI ---
+
+        // 1. Tutup modal & bersihkan input dulu agar UI responsif
         setShowModal(false);
         setFolderNameInput('');
         
-        // Panggil fungsi ini untuk ambil data terbaru dari server
-        // Tanpa reload halaman!
-        fetchContent(); 
-        
+        // 2. Beri jeda sedikit agar backend/disk selesai menulis folder
+        setTimeout(() => {
+            fetchContent();
+        }, 500); 
+
     } catch (err) {
+        console.error("Gagal:", err);
         alert("Gagal memproses folder");
     }
 };
