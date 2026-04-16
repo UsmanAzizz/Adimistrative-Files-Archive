@@ -33,27 +33,35 @@ const SettingsPage = () => {
         return options;
     };
 
-    const fetchData = async () => {
-        try {
-            // 2. URL sekarang jauh lebih ringkas karena baseURL sudah diatur
-            const [globalRes, accessRes] = await Promise.all([
-                axios.get('/global'),
-                axios.get('/define-access')
-            ]);
+const fetchData = async () => {
+    try {
+        setLoading(true);
+        // Memanggil global data dan define-access secara paralel
+        const [globalRes, accessRes] = await Promise.all([
+            axios.get('/global'),
+            axios.get('/define-access')
+        ]);
 
-            setGlobalData(globalRes.data.data);
+        // Set data tahun pelajaran aktif
+        setGlobalData(globalRes.data.data);
 
-            const accessData = accessRes.data.data;
-            if (accessData.length > 0) {
-                setAvailableRoles(Object.keys(accessData[0]).filter(key => key !== 'user_id'));
-            }
-        } catch (err) {
-            console.error("Fetch Error:", err);
-            // Error 401 akan ditangani otomatis oleh interceptor di axiosConfig
-        } finally {
-            setLoading(false);
+        /**
+         * PERBAIKAN:
+         * Gunakan accessRes.data.roles untuk mendapatkan daftar jabatan.
+         * Ini jauh lebih aman karena tidak akan error meskipun accessRes.data.data kosong [].
+         */
+        if (accessRes.data.status === 'success') {
+            // Ambil daftar peran/jabatan langsung dari properti roles
+            const rolesFromServer = accessRes.data.roles || [];
+            setAvailableRoles(rolesFromServer);
         }
-    };
+
+    } catch (err) {
+        console.error("Fetch Error:", err);
+    } finally {
+        setLoading(false);
+    }
+};
 
     useEffect(() => { fetchData(); }, []);
 
