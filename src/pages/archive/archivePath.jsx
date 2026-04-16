@@ -118,16 +118,24 @@ const handleFolderAction = async () => {
     }
 };
 
-    const handleDelete = async (item) => {
-        if (window.confirm(`Hapus folder "${item.name}" secara permanen?`)) {
-            try {
-                await axios.delete(`/folders/sub/${item.id}`);
-                fetchContent();
-            } catch (err) {
-                alert("Gagal menghapus folder");
-            }
+const handleDelete = async (item) => {
+    if (window.confirm(`Hapus folder "${item.name}" secara permanen?`)) {
+        try {
+            // 1. Tunggu proses hapus di server selesai
+            await axios.delete(`/folders/sub/${item.id}`);
+            
+            // 2. Langsung tarik data terbaru untuk update UI (Hanya bagian folder)
+            fetchContent();
+            
+            // 3. Reset menu dropdown agar tertutup
+            setActiveMenu(null);
+            
+        } catch (err) {
+            console.error("Gagal menghapus:", err);
+            alert("Gagal menghapus folder dari server.");
         }
-    };
+    }
+};
 
     return (
         <div className="min-h-screen bg-[#FBFBFB] p-4 md:p-2 space-y-6">
