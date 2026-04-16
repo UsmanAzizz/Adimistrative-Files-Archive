@@ -10,35 +10,32 @@ const MainArchive = () => {
 
     const [folders, setFolders] = useState([]);
     const [loading, setLoading] = useState(true);
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+
     // 2. Mempersiapkan format tampilan Tahun Pelajaran (misal: 2025-2026 -> 2025/2026)
     const displayTapel = tapel ? tapel.replace(/-/g, '/') : '';
 
-  const fetchFolders = async () => {
-    setLoading(true);
-    try {
-        // 1. Tambahkan API_URL sesuai permintaan
-        const response = await axios.get(`${API_URL}/define-access`);
-        
-        // 2. PERBAIKAN: Ganti 'res' menjadi 'response' agar tidak undefined
-        if (response.data.status === 'success' && response.data.data.length > 0) {
+    const fetchFolders = async () => {
+        setLoading(true);
+        try {
+            // Mengambil struktur kolom jabatan dari backend
+            const res = await axios.get('/define-access');
             
-            // Ambil semua kunci kolom dari data index ke-0
-            const allKeys = Object.keys(response.data.data[0]);
-            
-            // 3. Filter field yang bukan merupakan direktori jabatan
-            const ignoreFields = ['user_id', 'nama', 'tahun_pelajaran', 'created_at', 'updated_at'];
-            const dynamicFolders = allKeys.filter(key => !ignoreFields.includes(key));
-            
-            // Masukkan ke state untuk di-render di UI
-            setFolders(dynamicFolders);
+            if (res.data.status === 'success' && res.data.data.length > 0) {
+                // Ambil semua kunci kolom
+                const allKeys = Object.keys(res.data.data[0]);
+                
+                // Pengecualian: variabel ini bukan merupakan direktori jabatan
+                const ignoreFields = ['user_id', 'nama', 'tahun_pelajaran', 'created_at', 'updated_at'];
+                const dynamicFolders = allKeys.filter(key => !ignoreFields.includes(key));
+                
+                setFolders(dynamicFolders);
+            }
+        } catch (err) {
+            console.error("Gagal memuat struktur arsip:", err);
+        } finally {
+            setLoading(false);
         }
-    } catch (err) {
-        console.error("Gagal memuat struktur arsip:", err);
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
     useEffect(() => {
         fetchFolders();
