@@ -20,7 +20,7 @@ const ArchivePage = () => {
 
   const fetchArchives = async () => {
     try {
-      const response = await axios.get(`${API_URL}api/archive-years`);
+      const response = await axios.get(`${API_URL}/archive-years`);
       if (response.data.success) {
         setArchiveYears(response.data.data);
       }
@@ -43,7 +43,7 @@ const ArchivePage = () => {
     if (!newTa) return;
     setIsSubmitting(true);
     try {
-      const response = await axios.post(`${API_URL}api/archive-years`, { ta: newTa });
+      const response = await axios.post(`${API_URL}/archive-years`, { ta: newTa });
       if (response.data.success) {
         setIsDialogOpen(false);
         setNewTa('');
@@ -67,7 +67,7 @@ const handleCardClick = (ta) => {
     
     if (window.confirm(`Apakah Anda yakin ingin menghapus arsip ${ta}?`)) {
       try {
-        const response = await axios.delete(`${API_URL}api/archive-years/${id}`);
+        const response = await axios.delete(`${API_URL}/archive-years/${id}`);
         if (response.data.success) {
           showStatus('success', 'Dihapus', `Arsip ${ta} berhasil dihapus.`);
           fetchArchives();
