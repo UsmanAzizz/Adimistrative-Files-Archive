@@ -6,11 +6,14 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
+    // PENTING: Tambahkan base path agar aset (js/css) diarahkan ke /dafa/
+    base: mode === 'production' ? '/dafa/' : '/',
+    
     plugins: [react()],
     server: {
       proxy: {
         '/api': {
-          target: env.VITE_API_BASE_URL, // Mengambil target dari .env
+          target: env.VITE_API_BASE_URL,
           changeOrigin: true,
           secure: false,
         },
