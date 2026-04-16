@@ -10,32 +10,36 @@ const MainArchive = () => {
 
     const [folders, setFolders] = useState([]);
     const [loading, setLoading] = useState(true);
-
+const API_URL = import.meta.env.VITE_API_BASE_URL;
     // 2. Mempersiapkan format tampilan Tahun Pelajaran (misal: 2025-2026 -> 2025/2026)
     const displayTapel = tapel ? tapel.replace(/-/g, '/') : '';
 
-    const fetchFolders = async () => {
-        setLoading(true);
-        try {
-            // Mengambil struktur kolom jabatan dari backend
-            const res = await axios.get('/define-access');
+  const fetchFolders = async () => {
+    setLoading(true);
+    try {
+        // 1. Pakai axios instance (tidak perlu API_URL lagi jika baseURL sudah benar)
+        // Jika tetap ingin pakai API_URL manual, pastikan variabelnya sinkron
+        const response = await axios.get('/define-access');
+        
+        // 2. PASTIIN NAMA VARIABELNYA SAMA (pakai 'response', bukan 'res')
+        if (response.data.status === 'success' && response.data.data.length > 0) {
             
-            if (res.data.status === 'success' && res.data.data.length > 0) {
-                // Ambil semua kunci kolom
-                const allKeys = Object.keys(res.data.data[0]);
-                
-                // Pengecualian: variabel ini bukan merupakan direktori jabatan
-                const ignoreFields = ['user_id', 'nama', 'tahun_pelajaran', 'created_at', 'updated_at'];
-                const dynamicFolders = allKeys.filter(key => !ignoreFields.includes(key));
-                
-                setFolders(dynamicFolders);
-            }
-        } catch (err) {
-            console.error("Gagal memuat struktur arsip:", err);
-        } finally {
-            setLoading(false);
+            // Ambil semua kunci kolom dari item pertama
+            const allKeys = Object.keys(response.data.data[0]);
+            
+            // Pengecualian: variabel ini bukan merupakan direktori jabatan
+            const ignoreFields = ['user_id', 'nama', 'tahun_pelajaran', 'created_at', 'updated_at'];
+            const dynamicFolders = allKeys.filter(key => !ignoreFields.includes(key));
+            
+            console.log("Folders ditemukan:", dynamicFolders); // Buat intip di console
+            setFolders(dynamicFolders);
         }
-    };
+    } catch (err) {
+        console.error("Gagal memuat struktur arsip:", err);
+    } finally {
+        setLoading(false);
+    }
+};
 
     useEffect(() => {
         fetchFolders();
