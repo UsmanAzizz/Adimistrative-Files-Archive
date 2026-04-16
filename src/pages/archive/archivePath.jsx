@@ -46,8 +46,8 @@ const ArchivePath = () => {
     }
 
     // --- 2. FETCH CONTENT (DIPERBAIKI AGAR TIDAK 502) ---
- const fetchContent = async () => {
-    // setLoading(true); // Opsional: matikan jika ingin "silent update"
+const fetchContent = async () => {
+    // setLoading(true); // Opsional, bisa dimatikan agar update lebih "silent"
     try {
         const cleanPath = (subPath || "").replace(/^\/+|\/+$/g, "");
         const res = await axios.get('/folders/content', {
@@ -55,12 +55,12 @@ const ArchivePath = () => {
         });
         
         if (res.data.status === 'success') {
-            // React akan mendeteksi perbedaan data dan 
-            // hanya merender ulang daftar folder saja.
-            setItems(res.data.data || []);
+            // Kita buat array baru [...data] supaya React tahu ada perubahan
+            setItems([...res.data.data]); 
         }
     } catch (err) {
-        console.error("Gagal update list:", err);
+        console.error("Fetch error:", err);
+        setItems([]);
     } finally {
         setLoading(false);
     }
@@ -119,20 +119,25 @@ const handleFolderAction = async () => {
 };
 
 const handleDelete = async (item) => {
+    // Konfirmasi penghapusan
     if (window.confirm(`Hapus folder "${item.name}" secara permanen?`)) {
         try {
-            // 1. Tunggu proses hapus di server selesai
+            // 1. Eksekusi hapus ke backend
             await axios.delete(`/folders/sub/${item.id}`);
             
-            // 2. Langsung tarik data terbaru untuk update UI (Hanya bagian folder)
-            fetchContent();
-            
-            // 3. Reset menu dropdown agar tertutup
+            // 2. Tutup menu dropdown agar tidak nyangkut di layar
             setActiveMenu(null);
-            
+
+            // 3. Update daftar folder tanpa F5
+            // Kita kasih delay 300ms agar VPS selesai hapus file fisiknya
+            setTimeout(() => {
+                fetchContent(); 
+                console.log("Daftar folder diperbarui!");
+            }, 300);
+
         } catch (err) {
             console.error("Gagal menghapus:", err);
-            alert("Gagal menghapus folder dari server.");
+            alert("Gagal menghapus folder. Cek koneksi backend.");
         }
     }
 };
