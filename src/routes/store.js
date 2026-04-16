@@ -33,17 +33,24 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Ambil isi folder (berdasarkan path bersarang)
+// Di Backend (Express)
 router.get('/content', async (req, res) => {
-    const { tapel, jabatan, path: subPath } = req.query;
+    const { tapel, jabatan, path } = req.query;
+    
+    // Validasi dasar agar tidak crash
+    if (!tapel || !jabatan) {
+        return res.status(400).json({ status: 'error', message: 'Parameter tidak lengkap' });
+    }
+
     try {
         const [rows] = await db.query(
-            'SELECT id, name, isFolder, size FROM archives WHERE tapel = ? AND jabatan = ? AND parent_path = ?',
-            [tapel, jabatan, subPath || '']
+            'SELECT * FROM archives WHERE tapel = ? AND jabatan = ? AND parent_path = ?',
+            [tapel, jabatan, path || '']
         );
-        res.status(200).json({ status: 'success', data: rows });
+        res.json({ status: 'success', data: rows });
     } catch (error) {
-        res.status(200).json({ status: 'success', data: [] });
+        console.error("Crash di /content:", error);
+        res.status(500).json({ status: 'error', message: 'Internal Server Error' });
     }
 });
 

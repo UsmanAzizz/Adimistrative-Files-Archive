@@ -40,20 +40,31 @@ const ArchivePath = () => {
         });
     }
 
-    // --- 1. FETCH CONTENT ---
-    const fetchContent = async () => {
-        setLoading(true);
-        try {
-            const res = await axios.get('/folders/content', {
-                params: { tapel, jabatan, path: subPath || '' }
-            });
+  const fetchContent = async () => {
+    setLoading(true);
+    try {
+        // Gunakan nilai fallback yang jelas
+        const currentPath = subPath || ""; 
+        
+        const res = await axios.get('/folders/content', {
+            params: { 
+                tapel, 
+                jabatan, 
+                // Pastikan dikirim sebagai string, bukan undefined
+                path: currentPath 
+            }
+        });
+        
+        if (res.data.status === 'success') {
             setItems(res.data.data);
-        } catch (err) {
-            setItems([]);
-        } finally {
-            setLoading(false);
         }
-    };
+    } catch (err) {
+        console.error("Gagal fetch content:", err);
+        setItems([]);
+    } finally {
+        setLoading(false);
+    }
+};
 
     useEffect(() => {
         fetchContent();
