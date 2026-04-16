@@ -2,12 +2,14 @@
     import { useNavigate } from 'react-router-dom';
     import { motion } from 'framer-motion';
     import { FiUser, FiLock } from 'react-icons/fi';
+    import axios from '../backend/axiosConfig'; // Sesuaikan path-nya ke file axiosConfig kamu
     import Input from '../components/input';
     import Button from '../components/button';
     import Dialog from '../components/dialog';
     
     function Login() {
         const [username, setUsername] = useState('');
+        
         const [password, setPassword] = useState('');
         const [isLoading, setIsLoading] = useState(false);
 
@@ -21,59 +23,54 @@
             message: ''
         });
 
-       const handleLogin = async (e) => {
+    const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-        const response = await fetch(`${API_URL}api/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }),
-            credentials: 'include', 
+        // Menggunakan axios instance yang sudah di-import
+        // BaseURL otomatis mengambil dari axiosConfig (misal: /dafa/api)
+        const response = await axios.post('/login', {
+            username,
+            password
         });
 
-        const result = await response.json();
+        // Axios menyimpan data response di properti .data
+        const result = response.data;
 
-        if (response.ok) {
-            // 1. Simpan data user (non-sensitif) ke localStorage
-            // Pastikan result.user ada nilainya
-            if (result.user) {
-                localStorage.setItem('user_info', JSON.stringify(result.user));
-            }
-
-            // 2. Set Konfigurasi Dialog Berhasil
-            setDialogConfig({
-                isOpen: true,
-                type: 'success',
-                title: 'Login Berhasil',
-                message: `Selamat datang kembali, ${result.user?.username || 'User'}.`
-            });
-
-            // 3. Eksekusi Navigasi
-            // Berikan waktu sedikit agar user bisa melihat pesan sukses
-            setTimeout(() => {
-                setIsLoading(false); // Reset loading sebelum pindah
-                navigate('/dashboard', { replace: true }); // 'replace' mencegah user back ke login lagi
-            }, 1200);
-
-        } else {
-            setIsLoading(false);
-            setDialogConfig({
-                isOpen: true,
-                type: 'error',
-                title: 'Login gagal',
-                message: result.message || 'Kredensial tidak valid.'
-            });
+        // 1. Simpan data user (non-sensitif) ke localStorage
+        if (result.user) {
+            localStorage.setItem('user_info', JSON.stringify(result.user));
         }
+
+        // 2. Set Konfigurasi Dialog Berhasil
+        setDialogConfig({
+            isOpen: true,
+            type: 'success',
+            title: 'Login Berhasil',
+            message: `Selamat datang kembali, ${result.user?.username || 'User'}.`
+        });
+
+        // 3. Eksekusi Navigasi
+        setTimeout(() => {
+            setIsLoading(false);
+            navigate('/dashboard', { replace: true });
+        }, 1200);
+
     } catch (error) {
         setIsLoading(false);
+        
+        // Menangani error dari Axios (401, 404, 500, dll)
+        const errorMsg = error.response?.data?.message || 'Kredensial tidak valid atau masalah koneksi.';
+        
         setDialogConfig({
             isOpen: true,
             type: 'error',
-            title: 'Masalah Koneksi',
-            message: 'Gagal terhubung ke server. Pastikan backend aktif.'
+            title: 'Login Gagal',
+            message: errorMsg
         });
+        
+        console.error("Login Error:", error);
     }
 };
 
