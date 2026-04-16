@@ -46,31 +46,25 @@ const ArchivePath = () => {
     }
 
     // --- 2. FETCH CONTENT (DIPERBAIKI AGAR TIDAK 502) ---
-    const fetchContent = async () => {
-        setLoading(true);
-        try {
-            // Pastikan tidak ada slash di awal/akhir yang mengganggu query backend
-            const cleanPath = subPath.replace(/^\/+|\/+$/g, "");
-            
-            const res = await axios.get('/folders/content', {
-                params: { 
-                    tapel, 
-                    jabatan, 
-                    path: cleanPath 
-                }
-            });
-            
-            if (res.data.status === 'success') {
-                setItems(Array.isArray(res.data.data) ? res.data.data : []);
-            }
-        } catch (err) {
-            console.error("Gagal fetch content:", err);
-            setItems([]);
-            // Jika 502 terjadi, pastikan backend tidak crash saat membaca path kosong
-        } finally {
-            setLoading(false);
+ const fetchContent = async () => {
+    // setLoading(true); // Opsional: matikan jika ingin "silent update"
+    try {
+        const cleanPath = (subPath || "").replace(/^\/+|\/+$/g, "");
+        const res = await axios.get('/folders/content', {
+            params: { tapel, jabatan, path: cleanPath }
+        });
+        
+        if (res.data.status === 'success') {
+            // React akan mendeteksi perbedaan data dan 
+            // hanya merender ulang daftar folder saja.
+            setItems(res.data.data || []);
         }
-    };
+    } catch (err) {
+        console.error("Gagal update list:", err);
+    } finally {
+        setLoading(false);
+    }
+};
 
     // Trigger fetch saat path berubah
     useEffect(() => {
@@ -97,29 +91,30 @@ const ArchivePath = () => {
     };
 
     const handleFolderAction = async () => {
-        if (!folderNameInput.trim()) return;
-        try {
-            if (modalType === 'create') {
-                await axios.post('/folders/create-sub', {
-                    tapel, 
-                    jabatan, 
-                    parentPath: subPath || '', 
-                    folderName: folderNameInput
-                });
-            } else {
-                await axios.put('/folders/rename-sub', {
-                    id: selectedItem.id, 
-                    newName: folderNameInput
-                });
-            }
-            setShowModal(false);
-            setFolderNameInput('');
-            // Refresh content setelah aksi
-            fetchContent();
-        } catch (err) {
-            alert("Gagal memproses folder. Periksa koneksi backend (502).");
+    if (!folderNameInput.trim()) return;
+    try {
+        if (modalType === 'create') {
+            await axios.post('/folders/create-sub', {
+                tapel, jabatan, parentPath: subPath || '', folderName: folderNameInput
+            });
+        } else {
+            await axios.put('/folders/rename-sub', {
+                id: selectedItem.id, newName: folderNameInput
+            });
         }
-    };
+        
+        // --- POIN PENTING DISINI ---
+        setShowModal(false);
+        setFolderNameInput('');
+        
+        // Panggil fungsi ini untuk ambil data terbaru dari server
+        // Tanpa reload halaman!
+        fetchContent(); 
+        
+    } catch (err) {
+        alert("Gagal memproses folder");
+    }
+};
 
     const handleDelete = async (item) => {
         if (window.confirm(`Hapus folder "${item.name}" secara permanen?`)) {
