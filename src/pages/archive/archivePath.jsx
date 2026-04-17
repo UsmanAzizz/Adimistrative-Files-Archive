@@ -15,33 +15,48 @@ import {
 } from 'react-icons/fa';
 
 const getFileConfig = (fileName, isFolder) => {
-    if (isFolder) return <FiFolder size={32} fill="currentColor" className="text-amber-400" />;
+    // 1. Jika Folder
+    if (isFolder) {
+        return { 
+            icon: <FiFolder size={32} fill="currentColor" />, 
+            color: 'bg-amber-50 text-amber-500' 
+        };
+    }
 
+    // 2. Jika File, ambil ekstensi
     const ext = fileName.split('.').pop().toLowerCase();
 
-    // Mapping Ekstensi ke Ikon & Warna
-    switch (ext) {
-        case 'pdf': 
-            return <FaFilePdf size={32} className="text-red-500" />;
-        case 'doc': case 'docx': 
-            return <FaFileWord size={32} className="text-blue-600" />;
-        case 'xls': case 'xlsx': case 'csv': 
-            return <FaFileExcel size={32} className="text-emerald-600" />;
-        case 'ppt': case 'pptx': 
-            return <FaFilePowerpoint size={32} className="text-orange-500" />;
-        case 'jpg': case 'jpeg': case 'png': case 'svg': case 'gif': 
-            return <FiImage size={32} className="text-purple-500" />;
-        case 'mp4': case 'mkv': case 'mov': 
-            return <FiVideo size={32} className="text-pink-500" />;
-        case 'mp3': case 'wav': 
-            return <FiMusic size={32} className="text-cyan-500" />;
-        case 'zip': case 'rar': case '7z': case 'tar': 
-            return <FaArchive size={32} className="text-yellow-600" />;
-        case 'js': case 'jsx': case 'html': case 'css': case 'json': 
-            return <FiCode size={32} className="text-slate-700" />;
-        default: 
-            return <FiFileText size={32} className="text-slate-400" />;
-    }
+    const map = {
+        // Dokumen
+        pdf: { icon: <FaFilePdf size={32} />, color: 'bg-red-50 text-red-500' },
+        doc: { icon: <FaFileWord size={32} />, color: 'bg-blue-50 text-blue-600' },
+        docx: { icon: <FaFileWord size={32} />, color: 'bg-blue-50 text-blue-600' },
+        xls: { icon: <FaFileExcel size={32} />, color: 'bg-emerald-50 text-emerald-600' },
+        xlsx: { icon: <FaFileExcel size={32} />, color: 'bg-emerald-50 text-emerald-600' },
+        csv: { icon: <FaFileExcel size={32} />, color: 'bg-emerald-50 text-emerald-600' },
+        ppt: { icon: <FaFilePowerpoint size={32} />, color: 'bg-orange-50 text-orange-500' },
+        pptx: { icon: <FaFilePowerpoint size={32} />, color: 'bg-orange-50 text-orange-500' },
+        
+        // Media & Image
+        jpg: { icon: <FiImage size={32} />, color: 'bg-purple-50 text-purple-500' },
+        jpeg: { icon: <FiImage size={32} />, color: 'bg-purple-50 text-purple-500' },
+        png: { icon: <FiImage size={32} />, color: 'bg-purple-50 text-purple-500' },
+        svg: { icon: <FiImage size={32} />, color: 'bg-purple-50 text-purple-500' },
+        mp4: { icon: <FiVideo size={32} />, color: 'bg-pink-50 text-pink-500' },
+        mp3: { icon: <FiMusic size={32} />, color: 'bg-cyan-50 text-cyan-500' },
+        
+        // Archive & Code
+        zip: { icon: <FiArchive size={32} />, color: 'bg-yellow-50 text-yellow-600' },
+        rar: { icon: <FiArchive size={32} />, color: 'bg-yellow-50 text-yellow-600' },
+        js: { icon: <FiCode size={32} />, color: 'bg-slate-100 text-slate-700' },
+        html: { icon: <FiCode size={32} />, color: 'bg-slate-100 text-slate-700' },
+    };
+
+    // 3. Return mapping atau default jika tidak ketemu
+    return map[ext] || { 
+        icon: <FiFileText size={32} />, 
+        color: 'bg-slate-50 text-slate-400' 
+    };
 };
 
 const ArchivePath = () => {
