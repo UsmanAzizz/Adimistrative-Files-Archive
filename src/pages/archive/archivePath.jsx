@@ -5,6 +5,44 @@ import {
     FiChevronRight, FiHome, FiX, FiEdit2, FiTrash2, FiGrid, FiList, FiDownload, FiUploadCloud
 } from 'react-icons/fi';
 import axios from '../../backend/axiosConfig';
+import { 
+    FiImage, FiMusic, FiVideo, 
+    FiFileText, FiArchive, FiCode 
+} from 'react-icons/fi';
+// Jika ingin warna-warni, Mas bisa pakai library 'react-icons/fa' (Font Awesome)
+import { 
+    FaFilePdf, FaFileWord, FaFileExcel, FaFilePowerpoint, FaFileArchive 
+} from 'react-icons/fa';
+
+const getFileConfig = (fileName, isFolder) => {
+    if (isFolder) return <FiFolder size={32} fill="currentColor" className="text-amber-400" />;
+
+    const ext = fileName.split('.').pop().toLowerCase();
+
+    // Mapping Ekstensi ke Ikon & Warna
+    switch (ext) {
+        case 'pdf': 
+            return <FaFilePdf size={32} className="text-red-500" />;
+        case 'doc': case 'docx': 
+            return <FaFileWord size={32} className="text-blue-600" />;
+        case 'xls': case 'xlsx': case 'csv': 
+            return <FaFileExcel size={32} className="text-emerald-600" />;
+        case 'ppt': case 'pptx': 
+            return <FaFilePowerpoint size={32} className="text-orange-500" />;
+        case 'jpg': case 'jpeg': case 'png': case 'svg': case 'gif': 
+            return <FiImage size={32} className="text-purple-500" />;
+        case 'mp4': case 'mkv': case 'mov': 
+            return <FiVideo size={32} className="text-pink-500" />;
+        case 'mp3': case 'wav': 
+            return <FiMusic size={32} className="text-cyan-500" />;
+        case 'zip': case 'rar': case '7z': case 'tar': 
+            return <FaArchive size={32} className="text-yellow-600" />;
+        case 'js': case 'jsx': case 'html': case 'css': case 'json': 
+            return <FiCode size={32} className="text-slate-700" />;
+        default: 
+            return <FiFileText size={32} className="text-slate-400" />;
+    }
+};
 
 const ArchivePath = () => {
     const params = useParams();
@@ -210,44 +248,71 @@ const fetchContent = async () => {
             </div>
 
             {/* EXPLORER */}
-            {loading ? (
-                <div className="py-20 text-center animate-pulse text-slate-300 font-black uppercase text-[10px] tracking-[0.3em]">Menyusun Berkas...</div>
-            ) : (
-                <div className={viewMode === 'grid' ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6" : "flex flex-col gap-2"}>
-                    {items.map((item, idx) => (
-                        <div key={idx} onClick={() => item.isFolder && handleFolderClick(item.name)} className={`group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all cursor-pointer relative ${viewMode === 'list' ? 'flex items-center justify-between p-4' : 'text-center'}`}>
-                            
-                            <div className={viewMode === 'list' ? "flex items-center gap-4" : ""}>
-                                <div className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${item.isFolder ? 'bg-amber-50 text-amber-500' : 'bg-blue-50 text-blue-500'} ${viewMode === 'list' ? 'w-12 h-12 mb-0' : ''}`}>
-                                    {item.isFolder ? <FiFolder size={32} fill="currentColor" /> : <FiFile size={32} />}
-                                </div>
-                                <div className={viewMode === 'list' ? "text-left" : ""}>
-                                    <p className="font-bold text-slate-700 text-[11px] truncate uppercase tracking-tight px-2">{item.name}</p>
-                                    <p className="text-[9px] font-black text-slate-300 uppercase mt-1">{item.isFolder ? 'Folder' : item.size}</p>
-                                </div>
-                            </div>
+{loading ? (
+    <div className="py-20 text-center animate-pulse text-slate-300 font-black uppercase text-[10px] tracking-[0.3em]">
+        Menyusun Berkas...
+    </div>
+) : (
+    <div className={viewMode === 'grid' ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6" : "flex flex-col gap-2"}>
+        {items.map((item, idx) => {
+            // Logika pendefinisian icon & color harus di dalam kurung kurawal map
+            const { icon, color } = getFileConfig(item.name, item.isFolder);
 
-                            <div className="absolute top-4 right-2" ref={activeMenu === idx ? menuRef : null}>
-                                <button onClick={(e) => { e.stopPropagation(); setActiveMenu(activeMenu === idx ? null : idx); }} className="p-2 text-slate-300 hover:text-slate-600"><FiMoreVertical size={16} /></button>
-                                {activeMenu === idx && (
-                                    <ActionMenu 
-                                        item={item} 
-                                        canEdit={canEdit} 
-                                        handleDownload={handleDownload} 
-                                        handleDelete={handleDelete}
-                                        setModalType={setModalType}
-                                        setSelectedItem={setSelectedItem}
-                                        setFolderNameInput={setFolderNameInput}
-                                        setShowModal={setShowModal}
-                                        setActiveMenu={setActiveMenu}
-                                    />
-                                )}
-                            </div>
+            return (
+                <div 
+                    key={idx} 
+                    onClick={() => item.isFolder && handleFolderClick(item.name)} 
+                    className={`group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all cursor-pointer relative ${
+                        viewMode === 'list' ? 'flex items-center justify-between p-4' : 'text-center'
+                    }`}
+                >
+                    <div className={viewMode === 'list' ? "flex items-center gap-4" : ""}>
+                        <div className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${color} ${
+                            viewMode === 'list' ? 'w-12 h-12 mb-0' : ''
+                        }`}>
+                            {icon}
                         </div>
-                    ))}
-                </div>
-            )}
+                        
+                        <div className={viewMode === 'list' ? "text-left" : ""}>
+                            <p className="font-bold text-slate-700 text-[11px] truncate uppercase tracking-tight px-2">
+                                {item.name}
+                            </p>
+                            <p className="text-[9px] font-black text-slate-300 uppercase mt-1">
+                                {item.isFolder ? 'Folder' : item.size}
+                            </p>
+                        </div>
+                    </div>
 
+                    <div className="absolute top-4 right-2" ref={activeMenu === idx ? menuRef : null}>
+                        <button 
+                            onClick={(e) => { 
+                                e.stopPropagation(); 
+                                setActiveMenu(activeMenu === idx ? null : idx); 
+                            }} 
+                            className="p-2 text-slate-300 hover:text-slate-600"
+                        >
+                            <FiMoreVertical size={16} />
+                        </button>
+                        
+                        {activeMenu === idx && (
+                            <ActionMenu 
+                                item={item} 
+                                canEdit={canEdit} 
+                                handleDownload={handleDownload} 
+                                handleDelete={handleDelete}
+                                setModalType={setModalType}
+                                setSelectedItem={setSelectedItem}
+                                setFolderNameInput={setFolderNameInput}
+                                setShowModal={setShowModal}
+                                setActiveMenu={setActiveMenu}
+                            />
+                        )}
+                    </div>
+                </div>
+            );
+        })}
+    </div>
+)}
             {/* MODAL RENAME/CREATE */}
             {showModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
