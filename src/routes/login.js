@@ -9,7 +9,8 @@ router.post('/', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        const [rows] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
+        // Gunakan execute agar konsisten
+        const [rows] = await db.execute('SELECT * FROM users WHERE username = ?', [username]);
         const user = rows[0];
 
         if (!user) {
@@ -21,39 +22,41 @@ router.post('/', async (req, res) => {
             return res.status(401).json({ message: 'Password salah' });
         }
 
-        // 1. Generate Token
+        // 1. Generate Token (Sudah benar memasukkan role)
         const token = jwt.sign(
-            { id: user.id, role: user.role }, 
+            { id: user.id, username: user.username, role: user.role }, 
             process.env.JWT_SECRET || 'smk_dipo_secret', 
             { expiresIn: '24h' }
         );
 
-        // 2. Simpan token di Cookie
-       res.cookie('token', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', 
-    sameSite: 'lax', // Ganti dari strict ke lax
-    maxAge: 24 * 60 * 60 * 1000 
-});
+        // 2. Simpan token di Cookie (PERBAIKAN DI SINI)
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: false, // Set FALSE dulu selama di localhost agar bisa terbaca tanpa HTTPS
+            sameSite: 'lax', 
+            maxAge: 24 * 60 * 60 * 1000,
+            path: '/' // Pastikan cookie tersedia di seluruh path API
+        });
 
-        // 3. Kirim response tanpa token di body
+        // 3. Kirim response
         res.json({
+            success: true,
             message: 'Login Berhasil',
             user: { 
                 name: user.nama,
+                user_id:user.user_id,
                 role: user.role 
             }
         });
 
     } catch (err) {
-        console.error(err);
+        console.error("Login Error:", err);
         res.status(500).json({ message: 'Terjadi kesalahan pada server' });
     }
 });
 
-// Tambahkan Route Logout untuk menghapus cookie
 router.post('/logout', (req, res) => {
-    res.clearCookie('token');
+    res.clearCookie('token', { path: '/' });
     res.json({ message: 'Logout berhasil' });
 });
 

@@ -14,6 +14,7 @@ import getArchive from '../routes/getArchive.js';
 import accessRoutes from '../routes/defineAccess.js';
 import errorMiddleware from './errorMiddleware.js';
 import folderRoutes from '../routes/store.js';
+import fileRoutes from '../routes/crudFile.js';
 
 dotenv.config();
 const app = express();
@@ -43,6 +44,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/define-access', accessRoutes); 
 app.use('/api/archive-years', getArchive); 
 app.use('/api/folders', folderRoutes);
+app.use('/api/files', fileRoutes);
 
 // --- 4. ERROR HANDLING ---
 app.use((req, res, next) => {

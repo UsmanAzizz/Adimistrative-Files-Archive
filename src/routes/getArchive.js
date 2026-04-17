@@ -1,70 +1,102 @@
 import express from 'express';
 import db from '../backend/db_connections.js';
+import { verifyToken } from '../backend/verifyToken.js';
+import { isAdmin } from '../backend/authMiddleware.js';
 
 const router = express.Router();
 
-// --- 1. GET ALL ---
+// --- 1. GET ALL (Public) ---
+// Route ini tidak melewati middleware verifyToken/isAdmin agar user umum bisa melihat
 router.get('/', async (req, res) => {
     try {
-        const [rows] = await db.query(`SELECT * FROM tahun_akademik ORDER BY ta DESC`);
-        res.status(200).json({ success: true, data: rows });
+        const [rows] = await db.execute(`SELECT * FROM tahun_akademik ORDER BY ta DESC`);
+        res.status(200).json({ 
+            success: true, 
+            data: rows 
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Gagal mengambil data' });
-    }
-});
-
-// --- 2. POST (CREATE) ---
-router.post('/', async (req, res) => {
-    const { ta } = req.body;
-    if (!ta) return res.status(400).json({ success: false, message: "TA wajib diisi" });
-
-    try {
-        const [result] = await db.query(`
-            INSERT INTO tahun_akademik (ta) 
-            VALUES (?)`, [ta]);
-        res.status(201).json({ success: true, id: result.insertId });
-    } catch (error) {
-        res.status(error.code === 'ER_DUP_ENTRY' ? 400 : 500).json({ 
+        console.error("Database Error:", error.message);
+        res.status(500).json({ 
             success: false, 
-            message: error.code === 'ER_DUP_ENTRY' ? "TA sudah ada" : "Server Error" 
+            message: 'Gagal mengambil data dari database' 
         });
     }
 });
 
-// --- 3. PUT (UPDATE Nama TA atau Status Jabatan) ---
-// --- 3. PUT (Update) ---
-// Cukup gunakan '/:id' karena prefix sudah diatur di server.js
-router.put('/:id', async (req, res) => {
-    const { id } = req.params;
-    const updates = req.body;
+/**
+ * --- BARRIER PROTEKSI ---
+ * Middleware didefinisikan secara berurutan. 
+ * verifyToken: Mengambil token -> Decode -> Simpan data user ke req.user
+ * isAdmin: Mengambil req.user -> Cek role
+ */
+router.use(verifyToken);
+router.use(isAdmin);
 
-    const fields = Object.keys(updates).map(key => `${key} = ?`).join(', ');
-    const values = Object.values(updates);
-
-    if (values.length === 0) return res.status(400).json({ success: false, message: "Tidak ada data yang diubah" });
+// --- 2. POST (CREATE) - Terproteksi ---
+router.post('/', async (req, res) => {
+    const { ta } = req.body;
+    
+    // Validasi input
+    if (!ta) {
+        return res.status(400).json({ success: false, message: "Tahun Akademik (TA) wajib diisi" });
+    }
 
     try {
-        await db.query(`UPDATE tahun_akademik SET ${fields} WHERE id = ?`, [...values, id]);
-        res.status(200).json({ success: true, message: "Update berhasil" });
+        const [result] = await db.execute(`INSERT INTO tahun_akademik (ta) VALUES (?)`, [ta]);
+        res.status(201).json({ 
+            success: true, 
+            id: result.insertId, 
+            message: "Tahun akademik berhasil ditambahkan" 
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Gagal update data" });
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ success: false, message: "TA tersebut sudah terdaftar" });
+        }
+        res.status(500).json({ success: false, message: "Gagal menyimpan ke database" });
     }
 });
 
-// --- 4. DELETE ---
-// Cukup gunakan '/:id'
+// --- 3. PUT (UPDATE) - Terproteksi ---
+router.put('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { ta } = req.body;
+
+    if (!ta) return res.status(400).json({ success: false, message: "Data update kosong" });
+
+    try {
+        const [result] = await db.execute(`UPDATE tahun_akademik SET ta = ? WHERE id = ?`, [ta, id]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Data tidak ditemukan" });
+        }
+
+        res.status(200).json({ success: true, message: "Berhasil memperbarui data" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Gagal memperbarui database" });
+    }
+});
+
+// --- 4. DELETE - Terproteksi ---
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const [exists] = await db.query(`SELECT id FROM tahun_akademik WHERE id = ?`, [id]);
-        if (exists.length === 0) return res.status(404).json({ success: false, message: "Data tidak ditemukan" });
+        // Cek keberadaan data sebelum hapus
+        const [check] = await db.execute(`SELECT id FROM tahun_akademik WHERE id = ?`, [id]);
+        if (check.length === 0) {
+            return res.status(404).json({ success: false, message: "Arsip sudah tidak ada" });
+        }
 
-        await db.query(`DELETE FROM tahun_akademik WHERE id = ?`, [id]);
-        res.status(200).json({ success: true, message: `Arsip berhasil dihapus` });
+        const [result] = await db.execute(`DELETE FROM tahun_akademik WHERE id = ?`, [id]);
+        
+        if (result.affectedRows > 0) {
+            res.status(200).json({ success: true, message: "Tahun akademik berhasil dihapus" });
+        } else {
+            res.status(400).json({ success: false, message: "Gagal menghapus data" });
+        }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Gagal menghapus data" });
+        console.error("Delete Error:", error.message);
+        res.status(500).json({ success: false, message: "Kesalahan server saat menghapus arsip" });
     }
 });
 

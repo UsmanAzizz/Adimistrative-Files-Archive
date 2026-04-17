@@ -2,7 +2,7 @@ import React, { useState } from 'react'; // Tambah useState
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion'; // Tambah useScroll & useMotionValueEvent
 import { NavLink, useNavigate } from 'react-router-dom'; 
 import { FiHome, FiFolder, FiSettings, FiLogOut, FiUsers } from 'react-icons/fi';
-
+import logoDafa from '../assets/vite.svg'; // Sesuaikan jumlah ../ dengan struktur folder Mas
 
 const Sidebar = () => {
  const navigate = useNavigate();
@@ -49,40 +49,79 @@ const Sidebar = () => {
   return (
     <>
       {/* DESKTOP SIDEBAR */}
-      <aside className="hidden md:flex w-64 h-screen bg-slate-900 text-slate-300 flex-col fixed left-0 top-0 z-50">
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-500/20">
-            D
-          </div>
-          <div>
-            <h1 className="text-white font-bold leading-none">DAFA</h1>
-            <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-semibold">
-              Dipo Archive System
-            </p>
-          </div>
-        </div>
+      <aside className="hidden md:flex w-64 h-screen bg-slate-900 text-slate-300 flex-col fixed left-0 top-0 z-50 border-r border-slate-800">
+  
+  {/* HEADER LOGO */}
+  <div className="p-6 flex items-center gap-3">
+ <div className="relative w-10 h-10 bg-white rounded-[10px] flex items-center justify-center shadow-sm border border-emerald-400 overflow-hidden">
+      <img 
+        src={logoDafa} 
+        alt="Logo DAFA" 
+        className="w-6 h-6 object-contain" 
+      />
+    </div>
+    <div>
+      <h1 className="text-white font-bold leading-none tracking-tight">DAFA</h1>
+      <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-semibold">
+        Dipo Archive System
+      </p>
+    </div>
+  </div>
 
-        <nav className="flex-1 px-4 space-y-1">
-          {/* Gunakan filteredMenu di sini */}
-          {filteredMenu.map((item) => (
-            <NavLink key={item.id} to={item.path} className="block no-underline">
-              {({ isActive }) => (
-                <div className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all ${isActive ? 'bg-emerald-600 text-white' : 'hover:bg-slate-800'}`}>
-                  <item.icon className="text-xl" />
-                  <span className="text-sm font-bold">{item.label}</span>
-                </div>
-              )}
-            </NavLink>
-          ))}
-        </nav>
+  {/* NAVIGATION */}
+<nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto custom-scrollbar">
+  {filteredMenu.map((item) => (
+    <NavLink 
+      key={item.id} 
+      to={item.path} 
+      className="block no-underline group" // Group ini penting
+    >
+      {({ isActive }) => (
+        <div className={`
+          flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200
+          ${isActive 
+            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' 
+            : 'hover:bg-slate-800 hover:text-white'}
+        `}>
+          
+          {/* PEMBUNGKUS IKON - Kita pakai varian motion di sini */}
+          <motion.div
+            variants={{
+              hover: { scale: 1.3, rotate: 5 } // Membesar 30% saat group di-hover
+            }}
+            whileHover="hover"
+            // Atau jika ingin otomatis membesar saat menu utamanya di-hover:
+            initial={false}
+            animate={isActive ? { scale: 1.1 } : { scale: 1 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            className="flex items-center justify-center"
+          >
+            <item.icon 
+              className={`text-xl transition-colors duration-200 
+                ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-emerald-400'}
+              `} 
+            />
+          </motion.div>
 
-        <div className="p-6 border-t border-slate-800">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-rose-400 hover:bg-rose-500/10 font-bold text-sm">
-            <FiLogOut className="text-xl" />
-            <span>Keluar</span>
-          </button>
+          <span className="text-sm font-bold">{item.label}</span>
         </div>
-      </aside>
+      )}
+    </NavLink>
+  ))}
+</nav>
+
+  {/* FOOTER / LOGOUT */}
+  <div className="p-4 border-t border-slate-800">
+    <button 
+      onClick={handleLogout} 
+      className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-rose-400 hover:bg-rose-500/10 transition-colors duration-200 font-bold text-sm"
+    >
+      <FiLogOut className="text-xl" />
+      <span>Keluar Aplikasi</span>
+    </button>
+  </div>
+
+</aside>
 
       {/* MOBILE BOTTOM NAV */}
    {/* MOBILE BOTTOM NAV */}
@@ -97,29 +136,38 @@ const Sidebar = () => {
   className="md:hidden fixed bottom-6 left-6 right-6 bg-slate-900/90 backdrop-blur-lg border border-slate-800 h-16 rounded-[2rem] z-[100] flex justify-around items-center px-2 shadow-2xl"
 >
   {filteredMenu.map((item) => (
-    <NavLink key={item.id} to={item.path} className="relative flex-1 flex justify-center">
-      {({ isActive }) => (
-        <div className="relative flex items-center justify-center w-12 h-12"> {/* Container dikunci ukurannya */}
-          
-          {/* PEMBUNGKUS LINGKARAN */}
-          {isActive && (
-            <motion.div 
-              layoutId="navActive" 
-              className="absolute inset-0 bg-emerald-600/20 rounded-full" 
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            />
-          )}
-          
-          {/* IKON */}
-          <div className="relative z-10 flex flex-col items-center">
-            <item.icon size={22} className={isActive ? 'text-emerald-400' : 'text-slate-500'} />
-            {/* Titik kecil opsional, kalau mau benar-benar bersih bisa dihapus */}
-            {/* {isActive && <div className="w-1 h-1 bg-emerald-400 rounded-full mt-1" />} */}
-          </div>
-          
-        </div>
+ <NavLink key={item.id} to={item.path} className="relative flex-1 flex justify-center">
+  {({ isActive }) => (
+    <div className="relative flex items-center justify-center w-12 h-12">
+      
+      {/* PEMBUNGKUS BACKGROUND (Tetap Lingkaran) */}
+      {isActive && (
+        <motion.div 
+          layoutId="navActive" 
+          className="absolute inset-0 bg-emerald-600/20 rounded-full" 
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        />
       )}
-    </NavLink>
+      
+      {/* IKON DENGAN EFEK SCALE */}
+      <motion.div 
+        className="relative z-10 flex flex-col items-center"
+        // Efek saat kursor di atas ikon
+        whileHover={{ scale: 1.2 }} 
+        // Efek saat ikon diklik (opsional, biar mantul)
+        whileTap={{ scale: 0.9 }}
+        // Efek transisi halus
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      >
+        <item.icon 
+          size={22} 
+          className={`transition-colors duration-300 ${isActive ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'}`} 
+        />
+      </motion.div>
+      
+    </div>
+  )}
+</NavLink>
   ))}
   
   <button onClick={handleLogout} className="flex-1 text-rose-500/60 flex justify-center items-center">

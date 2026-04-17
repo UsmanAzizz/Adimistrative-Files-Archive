@@ -5,17 +5,9 @@ import { isAdmin } from '../backend/authMiddleware.js';
 
 const router = express.Router();
 
-router.use(verifyToken);
-router.use(isAdmin);
-
-// --- 1. GET ALL DATA & COLUMNS ---
 router.get('/', async (req, res) => {
   try {
-    // 1. Ambil data record (untuk mengisi checkbox/status di tabel)
     const [rows] = await db.query('SELECT * FROM client_access');
-
-    // 2. Ambil struktur kolom langsung dari MySQL agar tetap dapat "Daftar Jabatan" meski tabel kosong
-    // Ganti 'nama_database_kamu' dengan nama DB yang sebenarnya
     const [columns] = await db.query(`
       SELECT COLUMN_NAME 
       FROM INFORMATION_SCHEMA.COLUMNS 
@@ -23,7 +15,6 @@ router.get('/', async (req, res) => {
       AND TABLE_SCHEMA = DATABASE()
     `);
 
-    // 3. Filter kolom yang bukan jabatan
     const ignoreFields = ['user_id', 'created_at', 'updated_at'];
     const availableRoles = columns
       .map(col => col.COLUMN_NAME)
@@ -31,15 +22,43 @@ router.get('/', async (req, res) => {
 
     res.status(200).json({ 
       status: 'success', 
-      data: rows,           // Ini mungkin [] jika kosong
-      roles: availableRoles // Ini akan SELALU ada isinya (daftar kolom jabatan)
+      data: rows, 
+      roles: availableRoles 
     });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
+router.use(verifyToken);
+router.get('/check-permission', verifyToken, async (req, res) => {
+    try {
+        const { jabatan } = req.query;
+        const userId = req.user.id;
 
-// --- 2. TAMBAH KOLOM BARU ---
+        // Query dinamis berdasarkan kolom jabatan
+        // Gunakan mysql2/promise (db.query)
+        const [rows] = await db.query(
+            `SELECT ?? FROM client_access WHERE user_id = ?`,
+            [jabatan, userId]
+        );
+
+        if (rows.length > 0 && rows[0][jabatan] === 1) {
+            return res.json({ can_edit: true });
+        }
+
+        res.json({ can_edit: false });
+    } catch (error) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
+// =========================================================
+// BARRIER PROTEKSI (Middleware Satpam)
+// Semua route di BAWAH baris ini wajib Login & Admin
+// =========================================================
+
+router.use(isAdmin);
+
 router.post('/column', async (req, res) => {
   try {
     const { name } = req.body;
