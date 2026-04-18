@@ -30,22 +30,31 @@ router.get('/', async (req, res) => {
   }
 });
 router.use(verifyToken);
+// --- 2. RUTE USER ACCESS (Wajib Login) ---
 router.get('/check-permission', verifyToken, async (req, res) => {
     try {
         const { jabatan } = req.query;
         const userId = req.user.id;
+        const userRole = req.user.role; // Ambil role dari token
 
-        // Query dinamis berdasarkan kolom jabatan
-        // Gunakan mysql2/promise (db.query)
+        // 1. JIKA DIA ADMIN, LANGSUNG LOLOSKAN (BYPASS)
+        if (userRole === 'admin') {
+            return res.json({ can_edit: true, is_admin: true });
+        }
+
+        if (!jabatan) return res.status(400).json({ message: 'Parameter jabatan diperlukan' });
+
+        // 2. JIKA BUKAN ADMIN, CEK KOLOM AKSES SEPERTI BIASA
         const [rows] = await db.query(
-            `SELECT ?? FROM client_access WHERE user_id = ?`,
-            [jabatan, userId]
+            `SELECT \`${jabatan}\` as status FROM client_access WHERE user_id = ?`,
+            [userId]
         );
 
-        if (rows.length > 0 && rows[0][jabatan] === 1) {
+        if (rows.length > 0 && rows[0].status === 1) {
             return res.json({ can_edit: true });
         }
 
+        // Jika semua gagal
         res.json({ can_edit: false });
     } catch (error) {
         res.status(500).json({ status: 'error', message: error.message });

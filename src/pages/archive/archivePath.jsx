@@ -421,7 +421,7 @@ const ArchivePath = () => {
             <Dialog
                 isOpen={showModal}
                 onClose={() => { setShowModal(false); setActiveMenu(null); }}
-                title={modalType === 'create' ? 'Folder Baru' : modalType === 'Ubah ' ? 'Ubah Nama' : 'Opsi Berkas'}
+                title={modalType === 'create' ? 'Folder Baru' : modalType === 'Ubah ' ? 'Ubah Nama' : 'Detail'}
                 size="sm"
             >
                 {/* Gunakan Ref Mas di sini agar useEffect handleClick tetap bekerja */}
@@ -449,7 +449,7 @@ const ArchivePath = () => {
                                     className="w-full py-4.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-[0_15px_30px_rgba(16,185,129,0.2)] active:scale-[0.96] transition-all group"
                                 >
                                     <FiDownload size={18} className="group-hover:-translate-y-0.5 transition-transform" />
-                                    {selectedItem?.isFolder ? 'Download ZIP' : 'Download Berkas'}
+                                    {selectedItem?.isFolder ? 'Download ZIP' : 'Download'}
                                 </button>
 
 
