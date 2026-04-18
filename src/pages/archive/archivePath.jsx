@@ -5,7 +5,7 @@ import Dialog from '../../components/dialog'; // Sesuaikan path jika folder comp
 import {
     FiArrowLeft, FiChevronRight, FiHome, FiPlus, FiUploadCloud,
     FiGrid, FiList, FiDownload, FiFolder, FiEdit2, FiTrash2,
-    FiSearch, FiImage, FiMusic, FiVideo, FiFileText, FiArchive, FiCode
+    FiSearch, FiImage, FiMusic, FiVideo, FiFileText, FiArchive, FiCode, FiMoreVertical 
 } from 'react-icons/fi';
 import {
     FaFilePdf, FaFileWord, FaFileExcel, FaFilePowerpoint
@@ -241,61 +241,79 @@ const [selectedFile, setSelectedFile] = useState(null);
                         </div>
                     )}
 
-                    {[...items]
-                        .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                        .sort((a, b) => (a.isFolder === b.isFolder ? a.name.localeCompare(b.name) : a.isFolder ? -1 : 1))
-                        .map((item, idx) => {
-                            const { icon, color } = getFileConfig(item.name, item.isFolder);
-                            const isActive = activeMenu === idx;
+                {[...items]
+    .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => (a.isFolder === b.isFolder ? a.name.localeCompare(b.name) : a.isFolder ? -1 : 1))
+    .map((item, idx) => {
+        const { icon, color } = getFileConfig(item.name, item.isFolder);
+        const isActive = activeMenu === idx;
 
-                            return (
-                               <div key={idx} 
-    onClick={() => {
-        setSelectedItem(item);
-        if (window.innerWidth < 1024) {
-            // Mobile/Tablet: Klik kiri buka menu opsi
-            setModalType('options');
-            setShowModal(true);
-        } else {
-            // Desktop: Klik kiri HANYA masuk folder, tidak download file
-            if (item.isFolder) {
-                handleFolderClick(item.name);
-            } else {
-                // Opsional: cuma set activeMenu untuk highlight visual
-                setActiveMenu(idx); 
-            }
-        }
-    }}
-    onContextMenu={(e) => { 
-        // Desktop: Klik kanan baru panggil Dialog opsi
-        e.preventDefault(); 
-        setSelectedItem(item);
-        setActiveMenu(idx);
-        setModalType('options');
-        setShowModal(true);
-    }}
-                                    className={viewMode === 'grid'
-                                        ? `group bg-white p-5 rounded-3xl border transition-all cursor-pointer text-center relative ${isActive ? 'border-emerald-500 shadow-xl' : 'border-slate-100 shadow-sm hover:border-emerald-200'}`
-                                        : `group grid grid-cols-12 items-center gap-4 px-8 py-4 border-b border-slate-50 last:border-0 hover:bg-emerald-50/30 transition-all cursor-pointer ${isActive ? 'bg-emerald-50/50' : ''}`
-                                    }>
-                                    <div className={viewMode === 'grid' ? "" : "col-span-10 md:col-span-6 flex items-center gap-4"}>
-                                        <div className={`flex items-center justify-center shrink-0 transition-transform ${viewMode === 'grid' ? `mx-auto w-14 h-14 rounded-2xl mb-3 group-hover:scale-110 ${color}` : `w-10 h-10 rounded-xl ${color}`}`}>
-                                            {React.cloneElement(icon, { size: viewMode === 'list' ? 18 : 24 })}
-                                        </div>
-                                        <div className={viewMode === 'list' ? "truncate text-left" : ""}>
-                                            <p className="font-bold text-slate-700 text-[11px] truncate uppercase tracking-tight">{item.name}</p>
-                                            <p className="text-[9px] font-black text-slate-300 uppercase mt-1">{item.isFolder ? 'Folder' : item.size}</p>
-                                        </div>
-                                    </div>
-                                    {viewMode === 'list' && (
-                                        <>
-                                            <div className="hidden md:block col-span-3 text-center text-[11px] font-bold text-slate-400">{item.isFolder ? '-' : item.size}</div>
-                                            <div className="hidden md:block col-span-3 text-right text-[11px] font-bold text-slate-400 italic">{item.updatedAt ? new Date(item.updatedAt).toLocaleDateString('id-ID') : '-'}</div>
-                                        </>
-                                    )}
-                                </div>
-                            );
-                        })}
+        return (
+            <div key={idx} 
+                onClick={() => {
+                    setSelectedItem(item);
+                    if (item.isFolder) {
+                        handleFolderClick(item.name);
+                    } else {
+                        if (window.innerWidth < 1024) {
+                            setModalType('options');
+                            setShowModal(true);
+                        } else {
+                            setActiveMenu(idx); 
+                        }
+                    }
+                }}
+                onContextMenu={(e) => { 
+                    e.preventDefault(); 
+                    setSelectedItem(item);
+                    setActiveMenu(idx);
+                    setModalType('options');
+                    setShowModal(true);
+                }}
+                className={viewMode === 'grid'
+                    ? `group bg-white p-5 rounded-3xl border transition-all cursor-pointer text-center relative ${isActive ? 'z-10 border-emerald-500 shadow-xl' : 'z-0 border-slate-100 shadow-sm hover:border-emerald-200'}`
+                    : `group grid grid-cols-12 items-center gap-4 px-8 py-4 border-b border-slate-50 last:border-0 hover:bg-emerald-50/30 transition-all cursor-pointer relative ${isActive ? 'z-10 bg-emerald-50/50 border-emerald-200' : 'z-0'}`
+                }>
+                
+                {/* TOMBOL TITIK TIGA - Z-Index Tinggi & Position Absolute */}
+                {item.isFolder && (
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation(); // Biar nggak trigger masuk folder
+                            setSelectedItem(item);
+                            setModalType('options');
+                            setShowModal(true);
+                        }}
+                        className="lg:hidden absolute top-2 right-2 p-3 text-slate-400 hover:text-emerald-600 active:bg-slate-100 rounded-full z-[30] transition-colors"
+                    >
+                        <FiMoreVertical size={20} />
+                    </button>
+                )}
+
+                <div className={viewMode === 'grid' ? "" : "col-span-10 md:col-span-6 flex items-center gap-4"}>
+                    <div className={`flex items-center justify-center shrink-0 transition-transform ${viewMode === 'grid' ? `mx-auto w-14 h-14 rounded-2xl mb-3 group-hover:scale-110 ${color}` : `w-10 h-10 rounded-xl ${color}`}`}>
+                        {React.cloneElement(icon, { size: viewMode === 'list' ? 18 : 24 })}
+                    </div>
+                    <div className={viewMode === 'list' ? "truncate text-left" : ""}>
+                        {/* Padding right 8 agar teks tidak tertabrak tombol titik tiga di mobile */}
+                        <p className="font-bold text-slate-700 text-[11px] truncate uppercase tracking-tight pr-8 lg:pr-0">
+                            {item.name}
+                        </p>
+                        <p className="text-[9px] font-black text-slate-300 uppercase mt-1">
+                            {item.isFolder ? 'Folder' : item.size}
+                        </p>
+                    </div>
+                </div>
+
+                {viewMode === 'list' && (
+                    <>
+                        <div className="hidden md:block col-span-3 text-center text-[11px] font-bold text-slate-400">{item.isFolder ? '-' : item.size}</div>
+                        <div className="hidden md:block col-span-3 text-right text-[11px] font-bold text-slate-400 italic">{item.updatedAt ? new Date(item.updatedAt).toLocaleDateString('id-ID') : '-'}</div>
+                    </>
+                )}
+            </div>
+        );
+    })}
                 </div>
             )}
 
