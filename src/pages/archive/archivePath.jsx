@@ -241,7 +241,7 @@ const [selectedFile, setSelectedFile] = useState(null);
                         </div>
                     )}
 
-                {[...items]
+               {[...items]
     .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => (a.isFolder === b.isFolder ? a.name.localeCompare(b.name) : a.isFolder ? -1 : 1))
     .map((item, idx) => {
@@ -271,32 +271,34 @@ const [selectedFile, setSelectedFile] = useState(null);
                     setShowModal(true);
                 }}
                 className={viewMode === 'grid'
-                    ? `group bg-white p-5 rounded-3xl border transition-all cursor-pointer text-center relative ${isActive ? 'z-10 border-emerald-500 shadow-xl' : 'z-0 border-slate-100 shadow-sm hover:border-emerald-200'}`
-                    : `group grid grid-cols-12 items-center gap-4 px-8 py-4 border-b border-slate-50 last:border-0 hover:bg-emerald-50/30 transition-all cursor-pointer relative ${isActive ? 'z-10 bg-emerald-50/50 border-emerald-200' : 'z-0'}`
+                    ? `group bg-white p-5 rounded-[1rem] border transition-all cursor-pointer text-center relative ${isActive ? 'z-20 border-emerald-500 shadow-xl' : 'z-10 border-slate-100 shadow-sm hover:border-emerald-200'}`
+                    : `group grid grid-cols-12 items-center gap-4 px-8 py-4 border-b border-slate-50 relative ${isActive ? 'z-20 bg-emerald-50/50' : 'z-10'}`
                 }>
                 
-                {/* TOMBOL TITIK TIGA - Z-Index Tinggi & Position Absolute */}
+                {/* TOMBOL TITIK TIGA - Dipasang di layer terpisah agar tidak menggeser layout */}
                 {item.isFolder && (
-                    <button 
-                        onClick={(e) => {
-                            e.stopPropagation(); // Biar nggak trigger masuk folder
-                            setSelectedItem(item);
-                            setModalType('options');
-                            setShowModal(true);
-                        }}
-                        className="lg:hidden absolute top-2 right-2 p-3 text-slate-400 hover:text-emerald-600 active:bg-slate-100 rounded-full z-[30] transition-colors"
-                    >
-                        <FiMoreVertical size={20} />
-                    </button>
+                    <div className="absolute inset-0 pointer-events-none z-30">
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedItem(item);
+                                setModalType('options');
+                                setShowModal(true);
+                            }}
+                            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-slate-300 active:text-emerald-600 pointer-events-auto rounded-full active:bg-slate-50 transition-all"
+                        >
+                            <FiMoreVertical size={18} />
+                        </button>
+                    </div>
                 )}
 
-                <div className={viewMode === 'grid' ? "" : "col-span-10 md:col-span-6 flex items-center gap-4"}>
+                {/* Konten Utama - Struktur tetap murni seperti punya Mas */}
+                <div className={viewMode === 'grid' ? "w-full" : "col-span-10 md:col-span-6 flex items-center gap-4"}>
                     <div className={`flex items-center justify-center shrink-0 transition-transform ${viewMode === 'grid' ? `mx-auto w-14 h-14 rounded-2xl mb-3 group-hover:scale-110 ${color}` : `w-10 h-10 rounded-xl ${color}`}`}>
                         {React.cloneElement(icon, { size: viewMode === 'list' ? 18 : 24 })}
                     </div>
-                    <div className={viewMode === 'list' ? "truncate text-left" : ""}>
-                        {/* Padding right 8 agar teks tidak tertabrak tombol titik tiga di mobile */}
-                        <p className="font-bold text-slate-700 text-[11px] truncate uppercase tracking-tight pr-8 lg:pr-0">
+                    <div className={viewMode === 'list' ? "truncate text-left" : "w-full"}>
+                        <p className="font-bold text-slate-700 text-[11px] truncate uppercase tracking-tight">
                             {item.name}
                         </p>
                         <p className="text-[9px] font-black text-slate-300 uppercase mt-1">
