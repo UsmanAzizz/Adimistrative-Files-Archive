@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 *.history
 .env
+# Abaikan semua file hasil upload di lokal maupun produksi
+uploads/
+/uploads/*
+!/uploads/.gitkeep

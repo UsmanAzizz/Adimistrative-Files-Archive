@@ -5,21 +5,21 @@ import {
     FiChevronRight, FiHome, FiX, FiEdit2, FiTrash2, FiGrid, FiList, FiDownload, FiUploadCloud
 } from 'react-icons/fi';
 import axios from '../../backend/axiosConfig';
-import { 
-    FiImage, FiMusic, FiVideo, 
-    FiFileText, FiArchive, FiCode 
+import {
+    FiImage, FiMusic, FiVideo,
+    FiFileText, FiArchive, FiCode
 } from 'react-icons/fi';
 // Jika ingin warna-warni, Mas bisa pakai library 'react-icons/fa' (Font Awesome)
-import { 
-    FaFilePdf, FaFileWord, FaFileExcel, FaFilePowerpoint, FaFileArchive 
+import {
+    FaFilePdf, FaFileWord, FaFileExcel, FaFilePowerpoint, FaFileArchive
 } from 'react-icons/fa';
 
 const getFileConfig = (fileName, isFolder) => {
     // 1. Jika Folder
     if (isFolder) {
-        return { 
-            icon: <FiFolder size={32} fill="currentColor" />, 
-            color: 'bg-amber-50 text-amber-500' 
+        return {
+            icon: <FiFolder size={32} fill="currentColor" />,
+            color: 'bg-amber-50 text-amber-500'
         };
     }
 
@@ -36,7 +36,7 @@ const getFileConfig = (fileName, isFolder) => {
         csv: { icon: <FaFileExcel size={32} />, color: 'bg-emerald-50 text-emerald-600' },
         ppt: { icon: <FaFilePowerpoint size={32} />, color: 'bg-orange-50 text-orange-500' },
         pptx: { icon: <FaFilePowerpoint size={32} />, color: 'bg-orange-50 text-orange-500' },
-        
+
         // Media & Image
         jpg: { icon: <FiImage size={32} />, color: 'bg-purple-50 text-purple-500' },
         jpeg: { icon: <FiImage size={32} />, color: 'bg-purple-50 text-purple-500' },
@@ -44,7 +44,7 @@ const getFileConfig = (fileName, isFolder) => {
         svg: { icon: <FiImage size={32} />, color: 'bg-purple-50 text-purple-500' },
         mp4: { icon: <FiVideo size={32} />, color: 'bg-pink-50 text-pink-500' },
         mp3: { icon: <FiMusic size={32} />, color: 'bg-cyan-50 text-cyan-500' },
-        
+
         // Archive & Code
         zip: { icon: <FiArchive size={32} />, color: 'bg-yellow-50 text-yellow-600' },
         rar: { icon: <FiArchive size={32} />, color: 'bg-yellow-50 text-yellow-600' },
@@ -53,9 +53,9 @@ const getFileConfig = (fileName, isFolder) => {
     };
 
     // 3. Return mapping atau default jika tidak ketemu
-    return map[ext] || { 
-        icon: <FiFileText size={32} />, 
-        color: 'bg-slate-50 text-slate-400' 
+    return map[ext] || {
+        icon: <FiFileText size={32} />,
+        color: 'bg-slate-50 text-slate-400'
     };
 };
 
@@ -97,27 +97,43 @@ const ArchivePath = () => {
     };
 
     // --- 2. FETCH CONTENT ---
-const fetchContent = async () => {
-    try {
-        const cleanPath = (subPath || "").replace(/^\/+|\/+$/g, "");
-        const res = await axios.get('/files/list', { // Pastikan endpointnya /files/list
-            params: { tapel, jabatan, subPath: cleanPath }
-        });
-        
-        // SINKRONKAN DI SINI:
-        if (res.data.success) { 
-            setItems(res.data.data); 
-        } else {
-            setItems([]);
-        }
-    } catch (err) {
-        console.error("Fetch error:", err);
-        setItems([]);
-    } finally {
-        setLoading(false);
-    }
-};
+    const fetchContent = async () => {
+        try {
+            const cleanPath = (subPath || "").replace(/^\/+|\/+$/g, "");
+            const res = await axios.get('/files/list', { // Pastikan endpointnya /files/list
+                params: { tapel, jabatan, subPath: cleanPath }
+            });
 
+            // SINKRONKAN DI SINI:
+            if (res.data.success) {
+                setItems(res.data.data);
+            } else {
+                setItems([]);
+            }
+        } catch (err) {
+            console.error("Fetch error:", err);
+            setItems([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+    // Tambahkan ini di dalam ArchivePath, sebelum return
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // Jika menu sedang terbuka DAN klik terjadi DI LUAR elemen yang kita beri ref
+            if (activeMenu !== null && menuRef.current && !menuRef.current.contains(event.target)) {
+                setActiveMenu(null);
+            }
+        };
+
+        // Pasang listener klik global
+        document.addEventListener("mousedown", handleClickOutside);
+
+        // Cleanup listener saat komponen hancur/unmount
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [activeMenu]); // Listener diperbarui tiap activeMenu berubah
     useEffect(() => {
         setLoading(true);
         fetchContent();
@@ -127,7 +143,7 @@ const fetchContent = async () => {
     }, [tapel, jabatan, subPath]);
 
     // --- 3. FILE OPERATIONS ---
-    
+
     // Download via crudFiles.js
     const handleDownload = (item) => {
         const url = `${axios.defaults.baseURL}/files/download?tapel=${tapel}&jabatan=${jabatan}&subPath=${subPath}&fileName=${item.name}`;
@@ -220,7 +236,7 @@ const fetchContent = async () => {
 
     return (
         <div className="min-h-screen bg-[#FBFBFB] p-4 md:p-2 space-y-6">
-            
+
             {/* TOOLBAR */}
             <div className="bg-white p-5 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4 overflow-hidden">
@@ -241,93 +257,112 @@ const fetchContent = async () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {/* View Switcher */}
-                    <div className="flex bg-slate-100 p-1 rounded-2xl mr-2">
-                        <button onClick={() => setViewMode('grid')} className={`p-2 rounded-xl ${viewMode === 'grid' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}><FiGrid size={18} /></button>
-                        <button onClick={() => setViewMode('list')} className={`p-2 rounded-xl ${viewMode === 'list' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}><FiList size={18} /></button>
-                    </div>
-
-                    {/* ACTIONS: Hanya muncul jika canEdit === true */}
-                    {canEdit && (
-                        <>
-                            <button onClick={() => { setModalType('create'); setFolderNameInput(''); setShowModal(true); }} className="bg-amber-400 text-white px-4 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider flex items-center gap-2 shadow-md">
-                                <FiPlus /> Folder
+                    {/* View Switcher - Tinggi container ini ditentukan oleh p-1 + p-2 button */}
+                     {canEdit && (
+                        <div className="flex items-center gap-2">
+                            {/* Folder Button - Menggunakan py-2 agar setara dengan toggle */}
+                            <button
+                                onClick={() => { setModalType('create'); setFolderNameInput(''); setShowModal(true); }}
+                                className="h-[38px] bg-amber-400 text-white px-4 rounded-xl font-bold text-[10px] uppercase tracking-wider flex items-center gap-2 shadow-sm hover:bg-amber-500 transition-all"
+                            >
+                                <FiPlus size={14} /> Folder
                             </button>
-                            <label className="cursor-pointer bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider flex items-center gap-2 shadow-md hover:bg-emerald-600 transition-all">
-                                <FiUploadCloud /> Upload
+
+                            {/* Upload Button - Menggunakan h-[38px] untuk kepastian presisi */}
+                            <label className="h-[38px] cursor-pointer bg-emerald-500 text-white px-4 rounded-xl font-bold text-[10px] uppercase tracking-wider flex items-center gap-2 shadow-sm hover:bg-emerald-600 transition-all">
+                                <FiUploadCloud size={14} /> Upload
                                 <input type="file" className="hidden" onChange={handleUpload} />
                             </label>
-                        </>
+                        </div>
                     )}
+                    <div className="flex bg-slate-100 p-1 rounded-2xl mr-1">
+                        <button
+                            onClick={() => setViewMode('grid')}
+                            className={`p-2 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}
+                        >
+                            <FiGrid size={18} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-2 rounded-xl transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}
+                        >
+                            <FiList size={18} />
+                        </button>
+                    </div>
+
+                    {/* ACTIONS */}
+                  
                 </div>
             </div>
 
             {/* EXPLORER */}
-{loading ? (
-    <div className="py-20 text-center animate-pulse text-slate-300 font-black uppercase text-[10px] tracking-[0.3em]">
-        Menyusun Berkas...
-    </div>
-) : (
-    <div className={viewMode === 'grid' ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6" : "flex flex-col gap-2"}>
-        {items.map((item, idx) => {
-            // Logika pendefinisian icon & color harus di dalam kurung kurawal map
-            const { icon, color } = getFileConfig(item.name, item.isFolder);
-
-            return (
-                <div 
-                    key={idx} 
-                    onClick={() => item.isFolder && handleFolderClick(item.name)} 
-                    className={`group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all cursor-pointer relative ${
-                        viewMode === 'list' ? 'flex items-center justify-between p-4' : 'text-center'
-                    }`}
-                >
-                    <div className={viewMode === 'list' ? "flex items-center gap-4" : ""}>
-                        <div className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${color} ${
-                            viewMode === 'list' ? 'w-12 h-12 mb-0' : ''
-                        }`}>
-                            {icon}
-                        </div>
-                        
-                        <div className={viewMode === 'list' ? "text-left" : ""}>
-                            <p className="font-bold text-slate-700 text-[11px] truncate uppercase tracking-tight px-2">
-                                {item.name}
-                            </p>
-                            <p className="text-[9px] font-black text-slate-300 uppercase mt-1">
-                                {item.isFolder ? 'Folder' : item.size}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="absolute top-4 right-2" ref={activeMenu === idx ? menuRef : null}>
-                        <button 
-                            onClick={(e) => { 
-                                e.stopPropagation(); 
-                                setActiveMenu(activeMenu === idx ? null : idx); 
-                            }} 
-                            className="p-2 text-slate-300 hover:text-slate-600"
-                        >
-                            <FiMoreVertical size={16} />
-                        </button>
-                        
-                        {activeMenu === idx && (
-                            <ActionMenu 
-                                item={item} 
-                                canEdit={canEdit} 
-                                handleDownload={handleDownload} 
-                                handleDelete={handleDelete}
-                                setModalType={setModalType}
-                                setSelectedItem={setSelectedItem}
-                                setFolderNameInput={setFolderNameInput}
-                                setShowModal={setShowModal}
-                                setActiveMenu={setActiveMenu}
-                            />
-                        )}
-                    </div>
+            {loading ? (
+                <div className="py-20 text-center animate-pulse text-slate-300 font-black uppercase text-[10px] tracking-[0.3em]">
+                    Menyusun Berkas...
                 </div>
-            );
-        })}
-    </div>
-)}
+            ) : (
+                <div className={viewMode === 'grid' ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6" : "flex flex-col gap-2"}>
+                    {items.map((item, idx) => {
+                        // Logika pendefinisian icon & color harus di dalam kurung kurawal map
+                        const { icon, color } = getFileConfig(item.name, item.isFolder);
+
+                        return (
+                            <div
+                                key={idx}
+                                // Klik kiri tetap untuk buka folder
+                                onClick={() => item.isFolder && handleFolderClick(item.name)}
+
+                                // KLIK KANAN: Munculkan menu
+                                onContextMenu={(e) => {
+                                    e.preventDefault(); // Matikan menu bawaan windows/browser
+                                    setActiveMenu(activeMenu === idx ? null : idx);
+                                }}
+
+                                className={`group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all cursor-pointer relative ${viewMode === 'list' ? 'flex items-center justify-between p-4' : 'text-center'
+                                    }`}
+                            >
+                                {/* Konten Ikon & Nama tetap sama */}
+                                <div className={viewMode === 'list' ? "flex items-center gap-4" : ""}>
+                                    <div className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${color} ${viewMode === 'list' ? 'w-12 h-12 mb-0' : ''
+                                        }`}>
+                                        {icon}
+                                    </div>
+
+                                    <div className={viewMode === 'list' ? "text-left" : ""}>
+                                        <p className="font-bold text-slate-700 text-[11px] truncate uppercase tracking-tight px-2">
+                                            {item.name}
+                                        </p>
+                                        <p className="text-[9px] font-black text-slate-300 uppercase mt-1">
+                                            {item.isFolder ? 'Folder' : item.size}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* MENU ACTION: Sekarang hanya muncul jika diklik kanan */}
+                                <div
+                                    className="absolute top-10 left-1/2 -translate-x-1/2 z-50"
+                                    ref={activeMenu === idx ? menuRef : null}
+                                    onClick={(e) => e.stopPropagation()} // Cegah trigger buka folder saat pilih menu
+                                >
+                                    {activeMenu === idx && (
+                                        <ActionMenu
+                                            item={item}
+                                            canEdit={canEdit}
+                                            handleDownload={handleDownload}
+                                            handleDelete={handleDelete}
+                                            setModalType={setModalType}
+                                            setSelectedItem={setSelectedItem}
+                                            setFolderNameInput={setFolderNameInput}
+                                            setShowModal={setShowModal}
+                                            setActiveMenu={setActiveMenu}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
             {/* MODAL RENAME/CREATE */}
             {showModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
@@ -346,14 +381,14 @@ const fetchContent = async () => {
 };
 
 const ActionMenu = ({ item, canEdit, handleDownload, handleDelete, ...props }) => (
-    <div className="absolute right-0 mt-2 w-44 bg-white rounded-2xl shadow-2xl border border-slate-50 py-2 z-50 animate-in fade-in slide-in-from-top-2">
-        <button onClick={(e) => { e.stopPropagation(); handleDownload(item); props.setActiveMenu(null); }} className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase text-blue-600 hover:bg-blue-50 flex items-center gap-2">
+    <div className="absolute left-0 mt-2 w-44 bg-white rounded-2xl shadow-2xl border border-slate-50 py-2 z-50 animate-in fade-in slide-in-from-top-2">
+        <button onClick={(e) => { e.stopPropagation(); handleDownload(item); props.setActiveMenu(null); }} className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase text-slate-6    00 hover:bg-blue-50 flex items-center gap-2">
             <FiDownload /> Download
         </button>
         {canEdit && (
             <>
                 <button onClick={(e) => { e.stopPropagation(); props.setModalType('edit'); props.setSelectedItem(item); props.setFolderNameInput(item.name); props.setShowModal(true); props.setActiveMenu(null); }} className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase text-slate-600 hover:bg-slate-50 flex items-center gap-2 border-t border-slate-50">
-                    <FiEdit2 className="text-emerald-500" /> Rename
+                    <FiEdit2 className="text-stale-500" /> Ubah nama
                 </button>
                 <button onClick={(e) => { e.stopPropagation(); handleDelete(item); }} className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase text-red-500 hover:bg-red-50 flex items-center gap-2">
                     <FiTrash2 /> Hapus
