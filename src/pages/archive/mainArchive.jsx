@@ -87,78 +87,76 @@ const MainArchive = () => {
 
             {/* --- CONTENT AREA --- */}
             {folders.length > 0 ? (
-                viewMode === 'grid' ? (
-                    /* 4. GRID VIEW: CARD SNACK STYLE */
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                        {folders.map((folderName) => (
-                            <div
-                                key={folderName}
-                                onClick={() => navigate(`/archive/${tapel}/${folderName.toLowerCase().trim().replace(/\s+/g, "_")}`)}
-                                className="group relative bg-white rounded-[1.8rem] md:rounded-[2.2rem] border border-slate-100 shadow-md hover:shadow-xl hover:shadow-emerald-900/10 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col justify-between min-h-[140px] md:min-h-[200px]"
-                            >
-                                <div className="p-5 md:p-8 relative z-10">
-                                    <div className="w-10 h-10 md:w-14 md:h-14 bg-slate-50 text-slate-400 group-hover:bg-amber-400 group-hover:text-white rounded-xl md:rounded-2xl flex items-center justify-center transition-all duration-500 shadow-sm">
-                                        <FiFolder size={24} />
-                                    </div>
+              viewMode === 'grid' ? (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        {folders.map((folderName) => (
+            <div
+                key={folderName}
+                onClick={() => navigate(`/archive/${tapel}/${folderName.toLowerCase().trim().replace(/\s+/g, "_")}`)}
+                className="group relative bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-[10px_10px_0px_0px_rgba(16,185,129,1)] transition-all duration-200 cursor-pointer overflow-hidden flex flex-col min-h-[170px] md:min-h-[210px]"
+            >
+                {/* 80% AREA: CONTENT (Solid White) */}
+                <div className="h-[80%] p-6 md:p-8 flex flex-col justify-between relative">
+                    <div className="z-10">
+                        {/* Ikon Tanpa Background Bulat - Langsung Sharp */}
+                        <FiHardDrive 
+                            size={32} 
+                            className="text-slate-400 group-hover:text-amber-500 transition-colors duration-100" 
+                        />
+                        
+                        <div className="mt-6 md:mt-8">
+                            <h3 className="text-[13px] md:text-[17px] font-black text-slate-900 uppercase tracking-tighter leading-[1.1]">
+                                {folderName.replace(/_/g, " ")}
+                            </h3>
+                            <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-[0.2em]">
+                                Digital Archive
+                            </p>
+                        </div>
+                    </div>
 
-                                    <div className="mt-4 md:mt-6">
-                                        <h3 className="text-[13px] md:text-lg font-bold text-slate-700 uppercase leading-tight group-hover:text-emerald-700 transition-colors">
-                                            {folderName.replace(/_/g, " ")}
-                                        </h3>
-                                        <p className="text-[9px] font-medium text-slate-400 mt-1 uppercase">Direktori Sistem</p>
-                                    </div>
-                                </div>
+                   
+                </div>
 
-                                {/* Dekorasi Ikon Shadow */}
-                                <FiFolder 
-                                    className="absolute -right-2 -bottom-2 text-slate-50 group-hover:text-emerald-50/30 transition-all duration-700" 
-                                    size={100} 
-                                />
-
-                                {/* INDICATOR SNACK (Warna Hijau) */}
-                                <div className="h-1.5 md:h-2 w-full bg-emerald-500 transform scale-x-75 group-hover:scale-x-100 transition-transform duration-500 origin-center rounded-t-full" />
+                {/* 20% AREA: SOLID EMERALD BASE (Tanpa Transisi Berlebih) */}
+                <div className="h-[20%] w-full bg-emerald-500 flex items-center justify-between px-6 md:px-8 border-t-2 border-emerald-500/20">
+                    <span className="text-[9px] font-black text-white uppercase tracking-widest">
+                        #
+                    </span>
+                    <FiChevronRight className="text-white group-hover:translate-x-1 transition-transform" size={18} />
+                </div>
+            </div>
+        ))}
+    </div>
+) : (
+    /* LIST VIEW: FLAT & SHARP */
+    <div className="bg-white rounded-2xl border-2 border-slate-100 overflow-hidden shadow-sm">
+        <table className="w-full text-left">
+            <tbody className="divide-y-2 divide-slate-50">
+                {folders.map((folderName) => (
+                    <tr 
+                        key={folderName} 
+                        onClick={() => navigate(`/archive/${tapel}/${folderName.toLowerCase().trim().replace(/\s+/g, "_")}`)}
+                        className="group hover:bg-slate-50 cursor-pointer transition-none"
+                    >
+                        <td className="px-8 py-5">
+                            <div className="flex items-center gap-5">
+                             
+                                <span className="text-sm md:text-base font-black text-slate-900 uppercase tracking-tight">
+                                    {folderName.replace(/_/g, " ")}
+                                </span>
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    /* 5. LIST VIEW: TABLE STYLE */
-                    <div className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm">
-                        <table className="w-full text-left">
-                            <thead className="bg-slate-50/50 border-b border-slate-100">
-                                <tr>
-                                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Departemen</th>
-                                    <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-right">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {folders.map((folderName) => (
-                                    <tr 
-                                        key={folderName} 
-                                        onClick={() => navigate(`/archive/${tapel}/${folderName.toLowerCase().trim().replace(/\s+/g, "_")}`)}
-                                        className="group hover:bg-emerald-50/30 cursor-pointer transition-all"
-                                    >
-                                        <td className="px-8 py-5">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 bg-slate-50 text-slate-400 group-hover:bg-amber-400 group-hover:text-white rounded-xl flex items-center justify-center transition-all">
-                                                    <FiFolder size={18} />
-                                                </div>
-                                                <span className="text-sm md:text-base font-bold text-slate-700 capitalize group-hover:text-emerald-700 transition-colors">
-                                                    {folderName.replace(/_/g, " ")}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-5 text-right">
-                                            <div className="flex items-center justify-end gap-2 text-slate-300 group-hover:text-emerald-600 transition-all">
-                                                <span className="text-[10px] font-black opacity-0 group-hover:opacity-100 transition-all">BUKA</span>
-                                                <FiChevronRight size={20} />
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )
+                        </td>
+                        <td className="px-8 py-5 text-right">
+                             <div className="inline-block px-3 py-1 bg-white-600 text-white text-[10px] font-black rounded-md">
+                                 <FiHardDrive size={20} className="text-slate-400 group-hover:text-slate-600" />
+                             </div>
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+)
             ) : (
                 /* 6. EMPTY STATE */
                 <div className="flex flex-col items-center justify-center py-24 bg-white rounded-[3rem] border border-slate-100 shadow-sm text-center">
