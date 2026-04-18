@@ -5,7 +5,7 @@ import Dialog from '../../components/dialog'; // Sesuaikan path jika folder comp
 import {
     FiArrowLeft, FiChevronRight, FiHome, FiPlus, FiUploadCloud,
     FiGrid, FiList, FiDownload, FiFolder, FiEdit2, FiTrash2,
-    FiSearch, FiImage, FiMusic, FiVideo, FiFileText, FiArchive, FiCode, FiMoreVertical 
+    FiSearch, FiImage, FiMusic, FiVideo, FiFileText, FiArchive, FiCode, FiMoreVertical
 } from 'react-icons/fi';
 import {
     FaFilePdf, FaFileWord, FaFileExcel, FaFilePowerpoint
@@ -164,7 +164,7 @@ const ArchivePath = () => {
         });
     }
     const [showActionSheet, setShowActionSheet] = useState(false);
-const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
 
     const handleFolderClick = (name) => navigate(`/archive/${tapel}/${jabatan}/${subPath ? `${subPath}/${name}` : name}`);
     const handleBack = () => {
@@ -174,52 +174,160 @@ const [selectedFile, setSelectedFile] = useState(null);
         navigate(`/archive/${tapel}/${jabatan}${segments.length ? `/${segments.join('/')}` : ''}`);
     };
 
-   return (
+    return (
         <div className="min-h-screen bg-[#FBFBFB] p-4 md:p-0 space-y-6">
 
             {/* --- NAVIGATOR BAR --- */}
-            <div className="bg-white/80 backdrop-blur-md p-4 rounded-3xl shadow-[0_8px_10px_rgb(0,0,0,0.1),0_20px_40px_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col gap-4">
-                <div className="flex items-center gap-3 overflow-hidden">
-                    <button onClick={handleBack} className="p-2.5 hover:bg-slate-900 rounded-xl transition-all duration-300 text-slate-500 hover:text-white active:scale-90 shrink-0">
-                        <FiArrowLeft size={20} />
-                    </button>
+            <div className="bg-white/80] flex flex-col gap-4">
+                <div className="
+    
+            bg-white/95 
+            backdrop-blur-1xl 
+            p-2
+            rounded-2xl 
+            border border-slate-200/60 
+           shadow-[10px_10px_20px_-12px_rgba(0,0,0,0.15)]
+            flex flex-col gap-4 
+            transition-all 
+            duration-500
+        ">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                        {/* Tombol Back - Sedikit lebih tegas */}
+                        <button
+                            onClick={handleBack}
+                            className="w-11 h-11 flex items-center justify-center bg-slate-50 hover:bg-slate-900 rounded-xl transition-all duration-300 text-slate-400 hover:text-white active:scale-90 shrink-0 border border-slate-200/50"
+                        >
+                            <FiArrowLeft size={20} />
+                        </button>
 
-                    <nav className="flex items-center gap-1 bg-slate-200/50 p-1.5 rounded-2xl text-sm font-bold overflow-x-auto no-scrollbar border border-slate-200/30">
-                        {pathSegments.map((segment, i) => {
-                            const isLast = i === pathSegments.length - 1;
-                            return (
-                                <div key={i} className="flex items-center gap-1 whitespace-nowrap">
-                                    {i !== 0 && <FiChevronRight className="text-slate-900/80" size={12} />}
-                                    <button onClick={() => navigate(segment.path)}
-                                        className={`group flex items-center px-4 py-2.5 rounded-xl transition-all duration-300 ${isLast ? 'text-blue-700 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.05)] ring-1 ring-slate-100' : 'text-slate-400 hover:text-slate-900 hover:bg-white active:scale-95'}`}>
-                                        {segment.isHome ? <FiHome size={16} /> : <span className="text-[10px] font-black uppercase tracking-[0.15em]">{segment.name}</span>}
-                                    </button>
-                                </div>
-                            );
-                        })}
-                    </nav>
+                        {/* Bar Navigasi dengan Custom Scrollbar Modern */}
+                        <nav className="
+            flex items-center gap-1 bg-[#F8FAFC] p-1 rounded-xl flex-1
+            overflow-x-auto border border-slate-200/40 shadow-inner
+            /* MODERN SCROLLBAR LOGIC */
+            scrollbar-thin 
+            scrollbar-thumb-slate-300 
+            scrollbar-track-transparent
+            hover:scrollbar-thumb-slate-400
+            [&::-webkit-scrollbar]:h-1
+            [&::-webkit-scrollbar-track]:bg-transparent
+            [&::-webkit-scrollbar-thumb]:rounded-full
+            [&::-webkit-scrollbar-thumb]:bg-slate-200
+            hover:[&::-webkit-scrollbar-thumb]:bg-slate-300
+        ">
+                            {pathSegments.map((segment, i) => {
+                                const isLast = i === pathSegments.length - 1;
+                                return (
+                                    <div key={i} className="flex items-center gap-1 whitespace-nowrap">
+                                        {i !== 0 && (
+                                            <FiChevronRight className="text-slate-300 mx-0.5" size={14} />
+                                        )}
+
+                                        <button
+                                            onClick={() => navigate(segment.path)}
+                                            className={`
+        group flex items-center px-2 py-2 rounded-lg transition-all duration-200 border
+        ${isLast
+                                                    ? 'text-blue-700 bg-white shadow-sm border-slate-100 font-black'
+                                                    : 'text-slate-400 border-transparent hover:text-slate-900 hover:bg-white hover:border-slate-200 hover:shadow-sm active:scale-95 font-bold'
+                                                }
+    `}
+                                        >
+                                            {segment.isHome ? (
+                                                <FiHome size={15} className={isLast ? 'text-emerald-600' : 'group-hover:text-emerald-600'} />
+                                            ) : (
+                                                <span className="text-[10px] uppercase tracking-[0.15em] leading-none">
+                                                    {segment.name}
+                                                </span>
+                                            )}
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </nav>
+                    </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-3">
                     <div className="relative w-full md:flex-1 group">
-                        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input type="text" placeholder="Cari berkas..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-11 pr-4 text-[11px] font-bold tracking-wider focus:outline-none focus:border-slate-800 transition-all" />
+                        {/* Ikon Search - Berubah warna saat grup (kontainer) difokuskan */}
+                        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors duration-300 group-focus-within:text-slate-600 z-10" />
+
+                        <input
+                            type="text"
+                            placeholder="Cari berkas..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="
+            w-full 
+            bg-slate-300/50 
+            hover:bg-slate-100 
+            border border-transparent 
+            rounded-2xl 
+            py-3 pl-12 pr-4 
+            text-[13px] font-medium 
+            text-slate-700
+            placeholder:text-slate-500
+            placeholder:font-normal
+            focus:outline-none 
+            focus:bg-white 
+           
+            shadow-sm
+            transition-all 
+            duration-300
+        "
+                        />
+
+                        {/* Shortcut K (Opsional - biar makin mirip G-Drive) */}
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden lg:flex items-center gap-1 pointer-events-none opacity-40 group-focus-within:opacity-0 transition-opacity">
+                            <span className="text-[10px] border border-slate-300 rounded px-1.5 py-0.5 bg-white font-bold">/</span>
+                        </div>
                     </div>
 
                     <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
-                        {canEdit && (
-                            <div className="flex items-center gap-2">
-                                <button onClick={() => { setModalType('create'); setFolderNameInput(''); setShowModal(true); }}
-                                    className="h-[40px] bg-amber-400 text-white px-4 rounded-xl font-bold text-[10px] uppercase flex items-center gap-2 shadow-sm hover:bg-amber-500 transition-all">
-                                    <FiPlus size={14} /> <span>Folder</span>
-                                </button>
-                                <label className="h-[40px] cursor-pointer bg-emerald-500 text-white px-4 rounded-xl font-bold text-[10px] uppercase flex items-center gap-2 shadow-sm hover:bg-emerald-600 transition-all">
-                                    <FiUploadCloud size={14} /> <span>Upload</span>
-                                    <input type="file" className="hidden" onChange={handleUpload} />
-                                </label>
-                            </div>
-                        )}
+                      {canEdit && (
+    <div className="flex items-center gap-3 p-1 bg-slate-50/50 rounded-[20px] border border-slate-300/50 w-fit">
+        {/* Tombol Create Folder - Konsep Glass Amber */}
+        <button 
+            onClick={() => { setModalType('create'); setFolderNameInput(''); setShowModal(true); }}
+            className="
+                h-[40px] px-5 
+                bg-amber-400/10 hover:bg-amber-400
+                text-amber-600 hover:text-white
+                rounded-[16px] 
+                font-black text-[9px] uppercase tracking-[0.2em] 
+                flex items-center gap-2.5 
+                transition-all duration-300
+                hover:shadow-[10px_10px_20px_-5px_rgba(251,191,36,0.3)]
+                active:scale-95
+            "
+        >
+            <div className="w-6 h-6 rounded-lg bg-amber-400/20 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                <FiPlus size={14} strokeWidth={3} /> 
+            </div>
+            <span>Folder</span>
+        </button>
+
+        {/* Tombol Upload - Konsep Glass Emerald */}
+        <label className="
+            h-[40px] px-5 cursor-pointer 
+            bg-emerald-500/10 hover:bg-emerald-500
+            text-emerald-600 hover:text-white
+            rounded-[16px] 
+            font-black text-[9px] uppercase tracking-[0.2em] 
+            flex items-center gap-2.5 
+            transition-all duration-300
+            hover:shadow-[10px_10px_20px_-5px_rgba(16,185,129,0.3)]
+            active:scale-95
+        ">
+            <div className="w-6 h-6 rounded-lg bg-emerald-500/20 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                <FiUploadCloud size={14} strokeWidth={2.5} /> 
+            </div>
+            <span>Upload</span>
+            <input type="file" className="hidden" onChange={handleUpload} />
+        </label>
+    </div>
+)}
                         <div className="flex bg-slate-100 p-1 rounded-xl shrink-0">
                             <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}><FiGrid size={18} /></button>
                             <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}><FiList size={18} /></button>
@@ -241,88 +349,88 @@ const [selectedFile, setSelectedFile] = useState(null);
                         </div>
                     )}
 
-               {[...items]
-    .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    .sort((a, b) => (a.isFolder === b.isFolder ? a.name.localeCompare(b.name) : a.isFolder ? -1 : 1))
-    .map((item, idx) => {
-        const { icon, color } = getFileConfig(item.name, item.isFolder);
-        const isActive = activeMenu === idx;
+                    {[...items]
+                        .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                        .sort((a, b) => (a.isFolder === b.isFolder ? a.name.localeCompare(b.name) : a.isFolder ? -1 : 1))
+                        .map((item, idx) => {
+                            const { icon, color } = getFileConfig(item.name, item.isFolder);
+                            const isActive = activeMenu === idx;
 
-        return (
-            <div key={idx} 
-                onClick={() => {
-                    setSelectedItem(item);
-                    if (item.isFolder) {
-                        handleFolderClick(item.name);
-                    } else {
-                        if (window.innerWidth < 1024) {
-                            setModalType('options');
-                            setShowModal(true);
-                        } else {
-                            setActiveMenu(idx); 
-                        }
-                    }
-                }}
-                onContextMenu={(e) => { 
-                    e.preventDefault(); 
-                    setSelectedItem(item);
-                    setActiveMenu(idx);
-                    setModalType('options');
-                    setShowModal(true);
-                }}
-                className={viewMode === 'grid'
-                    ? `group bg-white p-5 rounded-[1rem] border transition-all cursor-pointer text-center relative ${isActive ? 'z-20 border-emerald-500 shadow-xl' : 'z-10 border-slate-100 shadow-sm hover:border-emerald-200'}`
-                    : `group grid grid-cols-12 items-center gap-4 px-8 py-4 border-b border-slate-50 relative ${isActive ? 'z-20 bg-emerald-50/50' : 'z-10'}`
-                }>
-                
-                {/* TOMBOL TITIK TIGA - Dipasang di layer terpisah agar tidak menggeser layout */}
-                {item.isFolder && (
-                    <div className="absolute inset-0 pointer-events-none z-30">
-                        <button 
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedItem(item);
-                                setModalType('options');
-                                setShowModal(true);
-                            }}
-                            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-slate-300 active:text-emerald-600 pointer-events-auto rounded-full active:bg-slate-50 transition-all"
-                        >
-                            <FiMoreVertical size={18} />
-                        </button>
-                    </div>
-                )}
+                            return (
+                                <div key={idx}
+                                    onClick={() => {
+                                        setSelectedItem(item);
+                                        if (item.isFolder) {
+                                            handleFolderClick(item.name);
+                                        } else {
+                                            if (window.innerWidth < 1024) {
+                                                setModalType('options');
+                                                setShowModal(true);
+                                            } else {
+                                                setActiveMenu(idx);
+                                            }
+                                        }
+                                    }}
+                                    onContextMenu={(e) => {
+                                        e.preventDefault();
+                                        setSelectedItem(item);
+                                        setActiveMenu(idx);
+                                        setModalType('options');
+                                        setShowModal(true);
+                                    }}
+                                    className={viewMode === 'grid'
+                                        ? `group bg-white p-5 rounded-[1rem] border transition-all cursor-pointer text-center relative ${isActive ? 'z-20 border-emerald-500 shadow-xl' : 'z-10 border-slate-100 shadow-sm hover:border-emerald-200'}`
+                                        : `group grid grid-cols-12 items-center gap-4 px-8 py-4 border-b border-slate-50 relative ${isActive ? 'z-20 bg-emerald-50/50' : 'z-10'}`
+                                    }>
 
-                {/* Konten Utama - Struktur tetap murni seperti punya Mas */}
-                <div className={viewMode === 'grid' ? "w-full" : "col-span-10 md:col-span-6 flex items-center gap-4"}>
-                    <div className={`flex items-center justify-center shrink-0 transition-transform ${viewMode === 'grid' ? `mx-auto w-14 h-14 rounded-2xl mb-3 group-hover:scale-110 ${color}` : `w-10 h-10 rounded-xl ${color}`}`}>
-                        {React.cloneElement(icon, { size: viewMode === 'list' ? 18 : 24 })}
-                    </div>
-                    <div className={viewMode === 'list' ? "truncate text-left" : "w-full"}>
-                        <p className="font-bold text-slate-700 text-[11px] truncate uppercase tracking-tight">
-                            {item.name}
-                        </p>
-                        <p className="text-[9px] font-black text-slate-300 uppercase mt-1">
-                            {item.isFolder ? 'Folder' : item.size}
-                        </p>
-                    </div>
-                </div>
+                                    {/* TOMBOL TITIK TIGA - Dipasang di layer terpisah agar tidak menggeser layout */}
+                                    {item.isFolder && (
+                                        <div className="absolute inset-0 pointer-events-none z-30">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedItem(item);
+                                                    setModalType('options');
+                                                    setShowModal(true);
+                                                }}
+                                                className="absolute top-4 right-2 w-8 h-8 flex items-center justify-center text-slate-300 active:text-emerald-600 pointer-events-auto rounded-full active:bg-slate-50 transition-all"
+                                            >
+                                                <FiMoreVertical size={18} />
+                                            </button>
+                                        </div>
+                                    )}
 
-                {viewMode === 'list' && (
-                    <>
-                        <div className="hidden md:block col-span-3 text-center text-[11px] font-bold text-slate-400">{item.isFolder ? '-' : item.size}</div>
-                        <div className="hidden md:block col-span-3 text-right text-[11px] font-bold text-slate-400 italic">{item.updatedAt ? new Date(item.updatedAt).toLocaleDateString('id-ID') : '-'}</div>
-                    </>
-                )}
-            </div>
-        );
-    })}
+                                    {/* Konten Utama - Struktur tetap murni seperti punya Mas */}
+                                    <div className={viewMode === 'grid' ? "w-full" : "col-span-10 md:col-span-6 flex items-center gap-4"}>
+                                        <div className={`flex items-center justify-center shrink-0 transition-transform ${viewMode === 'grid' ? `mx-auto w-14 h-14 rounded-2xl mb-3 group-hover:scale-110 ${color}` : `w-10 h-10 rounded-xl ${color}`}`}>
+                                            {React.cloneElement(icon, { size: viewMode === 'list' ? 18 : 24 })}
+                                        </div>
+                                        <div className={viewMode === 'list' ? "truncate text-left" : "w-full"}>
+                                            <p className="font-bold text-slate-700 text-[11px] truncate uppercase tracking-tight">
+                                                {item.name}
+                                            </p>
+                                            <p className="text-[9px] font-black text-slate-300 uppercase mt-1">
+                                                {item.isFolder ? 'Folder' : item.size}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {viewMode === 'list' && (
+                                        <>
+                                            <div className="hidden md:block col-span-3 text-center text-[11px] font-bold text-slate-400">{item.isFolder ? '-' : item.size}</div>
+                                            <div className="hidden md:block col-span-3 text-right text-[11px] font-bold text-slate-400 italic">{item.updatedAt ? new Date(item.updatedAt).toLocaleDateString('id-ID') : '-'}</div>
+                                        </>
+                                    )}
+                                </div>
+                            );
+                        })}
                 </div>
             )}
 
             {/* --- MODAL DIALOG (Luar Konteks Baris) --- */}
-            <Dialog 
-                isOpen={showModal} 
-                onClose={() => { setShowModal(false); setActiveMenu(null); }} 
+            <Dialog
+                isOpen={showModal}
+                onClose={() => { setShowModal(false); setActiveMenu(null); }}
                 title={modalType === 'create' ? 'Folder Baru' : modalType === 'Ubah ' ? 'Ubah Nama' : 'Opsi Berkas'}
                 size="sm"
             >
@@ -341,18 +449,18 @@ const [selectedFile, setSelectedFile] = useState(null);
                             </div>
 
                             <div className="space-y-3">
-                               {/* Tombol Aksi Utama di dalam Dialog */}
-<button 
-    onClick={() => {
-        handleDownload(selectedItem); // Memakai fungsi async download/zip yang Mas buat
-        setShowModal(false);
-        setActiveMenu(null);
-    }}
-    className="w-full py-4.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-[0_15px_30px_rgba(16,185,129,0.2)] active:scale-[0.96] transition-all group"
->
-    <FiDownload size={18} className="group-hover:-translate-y-0.5 transition-transform" /> 
-    {selectedItem?.isFolder ? 'Download ZIP' : 'Download Berkas'}
-</button>
+                                {/* Tombol Aksi Utama di dalam Dialog */}
+                                <button
+                                    onClick={() => {
+                                        handleDownload(selectedItem); // Memakai fungsi async download/zip yang Mas buat
+                                        setShowModal(false);
+                                        setActiveMenu(null);
+                                    }}
+                                    className="w-full py-4.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-[0_15px_30px_rgba(16,185,129,0.2)] active:scale-[0.96] transition-all group"
+                                >
+                                    <FiDownload size={18} className="group-hover:-translate-y-0.5 transition-transform" />
+                                    {selectedItem?.isFolder ? 'Download ZIP' : 'Download Berkas'}
+                                </button>
 
 
 
@@ -370,7 +478,7 @@ const [selectedFile, setSelectedFile] = useState(null);
                         </div>
                     ) : (
                         <div className="flex flex-col">
-                            <input autoFocus className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 mb-6 outline-none focus:border-emerald-500 font-bold text-slate-700 text-sm text-center" 
+                            <input autoFocus className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 mb-6 outline-none focus:border-emerald-500 font-bold text-slate-700 text-sm text-center"
                                 placeholder="Masukkan nama..." value={folderNameInput} onChange={(e) => setFolderNameInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleFolderAction()} />
                             <div className="grid grid-cols-2 gap-3">
