@@ -175,7 +175,7 @@ const ArchivePath = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#FBFBFB] p-4 md:p-0 space-y-6">
+        <div className="min-h-screen bg-[#FBFBFB] p-0 md:p-0 space-y-6">
 
             {/* --- NAVIGATOR BAR --- */}
             <div className="bg-white/80] flex flex-col gap-4">
@@ -249,88 +249,76 @@ const ArchivePath = () => {
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-3">
-                    <div className="relative w-full md:flex-1 group">
-                        {/* Ikon Search - Berubah warna saat grup (kontainer) difokuskan */}
-                        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors duration-300 group-focus-within:text-slate-600 z-10" />
+                    
 
-                        <input
-                            type="text"
-                            placeholder="Cari berkas..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="
-            w-full 
-            bg-slate-300/50 
-            hover:bg-slate-100 
-            border border-transparent 
-            rounded-2xl 
-            py-3 pl-12 pr-4 
-            text-[13px] font-medium 
-            text-slate-700
-            placeholder:text-slate-500
-            placeholder:font-normal
-            focus:outline-none 
-            focus:bg-white 
-           
-            shadow-sm
-            transition-all 
-            duration-300
-        "
-                        />
-
-                        {/* Shortcut K (Opsional - biar makin mirip G-Drive) */}
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden lg:flex items-center gap-1 pointer-events-none opacity-40 group-focus-within:opacity-0 transition-opacity">
-                            <span className="text-[10px] border border-slate-300 rounded px-1.5 py-0.5 bg-white font-bold">/</span>
+                    <div className="flex items-center gap-2 w-full">
+                        {/* SEARCH BAR - Flex 1 agar dinamis memenuhi ruang */}
+                        <div className="relative flex-1 group">
+                            <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors z-10" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Cari berkas..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-slate-100/80 hover:bg-slate-200/50 border border-transparent focus:border-slate-200 focus:bg-white rounded-xl py-2.5 pl-10 pr-4 text-[13px] font-medium text-slate-700 focus:outline-none focus:shadow-[8px_8px_20px_-8px_rgba(0,0,0,0.1)] transition-all duration-300"
+                            />
+                            {/* Shortcut - Hidden on Mobile */}
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:block opacity-30 group-focus-within:opacity-0 transition-opacity">
+                                <span className="text-[10px] border border-slate-300 rounded px-1.5 py-0.5 bg-white font-black">/</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
-                      {canEdit && (
-    <div className="flex items-center gap-3 p-1 bg-slate-50/50 rounded-[20px] border border-slate-300/50 w-fit">
-        {/* Tombol Create Folder - Konsep Glass Amber */}
-        <button 
-            onClick={() => { setModalType('create'); setFolderNameInput(''); setShowModal(true); }}
-            className="
-                h-[40px] px-5 
-                bg-amber-400/10 hover:bg-amber-400
-                text-amber-600 hover:text-white
-                rounded-[16px] 
-                font-black text-[9px] uppercase tracking-[0.2em] 
-                flex items-center gap-2.5 
-                transition-all duration-300
-                hover:shadow-[10px_10px_20px_-5px_rgba(251,191,36,0.3)]
+                        {/* ACTION GROUP - Tombol & Toggle */}
+                        <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0">
+    {canEdit && (
+        <>
+            {/* Tombol Folder - Simple Slate */}
+            <button
+                onClick={() => { setModalType('create'); setFolderNameInput(''); setShowModal(true); }}
+                className="
+                    h-9 px-3 
+                bg-amber-400 hover:bg-amber-500 
+                    text-white 
+                    rounded-lg
+                 
+                    flex items-center gap-2 
+                    transition-colors duration-200
+                    active:scale-95
+                "
+            >
+                <FiPlus size={16} strokeWidth={2.5} />
+                <span className="hidden md:block font-bold text-[11px]">Folder</span>
+            </button>
+
+            {/* Tombol Upload - Solid Emerald */}
+            <label className="
+                h-9 px-3 
+                cursor-pointer 
+                bg-emerald-400 hover:bg-emerald-500 
+                text-white 
+                rounded-lg
+                flex items-center gap-2 
+                transition-colors duration-200
                 active:scale-95
-            "
-        >
-            <div className="w-6 h-6 rounded-lg bg-amber-400/20 flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                <FiPlus size={14} strokeWidth={3} /> 
-            </div>
-            <span>Folder</span>
-        </button>
+            ">
+                <FiUploadCloud size={16} strokeWidth={2} />
+                <span className="hidden md:block font-bold text-[11px]">Upload</span>
+                <input type="file" className="hidden" onChange={handleUpload} />
+            </label>
+        </>
+    )}
+</div>
 
-        {/* Tombol Upload - Konsep Glass Emerald */}
-        <label className="
-            h-[40px] px-5 cursor-pointer 
-            bg-emerald-500/10 hover:bg-emerald-500
-            text-emerald-600 hover:text-white
-            rounded-[16px] 
-            font-black text-[9px] uppercase tracking-[0.2em] 
-            flex items-center gap-2.5 
-            transition-all duration-300
-            hover:shadow-[10px_10px_20px_-5px_rgba(16,185,129,0.3)]
-            active:scale-95
-        ">
-            <div className="w-6 h-6 rounded-lg bg-emerald-500/20 flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                <FiUploadCloud size={14} strokeWidth={2.5} /> 
-            </div>
-            <span>Upload</span>
-            <input type="file" className="hidden" onChange={handleUpload} />
-        </label>
-    </div>
-)}
-                        <div className="flex bg-slate-100 p-1 rounded-xl shrink-0">
-                            <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}><FiGrid size={18} /></button>
-                            <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}><FiList size={18} /></button>
+                            {/* View Toggle - Compact */}
+                            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/30">
+                                <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}>
+                                    <FiGrid size={16} />
+                                </button>
+                                <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}>
+                                    <FiList size={16} />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
