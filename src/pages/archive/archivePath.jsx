@@ -1,219 +1,161 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import {
-    FiFolder, FiFile, FiArrowLeft, FiPlus, FiMoreVertical,
-    FiChevronRight, FiHome, FiX, FiEdit2, FiTrash2, FiGrid, FiList, FiDownload, FiUploadCloud
-} from 'react-icons/fi';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../backend/axiosConfig';
+import Dialog from '../../components/dialog'; // Sesuaikan path jika folder components sejajar
 import {
-    FiImage, FiMusic, FiVideo,
-    FiFileText, FiArchive, FiCode
+    FiArrowLeft, FiChevronRight, FiHome, FiPlus, FiUploadCloud,
+    FiGrid, FiList, FiDownload, FiFolder, FiEdit2, FiTrash2,
+    FiSearch, FiImage, FiMusic, FiVideo, FiFileText, FiArchive, FiCode
 } from 'react-icons/fi';
-// Jika ingin warna-warni, Mas bisa pakai library 'react-icons/fa' (Font Awesome)
 import {
-    FaFilePdf, FaFileWord, FaFileExcel, FaFilePowerpoint, FaFileArchive
+    FaFilePdf, FaFileWord, FaFileExcel, FaFilePowerpoint
 } from 'react-icons/fa';
 
+// --- CONFIGURATION: ICON & COLOR MAPPING ---
 const getFileConfig = (fileName, isFolder) => {
-    // 1. Jika Folder
     if (isFolder) {
         return {
-            icon: <FiFolder size={32} fill="currentColor" />,
+            icon: <FiFolder size={24} fill="currentColor" />,
             color: 'bg-amber-50 text-amber-500'
         };
     }
-
-    // 2. Jika File, ambil ekstensi
     const ext = fileName.split('.').pop().toLowerCase();
-
     const map = {
-        // Dokumen
-        pdf: { icon: <FaFilePdf size={32} />, color: 'bg-red-50 text-red-500' },
-        doc: { icon: <FaFileWord size={32} />, color: 'bg-blue-50 text-blue-600' },
-        docx: { icon: <FaFileWord size={32} />, color: 'bg-blue-50 text-blue-600' },
-        xls: { icon: <FaFileExcel size={32} />, color: 'bg-emerald-50 text-emerald-600' },
-        xlsx: { icon: <FaFileExcel size={32} />, color: 'bg-emerald-50 text-emerald-600' },
-        csv: { icon: <FaFileExcel size={32} />, color: 'bg-emerald-50 text-emerald-600' },
-        ppt: { icon: <FaFilePowerpoint size={32} />, color: 'bg-orange-50 text-orange-500' },
-        pptx: { icon: <FaFilePowerpoint size={32} />, color: 'bg-orange-50 text-orange-500' },
-
-        // Media & Image
-        jpg: { icon: <FiImage size={32} />, color: 'bg-purple-50 text-purple-500' },
-        jpeg: { icon: <FiImage size={32} />, color: 'bg-purple-50 text-purple-500' },
-        png: { icon: <FiImage size={32} />, color: 'bg-purple-50 text-purple-500' },
-        svg: { icon: <FiImage size={32} />, color: 'bg-purple-50 text-purple-500' },
-        mp4: { icon: <FiVideo size={32} />, color: 'bg-pink-50 text-pink-500' },
-        mp3: { icon: <FiMusic size={32} />, color: 'bg-cyan-50 text-cyan-500' },
-
-        // Archive & Code
-        zip: { icon: <FiArchive size={32} />, color: 'bg-yellow-50 text-yellow-600' },
-        rar: { icon: <FiArchive size={32} />, color: 'bg-yellow-50 text-yellow-600' },
-        js: { icon: <FiCode size={32} />, color: 'bg-slate-100 text-slate-700' },
-        html: { icon: <FiCode size={32} />, color: 'bg-slate-100 text-slate-700' },
+        pdf: { icon: <FaFilePdf />, color: 'bg-red-50 text-red-500' },
+        doc: { icon: <FaFileWord />, color: 'bg-blue-50 text-blue-600' },
+        docx: { icon: <FaFileWord />, color: 'bg-blue-50 text-blue-600' },
+        xls: { icon: <FaFileExcel />, color: 'bg-emerald-50 text-emerald-600' },
+        xlsx: { icon: <FaFileExcel />, color: 'bg-emerald-50 text-emerald-600' },
+        ppt: { icon: <FaFilePowerpoint />, color: 'bg-orange-50 text-orange-500' },
+        pptx: { icon: <FaFilePowerpoint />, color: 'bg-orange-50 text-orange-500' },
+        jpg: { icon: <FiImage />, color: 'bg-purple-50 text-purple-500' },
+        png: { icon: <FiImage />, color: 'bg-purple-50 text-purple-500' },
+        mp4: { icon: <FiVideo />, color: 'bg-pink-50 text-pink-500' },
+        mp3: { icon: <FiMusic />, color: 'bg-cyan-50 text-cyan-500' },
+        zip: { icon: <FiArchive />, color: 'bg-yellow-50 text-yellow-600' },
+        rar: { icon: <FiArchive />, color: 'bg-yellow-50 text-yellow-600' },
+        js: { icon: <FiCode />, color: 'bg-slate-100 text-slate-700' },
     };
-
-    // 3. Return mapping atau default jika tidak ketemu
-    return map[ext] || {
-        icon: <FiFileText size={32} />,
-        color: 'bg-slate-50 text-slate-400'
-    };
+    return map[ext] || { icon: <FiFileText />, color: 'bg-slate-50 text-slate-400' };
 };
 
 const ArchivePath = () => {
     const params = useParams();
     const { tapel, jabatan } = params;
     const subPath = params['*'] || "";
-
     const navigate = useNavigate();
-    const location = useLocation();
 
-    // --- STATE UTAMA ---
+    // --- STATES ---
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState('grid');
-    const [canEdit, setCanEdit] = useState(false); // State Izin Akses
-
-    // --- STATE JABATAN & UI ---
-    const [currentJabatan, setCurrentJabatan] = useState(jabatan);
+    const [canEdit, setCanEdit] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState('create');
     const [selectedItem, setSelectedItem] = useState(null);
     const [folderNameInput, setFolderNameInput] = useState('');
     const [activeMenu, setActiveMenu] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
     const menuRef = useRef(null);
 
-    // --- 1. LOGIKA CEK AKSES (RBAC) ---
+    // --- PERMISSION & FETCH ---
     const checkPermission = async () => {
         try {
-            // Memanggil API client_access untuk cek kolom [jabatan] pada user ini
-            const res = await axios.get('/define-access/check-permission', {
-                params: { jabatan: jabatan }
-            });
+            const res = await axios.get('/define-access/check-permission', { params: { jabatan } });
             setCanEdit(res.data.can_edit);
-        } catch (err) {
-            console.error("Permission check failed", err);
-            setCanEdit(false);
-        }
+        } catch (err) { setCanEdit(false); }
     };
 
-    // --- 2. FETCH CONTENT ---
     const fetchContent = async () => {
         try {
+            setLoading(true);
             const cleanPath = (subPath || "").replace(/^\/+|\/+$/g, "");
-            const res = await axios.get('/files/list', { // Pastikan endpointnya /files/list
-                params: { tapel, jabatan, subPath: cleanPath }
-            });
-
-            // SINKRONKAN DI SINI:
-            if (res.data.success) {
-                setItems(res.data.data);
-            } else {
-                setItems([]);
-            }
-        } catch (err) {
-            console.error("Fetch error:", err);
-            setItems([]);
-        } finally {
-            setLoading(false);
-        }
+            const res = await axios.get('/files/list', { params: { tapel, jabatan, subPath: cleanPath } });
+            setItems(res.data.success ? res.data.data : []);
+        } catch (err) { setItems([]); } finally { setLoading(false); }
     };
-    // Tambahkan ini di dalam ArchivePath, sebelum return
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            // Jika menu sedang terbuka DAN klik terjadi DI LUAR elemen yang kita beri ref
-            if (activeMenu !== null && menuRef.current && !menuRef.current.contains(event.target)) {
-                setActiveMenu(null);
-            }
-        };
 
-        // Pasang listener klik global
-        document.addEventListener("mousedown", handleClickOutside);
-
-        // Cleanup listener saat komponen hancur/unmount
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [activeMenu]); // Listener diperbarui tiap activeMenu berubah
     useEffect(() => {
-        setLoading(true);
         fetchContent();
         checkPermission();
         setActiveMenu(null);
-        if (jabatan !== currentJabatan) setCurrentJabatan(jabatan);
     }, [tapel, jabatan, subPath]);
 
-    // --- 3. FILE OPERATIONS ---
+    // --- CLICK OUTSIDE HANDLER ---
+    useEffect(() => {
+        const handleClick = (e) => {
+            if (activeMenu !== null && menuRef.current && !menuRef.current.contains(e.target)) setActiveMenu(null);
+        };
+        document.addEventListener("mousedown", handleClick);
+        return () => document.removeEventListener("mousedown", handleClick);
+    }, [activeMenu]);
 
-    // Download via crudFiles.js
-    const handleDownload = (item) => {
-        const url = `${axios.defaults.baseURL}/files/download?tapel=${tapel}&jabatan=${jabatan}&subPath=${subPath}&fileName=${item.name}`;
-        window.open(url, '_blank');
+    // --- ACTIONS ---
+    const handleDownload = async (item) => {
+        try {
+            const endpoint = item.isFolder ? '/files/download-compressed' : '/files/download';
+            const params = item.isFolder
+                ? { tapel, jabatan, folderPath: subPath, folderName: item.name }
+                : { tapel, jabatan, subPath, fileName: item.name };
+
+            const response = await axios.get(endpoint, { params, responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', item.isFolder ? `${item.name}.zip` : item.name);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (err) { alert("Gagal mendownload berkas."); }
     };
 
-    // Upload via crudFiles.js
     const handleUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         const formData = new FormData();
         formData.append('file', file);
         formData.append('tapel', tapel);
         formData.append('jabatan', jabatan);
         formData.append('subPath', subPath);
-
         try {
             setLoading(true);
-            await axios.post('/files/upload', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            await axios.post('/files/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             fetchContent();
-        } catch (err) {
-            alert("Gagal upload berkas");
-        } finally {
-            setLoading(false);
-        }
+        } catch (err) { alert("Gagal upload berkas"); } finally { setLoading(false); }
     };
 
     const handleFolderAction = async () => {
         if (!folderNameInput.trim()) return;
         try {
             if (modalType === 'create') {
-                await axios.post('/folders/create-sub', {
-                    tapel, jabatan, parentPath: subPath || '', folderName: folderNameInput
-                });
+                await axios.post('/folders/create-sub', { tapel, jabatan, parentPath: subPath, folderName: folderNameInput });
             } else {
-                // Rename File/Folder
-                await axios.post('/files/rename', {
-                    tapel, jabatan, subPath, oldName: selectedItem.name, newName: folderNameInput
-                });
+                await axios.post('/files/rename', { tapel, jabatan, subPath, oldName: selectedItem.name, newName: folderNameInput });
             }
             setShowModal(false);
             setFolderNameInput('');
-            setTimeout(fetchContent, 500);
-        } catch (err) {
-            alert("Operasi gagal");
-        }
+            fetchContent();
+        } catch (err) { alert("Operasi gagal"); }
     };
 
     const handleDelete = async (item) => {
         if (window.confirm(`Hapus "${item.name}" secara permanen?`)) {
             try {
-                await axios.post('/files/delete', {
-                    tapel, jabatan, subPath, fileName: item.name
-                });
-                setActiveMenu(null);
-                setTimeout(fetchContent, 300);
-            } catch (err) {
-                alert("Gagal menghapus");
-            }
+                await axios.post('/files/delete', { tapel, jabatan, subPath, fileName: item.name });
+                fetchContent();
+            } catch (err) { alert("Gagal menghapus"); }
         }
     };
 
-    // --- BREADCRUMBS LOGIC ---
+    // --- NAVIGATION LOGIC ---
+    // --- NAVIGATION LOGIC ---
     const pathSegments = [
+        // Ikon rumah sekarang murni ke root archives
+        { name: 'Home', path: '/archives', isHome: true },
         { name: tapel?.replace(/-/g, '/') || '', path: `/archive/${tapel}` },
         { name: jabatan?.replace(/_/g, ' ') || '', path: `/archive/${tapel}/${jabatan}` }
     ];
+
     if (subPath) {
         const segments = subPath.split('/').filter(Boolean);
         segments.forEach((seg, i) => {
@@ -222,158 +164,208 @@ const ArchivePath = () => {
         });
     }
 
-    const handleFolderClick = (folderName) => {
-        const nextPath = subPath ? `${subPath.replace(/\/+$/, "")}/${folderName}` : folderName;
-        navigate(`/archive/${tapel}/${jabatan}/${nextPath}`);
-    };
-
+    const handleFolderClick = (name) => navigate(`/archive/${tapel}/${jabatan}/${subPath ? `${subPath}/${name}` : name}`);
     const handleBack = () => {
         if (!subPath) return navigate(`/archive/${tapel}`);
         const segments = subPath.split('/').filter(Boolean);
         segments.pop();
-        navigate(segments.length > 0 ? `/archive/${tapel}/${jabatan}/${segments.join('/')}` : `/archive/${tapel}/${jabatan}`);
+        navigate(`/archive/${tapel}/${jabatan}${segments.length ? `/${segments.join('/')}` : ''}`);
     };
 
     return (
-        <div className="min-h-screen bg-[#FBFBFB] p-4 md:p-2 space-y-6">
+        <div className="min-h-screen bg-[#FBFBFB] p-4 md:p-0 space-y-6">
 
-            {/* TOOLBAR */}
-            <div className="bg-white p-5 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4 overflow-hidden">
-                    <button onClick={handleBack} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-                        <FiArrowLeft size={20} className="text-slate-400" />
+            {/* --- NAVIGATOR BAR --- */}
+            <div className="bg-white/80 backdrop-blur-md p-4 rounded-3xl shadow-[0_8px_10px_rgb(0,0,0,0.1),0_20px_40px_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col gap-4">
+                {/* Upper: Breadcrumbs */}
+                <div className="flex items-center gap-3 overflow-hidden">
+                    <button
+                        onClick={handleBack}
+                        className="p-2.5 hover:bg-slate-900 rounded-xl transition-all duration-300 text-slate-500 hover:text-white active:scale-90 shrink-0"
+                    >
+                        <FiArrowLeft size={20} />
                     </button>
 
-                    <nav className="flex items-center gap-1 text-sm font-bold overflow-x-auto no-scrollbar">
-                        {pathSegments.map((segment, i) => (
-                            <div key={i} className="flex items-center gap-1 uppercase tracking-tight">
-                                {i !== 0 && <FiChevronRight className="text-slate-300" />}
-                                <button onClick={() => navigate(segment.path)} className={`${i === pathSegments.length - 1 ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400'} px-3 py-1.5 rounded-xl transition-all`}>
-                                    {i === 0 && <FiHome className="inline mr-1 mb-1" />} {segment.name}
-                                </button>
-                            </div>
-                        ))}
+                    <nav className="flex items-center gap-1 bg-slate-200/50 p-1.5 rounded-2xl text-sm font-bold overflow-x-auto no-scrollbar border border-slate-200/30">
+                        {pathSegments.map((segment, i) => {
+                            const isLast = i === pathSegments.length - 1;
+                            return (
+                                <div key={i} className="flex items-center gap-1 whitespace-nowrap">
+                                    {/* Separator Ikon */}
+                                    {i !== 0 && <FiChevronRight className="text-slate-900/80" size={12} />}
+
+                                    <button
+                                        onClick={() => navigate(segment.path)}
+                                        className={`
+                                group flex items-center px-4 py-2.5 rounded-xl transition-all duration-300
+                                ${isLast
+                                                ? 'text-emerald-700 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.05)] ring-1 ring-slate-100'
+                                                : 'text-slate-400 hover:text-slate-900 hover:bg-white hover:shadow-md active:scale-95'
+                                            }
+                            `}
+                                    >
+                                        {segment.isHome ? (
+                                            <FiHome
+                                                size={16}
+                                                className={`transition-transform duration-300 ${!isLast && 'group-hover:scale-110'}`}
+                                            />
+                                        ) : (
+                                            <span className="text-[10px] font-black uppercase tracking-[0.15em]">
+                                                {segment.name}
+                                            </span>
+                                        )}
+                                    </button>
+                                </div>
+                            );
+                        })}
                     </nav>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    {/* View Switcher - Tinggi container ini ditentukan oleh p-1 + p-2 button */}
-                     {canEdit && (
-                        <div className="flex items-center gap-2">
-                            {/* Folder Button - Menggunakan py-2 agar setara dengan toggle */}
-                            <button
-                                onClick={() => { setModalType('create'); setFolderNameInput(''); setShowModal(true); }}
-                                className="h-[38px] bg-amber-400 text-white px-4 rounded-xl font-bold text-[10px] uppercase tracking-wider flex items-center gap-2 shadow-sm hover:bg-amber-500 transition-all"
-                            >
-                                <FiPlus size={14} /> Folder
-                            </button>
 
-                            {/* Upload Button - Menggunakan h-[38px] untuk kepastian presisi */}
-                            <label className="h-[38px] cursor-pointer bg-emerald-500 text-white px-4 rounded-xl font-bold text-[10px] uppercase tracking-wider flex items-center gap-2 shadow-sm hover:bg-emerald-600 transition-all">
-                                <FiUploadCloud size={14} /> Upload
-                                <input type="file" className="hidden" onChange={handleUpload} />
-                            </label>
-                        </div>
-                    )}
-                    <div className="flex bg-slate-100 p-1 rounded-2xl mr-1">
-                        <button
-                            onClick={() => setViewMode('grid')}
-                            className={`p-2 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}
-                        >
-                            <FiGrid size={18} />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('list')}
-                            className={`p-2 rounded-xl transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}
-                        >
-                            <FiList size={18} />
-                        </button>
+                {/* Lower: Search & Controls */}
+                <div className="flex flex-col md:flex-row items-center gap-3">
+                    <div className="relative w-full md:flex-1 group">
+                        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-500" />
+                        <input type="text" placeholder="Cari berkas..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-11 pr-4 text-[11px] font-bold tracking-wider focus:outline-none focus:border-slate-800 focus:bg-white transition-all" />
                     </div>
 
-                    {/* ACTIONS */}
-                  
+                    <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
+                        {canEdit && (
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => { setModalType('create'); setFolderNameInput(''); setShowModal(true); }}
+                                    className="h-[40px] bg-amber-400 text-white px-4 rounded-xl font-bold text-[10px] uppercase flex items-center gap-2 shadow-sm hover:bg-amber-500 transition-all whitespace-nowrap">
+                                    <FiPlus size={14} /> <span>Folder</span>
+                                </button>
+                                <label className="h-[40px] cursor-pointer bg-emerald-500 text-white px-4 rounded-xl font-bold text-[10px] uppercase flex items-center gap-2 shadow-sm hover:bg-emerald-600 transition-all whitespace-nowrap">
+                                    <FiUploadCloud size={14} /> <span>Upload</span>
+                                    <input type="file" className="hidden" onChange={handleUpload} />
+                                </label>
+                            </div>
+                        )}
+                        <div className="flex bg-slate-100 p-1 rounded-xl shrink-0">
+                            <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}><FiGrid size={18} /></button>
+                            <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}><FiList size={18} /></button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* EXPLORER */}
+            {/* --- EXPLORER SECTION --- */}
             {loading ? (
-                <div className="py-20 text-center animate-pulse text-slate-300 font-black uppercase text-[10px] tracking-[0.3em]">
-                    Menyusun Berkas...
-                </div>
+                <div className="py-0 text-center animate-pulse text-slate-300 font-black uppercase text-[10px] tracking-[0.3em]"></div>
             ) : (
-                <div className={viewMode === 'grid' ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6" : "flex flex-col gap-2"}>
-                    {items.map((item, idx) => {
-                        // Logika pendefinisian icon & color harus di dalam kurung kurawal map
-                        const { icon, color } = getFileConfig(item.name, item.isFolder);
+                <div className={viewMode === 'grid'
+                    ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6"
+                    : "bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col"
+                }>
+                    {viewMode === 'list' && (
+                        <div className="hidden md:grid grid-cols-12 gap-4 px-8 py-4 bg-slate-50/50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            <div className="col-span-6">Nama Berkas</div>
+                            <div className="col-span-3 text-center">Ukuran</div>
+                            <div className="col-span-3 text-right">Terakhir Diubah</div>
+                        </div>
+                    )}
 
-                        return (
-                            <div
-                                key={idx}
-                                // Klik kiri tetap untuk buka folder
-                                onClick={() => item.isFolder && handleFolderClick(item.name)}
-
-                                // KLIK KANAN: Munculkan menu
-                                onContextMenu={(e) => {
-                                    e.preventDefault(); // Matikan menu bawaan windows/browser
-                                    setActiveMenu(activeMenu === idx ? null : idx);
-                                }}
-
-                                className={`group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all cursor-pointer relative ${viewMode === 'list' ? 'flex items-center justify-between p-4' : 'text-center'
-                                    }`}
-                            >
-                                {/* Konten Ikon & Nama tetap sama */}
-                                <div className={viewMode === 'list' ? "flex items-center gap-4" : ""}>
-                                    <div className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${color} ${viewMode === 'list' ? 'w-12 h-12 mb-0' : ''
-                                        }`}>
-                                        {icon}
+                    {[...items]
+                        .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                        .sort((a, b) => (a.isFolder === b.isFolder ? a.name.localeCompare(b.name) : a.isFolder ? -1 : 1))
+                        .map((item, idx) => {
+                            const { icon, color } = getFileConfig(item.name, item.isFolder);
+                            return (
+                                <div key={idx} onClick={() => item.isFolder && handleFolderClick(item.name)}
+                                    onContextMenu={(e) => { e.preventDefault(); setActiveMenu(idx); }}
+                                    className={viewMode === 'grid'
+                                        ? "group bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer relative text-center"
+                                        : "group grid grid-cols-12 items-center gap-4 px-8 py-3 border-b border-slate-50 last:border-0 hover:bg-emerald-50/30 transition-all cursor-pointer relative"
+                                    }>
+                                    <div className={viewMode === 'grid' ? "" : "col-span-10 md:col-span-6 flex items-center gap-4"}>
+                                        <div className={`flex items-center justify-center shrink-0 transition-transform ${viewMode === 'grid' ? `mx-auto w-14 h-14 rounded-xl mb-3 group-hover:scale-110 ${color}` : `w-9 h-9 rounded-lg ${color}`}`}>
+                                            {React.cloneElement(icon, { size: viewMode === 'list' ? 16 : 22 })}
+                                        </div>
+                                        <div className={viewMode === 'list' ? "truncate" : ""}>
+                                            <p className="font-bold text-slate-700 text-[11px] truncate uppercase tracking-tight">{item.name}</p>
+                                            <p className={`${viewMode === 'list' ? 'md:hidden' : ''} text-[9px] font-black text-slate-300 uppercase mt-1`}>{item.isFolder ? 'Folder' : item.size}</p>
+                                        </div>
                                     </div>
-
-                                    <div className={viewMode === 'list' ? "text-left" : ""}>
-                                        <p className="font-bold text-slate-700 text-[11px] truncate uppercase tracking-tight px-2">
-                                            {item.name}
-                                        </p>
-                                        <p className="text-[9px] font-black text-slate-300 uppercase mt-1">
-                                            {item.isFolder ? 'Folder' : item.size}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* MENU ACTION: Sekarang hanya muncul jika diklik kanan */}
-                                <div
-                                    className="absolute top-10 left-1/2 -translate-x-1/2 z-50"
-                                    ref={activeMenu === idx ? menuRef : null}
-                                    onClick={(e) => e.stopPropagation()} // Cegah trigger buka folder saat pilih menu
-                                >
-                                    {activeMenu === idx && (
-                                        <ActionMenu
-                                            item={item}
-                                            canEdit={canEdit}
-                                            handleDownload={handleDownload}
-                                            handleDelete={handleDelete}
-                                            setModalType={setModalType}
-                                            setSelectedItem={setSelectedItem}
-                                            setFolderNameInput={setFolderNameInput}
-                                            setShowModal={setShowModal}
-                                            setActiveMenu={setActiveMenu}
-                                        />
+                                    {viewMode === 'list' && (
+                                        <>
+                                            <div className="hidden md:block col-span-3 text-center text-[11px] font-bold text-slate-400">{item.isFolder ? '-' : item.size}</div>
+                                            <div className="hidden md:block col-span-3 text-right text-[11px] font-bold text-slate-400 italic">{item.updatedAt ? new Date(item.updatedAt).toLocaleDateString('id-ID') : '-'}</div>
+                                        </>
                                     )}
+
+                                    {/* Action Menu Trigger (Relative to Item) */}
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50" ref={activeMenu === idx ? menuRef : null}>
+                                        {activeMenu === idx && (
+                                            <ActionMenu item={item} canEdit={canEdit} handleDownload={handleDownload} handleDelete={handleDelete} setModalType={setModalType} setSelectedItem={setSelectedItem} setFolderNameInput={setFolderNameInput} setShowModal={setShowModal} setActiveMenu={setActiveMenu} />
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
                 </div>
             )}
-            {/* MODAL RENAME/CREATE */}
+
+            {/* --- MODAL --- */}
             {showModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-                    <div className="bg-white w-full max-w-md rounded-[3rem] p-10 shadow-2xl animate-in zoom-in-95 duration-200">
-                        <h3 className="text-xl font-black text-slate-800 uppercase mb-8">{modalType === 'create' ? 'Folder Baru' : 'Ubah Nama'}</h3>
-                        <input autoFocus className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 mb-8 outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700" placeholder="Nama..." value={folderNameInput} onChange={(e) => setFolderNameInput(e.target.value)} />
-                        <div className="grid grid-cols-2 gap-4">
-                            <button onClick={() => setShowModal(false)} className="py-4 font-black text-[10px] uppercase text-slate-400">Batal</button>
-                            <button onClick={handleFolderAction} className="py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-emerald-600 transition-all">Proses</button>
-                        </div>
+             <Dialog 
+    isOpen={showModal} 
+    onClose={() => setShowModal(false)} 
+    title={modalType === 'create' ? 'Folder Baru' : 'Ubah Nama'}
+    size="sm"
+>
+    <div className="w-full flex flex-col">
+        {/* Input Ramping */}
+        <input 
+            autoFocus 
+            className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3 mb-6 outline-none focus:border-emerald-500 transition-colors font-bold text-slate-700 text-sm" 
+            placeholder="Nama folder..." 
+            value={folderNameInput} 
+            onChange={(e) => setFolderNameInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleFolderAction()}
+        />
+        
+        {/* Tombol Sejajar Kanan-Kiri (Full Width) */}
+        <div className="grid grid-cols-2 gap-3 w-full">
+            <button 
+                onClick={() => setShowModal(false)} 
+                className="w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-wider text-slate-600 bg-slate-50 hover:bg-slate-100 transition-all"
+            >
+                Batal
+            </button>
+            <button 
+                onClick={handleFolderAction} 
+                className="w-full py-3 bg-emerald-600 text-white rounded-xl font-black text-[10px] uppercase tracking-wider hover:bg-emerald-700 shadow-md shadow-emerald-100 active:scale-95 transition-all"
+            >
+                Simpan
+            </button>
+        </div>
+    </div>
+</Dialog>
+            )}
+            
+            {/* --- EMPTY STATE (FOLDER KOSONG) --- */}
+            {items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="py-12 flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    {/* Ikon minimalis dengan lingkaran halus */}
+                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-6 border border-slate-100">
+                        <FiFolder size={24} className="text-slate-300" />
                     </div>
+
+                    <div className="text-center">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Belum Ada Berkas</h3>
+
+                    </div>
+
+                    {canEdit && (
+                        <button
+                            onClick={() => { setModalType('create'); setFolderNameInput(''); setShowModal(true); }}
+                            className="mt-10 px-8 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] shadow-sm hover:border-emerald-500 hover:text-emerald-600 hover:shadow-md transition-all duration-300 active:scale-95"
+                        >
+                            + Buat Folder
+                        </button>
+                    )}
                 </div>
             )}
         </div>
@@ -381,18 +373,16 @@ const ArchivePath = () => {
 };
 
 const ActionMenu = ({ item, canEdit, handleDownload, handleDelete, ...props }) => (
-    <div className="absolute left-0 mt-2 w-44 bg-white rounded-2xl shadow-2xl border border-slate-50 py-2 z-50 animate-in fade-in slide-in-from-top-2">
-        <button onClick={(e) => { e.stopPropagation(); handleDownload(item); props.setActiveMenu(null); }} className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase text-slate-6    00 hover:bg-blue-50 flex items-center gap-2">
-            <FiDownload /> Download
-        </button>
+    <div className="w-48 bg-white rounded-xl shadow-2xl border border-slate-100 py-2 animate-in fade-in zoom-in-95">
+        <button onClick={(e) => { e.stopPropagation(); handleDownload(item); props.setActiveMenu(null); }}
+            className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 flex items-center gap-3"><FiDownload size={16} /> Download</button>
         {canEdit && (
             <>
-                <button onClick={(e) => { e.stopPropagation(); props.setModalType('edit'); props.setSelectedItem(item); props.setFolderNameInput(item.name); props.setShowModal(true); props.setActiveMenu(null); }} className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase text-slate-600 hover:bg-slate-50 flex items-center gap-2 border-t border-slate-50">
-                    <FiEdit2 className="text-stale-500" /> Ubah nama
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); handleDelete(item); }} className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase text-red-500 hover:bg-red-50 flex items-center gap-2">
-                    <FiTrash2 /> Hapus
-                </button>
+                <div className="h-px bg-slate-50 my-1 mx-2" />
+                <button onClick={(e) => { e.stopPropagation(); props.setModalType('edit'); props.setSelectedItem(item); props.setFolderNameInput(item.name); props.setShowModal(true); props.setActiveMenu(null); }}
+                    className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase text-slate-600 hover:bg-slate-50 flex items-center gap-3"><FiEdit2 size={16} /> Ubah Nama</button>
+                <button onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
+                    className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase text-red-500 hover:bg-red-50 flex items-center gap-3"><FiTrash2 size={16} /> Hapus</button>
             </>
         )}
     </div>

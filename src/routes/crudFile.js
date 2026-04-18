@@ -2,15 +2,16 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs-extra';
 import multer from 'multer';
+import archiver from 'archiver'; // Ubah require jadi import
 
 // Import verifyToken untuk ambil user_id
 import { verifyToken } from '../backend/verifyToken.js';
 
 const router = express.Router();
-const upload = multer({ dest: 'temp/' }); // Folder transit sementara
+const upload = multer({ dest: 'temp/' });
 
 // --- CONFIGURATION ---
-// Gunakan path absolut yang aman. Pastikan folder ini ada.
+// Gunakan path yang fleksibel untuk Windows (Lokal) dan Linux (VPS)
 const ROOT_STORE = process.env.VITE_UPLOAD_PATH || "D:\\project\\DAFA\\src\\store";
 
 export const fileController = {
@@ -46,22 +47,18 @@ export const fileController = {
                         ext: path.extname(name).toLowerCase()
                     };
                 } catch (statErr) {
-                    // Jika file tiba-tiba hilang/di-rename saat loop, abaikan (return null)
                     return null;
                 }
             }));
 
-            // Filter data: buang yang null agar frontend tidak error
             const cleanList = list.filter(item => item !== null);
-
-            console.log(`[DAFA GET] Folder: ${cleanSubPath} oleh UserID: ${actorId}`);
             res.json({ success: true, data: cleanList });
         } catch (err) {
             res.status(500).json({ success: false, message: err.message });
         }
     },
 
-    // 2. DOWNLOAD FILE
+    // 2. DOWNLOAD FILE TUNGGAL
     downloadFile: async (req, res) => {
         try {
             const { tapel, jabatan, subPath, fileName } = req.query;
@@ -69,17 +66,45 @@ export const fileController = {
             const filePath = path.join(ROOT_STORE, tapel, jabatan, cleanSubPath, fileName);
 
             if (await fs.pathExists(filePath)) {
-                // Gunakan nama file asli agar saat didownload namanya benar
                 res.download(filePath, fileName);
             } else {
-                res.status(404).json({ success: false, message: 'File tidak ditemukan di Drive D.' });
+                res.status(404).json({ success: false, message: 'File tidak ditemukan.' });
             }
         } catch (err) {
             res.status(500).json({ success: false, message: err.message });
         }
     },
 
-    // 3. UPLOAD FILE
+    // 3. DOWNLOAD FOLDER (KOMPRESI JADI ZIP/RAR)
+    downloadFolder: async (req, res) => {
+        try {
+            const { tapel, jabatan, folderPath, folderName } = req.query;
+            const cleanSubPath = (folderPath || "").replace(/^\/+|\/+$/g, "").replace(/\//g, path.sep);
+            const fullFolderPath = path.join(ROOT_STORE, tapel, jabatan, cleanSubPath, folderName);
+
+            if (!(await fs.pathExists(fullFolderPath))) {
+                return res.status(404).json({ success: false, message: "Folder tidak ditemukan" });
+            }
+
+            // Set header agar browser mendownload sebagai file biner
+            res.attachment(`${folderName}.zip`); 
+
+            const archive = archiver('zip', { zlib: { level: 9 } });
+
+            // Pipe output kompresi langsung ke response (stream)
+            archive.pipe(res);
+            archive.directory(fullFolderPath, false);
+            await archive.finalize();
+
+        } catch (err) {
+            console.error("Archive Error:", err);
+            if (!res.headersSent) {
+                res.status(500).json({ success: false, message: err.message });
+            }
+        }
+    },
+
+    // 4. UPLOAD FILE
     uploadFile: async (req, res) => {
         try {
             const { tapel, jabatan, subPath } = req.body;
@@ -89,47 +114,36 @@ export const fileController = {
             const cleanSubPath = (subPath || "").replace(/^\/+|\/+$/g, "").replace(/\//g, path.sep);
             const targetDir = path.join(ROOT_STORE, tapel, jabatan, cleanSubPath);
 
-            // Pastikan folder tujuan ada (kalau belum ada, buat otomatis)
             await fs.ensureDir(targetDir);
-            
-            // Hindari karakter aneh di nama file yang bikin Windows error
             const safeFileName = file.originalname.replace(/[<>:"/\\|?*]/g, '_');
             const finalPath = path.join(targetDir, safeFileName);
             
-            // Pindah dari temp ke Drive D:
             await fs.move(req.file.path, finalPath, { overwrite: true });
-
             res.json({ success: true, message: 'Berhasil diarsipkan.' });
         } catch (err) {
-            // Hapus file di temp jika gagal move agar folder temp tidak bengkak
             if (req.file) await fs.remove(req.file.path);
             res.status(500).json({ success: false, message: err.message });
         }
     },
 
-    // 4. RENAME FILE/FOLDER
+    // 5. RENAME & 6. DELETE (Tetap seperti kode Mas)
     renameFile: async (req, res) => {
         try {
             const { tapel, jabatan, subPath, oldName, newName } = req.body;
             const cleanSubPath = (subPath || "").replace(/^\/+|\/+$/g, "").replace(/\//g, path.sep);
             const baseDir = path.join(ROOT_STORE, tapel, jabatan, cleanSubPath);
-
             const oldPath = path.join(baseDir, oldName);
             const newPath = path.join(baseDir, newName);
 
-            // Validasi: Apakah file lama benar-benar ada?
-            if (!(await fs.pathExists(oldPath))) {
-                return res.status(404).json({ success: false, message: 'Sumber file tidak ditemukan.' });
-            }
+            if (!(await fs.pathExists(oldPath))) return res.status(404).json({ success: false, message: 'Sumber tidak ditemukan.' });
 
             await fs.rename(oldPath, newPath);
             res.json({ success: true, message: 'Nama diperbarui.' });
         } catch (err) {
-            res.status(500).json({ success: false, message: 'Gagal ganti nama. File mungkin sedang dibuka program lain.' });
+            res.status(500).json({ success: false, message: 'Gagal ganti nama.' });
         }
     },
 
-    // 5. DELETE FILE/FOLDER
     deleteFile: async (req, res) => {
         try {
             const { tapel, jabatan, subPath, fileName } = req.body;
@@ -148,9 +162,12 @@ export const fileController = {
     }
 };
 
-// --- REGISTER ROUTES KE ROUTER ---
+// --- REGISTER ROUTES ---
 router.get('/list', verifyToken, fileController.getFiles);
 router.get('/download', verifyToken, fileController.downloadFile);
+// Tambahkan Route baru untuk folder
+router.get('/download-compressed', verifyToken, fileController.downloadFolder); 
+
 router.post('/upload', verifyToken, upload.single('file'), fileController.uploadFile);
 router.post('/rename', verifyToken, fileController.renameFile);
 router.post('/delete', verifyToken, fileController.deleteFile);

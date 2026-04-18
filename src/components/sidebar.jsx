@@ -111,15 +111,23 @@ const Sidebar = () => {
 </nav>
 
   {/* FOOTER / LOGOUT */}
-  <div className="p-4 border-t border-slate-800">
+ <div className="p-4 border-t border-slate-100/50">
     <button 
-      onClick={handleLogout} 
-      className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-rose-400 hover:bg-rose-500/10 transition-colors duration-200 font-bold text-sm"
+        onClick={handleLogout} 
+        className="group w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-slate-400 transition-all duration-300 hover:bg-rose-50 hover:text-rose-600 active:scale-[0.98] relative overflow-hidden"
     >
-      <FiLogOut className="text-xl" />
-      <span>Keluar Aplikasi</span>
+        {/* Ikon dengan animasi rotasi tipis saat hover */}
+        <FiLogOut className="text-xl transition-transform duration-300 group-hover:-translate-x-1 group-hover:scale-110" />
+        
+        {/* Teks dengan tracking luas agar konsisten dengan Nav */}
+        <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+            Keluar Aplikasi
+        </span>
+
+        {/* Efek Garis Samping (Indicator) yang muncul saat hover */}
+        <div className="absolute left-0 w-1 h-0 bg-rose-500 transition-all duration-300 group-hover:h-1/2" />
     </button>
-  </div>
+</div>
 
 </aside>
 
