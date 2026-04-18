@@ -16,7 +16,7 @@ const getFileConfig = (fileName, isFolder) => {
     if (isFolder) {
         return {
             icon: <FiFolder size={24} fill="currentColor" />,
-            color: 'bg-amber-50 text-amber-500'
+            color: 'bg-amber-0 text-amber-500'
         };
     }
     const ext = fileName.split('.').pop().toLowerCase();
@@ -184,10 +184,10 @@ const ArchivePath = () => {
             bg-white/95 
             backdrop-blur-1xl 
             p-2
-            rounded-2xl 
+            rounded-xl 
             border border-slate-200/60 
            shadow-[10px_10px_20px_-12px_rgba(0,0,0,0.15)]
-            flex flex-col gap-4 
+            flex flex-col gap-40
             transition-all 
             duration-500
         ">
@@ -195,7 +195,7 @@ const ArchivePath = () => {
                         {/* Tombol Back - Sedikit lebih tegas */}
                         <button
                             onClick={handleBack}
-                            className="w-11 h-11 flex items-center justify-center bg-slate-50 hover:bg-slate-900 rounded-xl transition-all duration-300 text-slate-400 hover:text-white active:scale-90 shrink-0 border border-slate-200/50"
+                            className="w-11 h-11 flex items-center justify-center bg-slate-50 hover:bg-slate-900 rounded-2xl transition-all duration-300 text-slate-700 hover:text-white active:scale-90 shrink-0 border border-slate-200/50"
                         >
                             <FiArrowLeft size={20} />
                         </button>
@@ -225,21 +225,24 @@ const ArchivePath = () => {
 
                                         <button
                                             onClick={() => navigate(segment.path)}
-                                            className={`
-        group flex items-center px-2 py-2 rounded-lg transition-all duration-200 border
-        ${isLast
-                                                    ? 'text-blue-700 bg-white shadow-sm border-slate-100 font-black'
-                                                    : 'text-slate-400 border-transparent hover:text-slate-900 hover:bg-white hover:border-slate-200 hover:shadow-sm active:scale-95 font-bold'
-                                                }
-    `}
-                                        >
-                                            {segment.isHome ? (
-                                                <FiHome size={15} className={isLast ? 'text-emerald-600' : 'group-hover:text-emerald-600'} />
-                                            ) : (
-                                                <span className="text-[10px] uppercase tracking-[0.15em] leading-none">
-                                                    {segment.name}
-                                                </span>
-                                            )}
+                                           className={`
+    group flex items-center px-3 py-2 rounded-md transition-all duration-200
+    ${isLast 
+        ? 'text-blue-500 font-black cursor-default' 
+        : 'text-slate-400 hover:text-emerald-600 active:scale-95 font-bold'
+    }
+`}
+>
+    {segment.isHome ? (
+        <FiHome 
+            size={16} 
+            className={`transition-colors ${isLast ? 'text-emerald-600' : 'group-hover:text-emerald-600'}`} 
+        />
+    ) : (
+        <span className="text-[11px] uppercase tracking-widest leading-none">
+            {segment.name}
+        </span>
+    )}
                                         </button>
                                     </div>
                                 );
@@ -249,7 +252,7 @@ const ArchivePath = () => {
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-3">
-                    
+
 
                     <div className="flex items-center gap-2 w-full">
                         {/* SEARCH BAR - Flex 1 agar dinamis memenuhi ruang */}
@@ -260,23 +263,22 @@ const ArchivePath = () => {
                                 placeholder="Cari berkas..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-slate-100/80 hover:bg-slate-200/50 border border-transparent focus:border-slate-200 focus:bg-white rounded-xl py-2.5 pl-10 pr-4 text-[13px] font-medium text-slate-700 focus:outline-none focus:shadow-[8px_8px_20px_-8px_rgba(0,0,0,0.1)] transition-all duration-300"
+                                className="w-full bg-slate-200/80 hover:bg-slate-200/50 border border-transparent focus:border-slate-200 focus:bg-white rounded-xl py-2.5 pl-10 pr-4 text-[13px] font-medium text-slate-700 focus:outline-none focus:shadow-[8px_8px_20px_-8px_rgba(0,0,0,0.1)] transition-all duration-300"
                             />
                             {/* Shortcut - Hidden on Mobile */}
                             <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:block opacity-30 group-focus-within:opacity-0 transition-opacity">
-                                <span className="text-[10px] border border-slate-300 rounded px-1.5 py-0.5 bg-white font-black">/</span>
                             </div>
                         </div>
 
                         {/* ACTION GROUP - Tombol & Toggle */}
                         <div className="flex items-center gap-2 shrink-0">
-                      <div className="flex items-center gap-1.5 shrink-0">
-    {canEdit && (
-        <>
-            {/* Tombol Folder - Simple Slate */}
-            <button
-                onClick={() => { setModalType('create'); setFolderNameInput(''); setShowModal(true); }}
-                className="
+                            <div className="flex items-center gap-1.5 shrink-0">
+                                {canEdit && (
+                                    <>
+                                        {/* Tombol Folder - Simple Slate */}
+                                        <button
+                                            onClick={() => { setModalType('create'); setFolderNameInput(''); setShowModal(true); }}
+                                            className="
                     h-9 px-3 
                 bg-amber-400 hover:bg-amber-500 
                     text-white 
@@ -286,13 +288,13 @@ const ArchivePath = () => {
                     transition-colors duration-200
                     active:scale-95
                 "
-            >
-                <FiPlus size={16} strokeWidth={2.5} />
-                <span className="hidden md:block font-bold text-[11px]">Folder</span>
-            </button>
+                                        >
+                                            <FiPlus size={16} strokeWidth={2.5} />
+                                            <span className="hidden md:block font-bold text-[11px]">Folder</span>
+                                        </button>
 
-            {/* Tombol Upload - Solid Emerald */}
-            <label className="
+                                        {/* Tombol Upload - Solid Emerald */}
+                                        <label className="
                 h-9 px-3 
                 cursor-pointer 
                 bg-emerald-400 hover:bg-emerald-500 
@@ -302,13 +304,13 @@ const ArchivePath = () => {
                 transition-colors duration-200
                 active:scale-95
             ">
-                <FiUploadCloud size={16} strokeWidth={2} />
-                <span className="hidden md:block font-bold text-[11px]">Upload</span>
-                <input type="file" className="hidden" onChange={handleUpload} />
-            </label>
-        </>
-    )}
-</div>
+                                            <FiUploadCloud size={16} strokeWidth={2} />
+                                            <span className="hidden md:block font-bold text-[11px]">Upload</span>
+                                            <input type="file" className="hidden" onChange={handleUpload} />
+                                        </label>
+                                    </>
+                                )}
+                            </div>
 
                             {/* View Toggle - Compact */}
                             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/30">
@@ -328,9 +330,9 @@ const ArchivePath = () => {
             {loading ? (
                 <div className="py-20 text-center animate-pulse text-slate-300 font-black uppercase text-[10px] tracking-[0.3em]">Memuat...</div>
             ) : (
-                <div className={viewMode === 'grid' ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6" : "bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col"}>
+                <div className={viewMode === 'grid' ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" : "bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col"}>
                     {viewMode === 'list' && (
-                        <div className="hidden md:grid grid-cols-12 gap-4 px-8 py-5 bg-slate-50/50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <div className="hidden md:grid grid-cols-12 gap-4 px-8 py-5 bg-slate-700/50 border-b border-slate-100 text-[10px] font-black text-white uppercase tracking-widest">
                             <div className="col-span-6">Nama Berkas</div>
                             <div className="col-span-3 text-center">Ukuran</div>
                             <div className="col-span-3 text-right">Update</div>
@@ -367,7 +369,7 @@ const ArchivePath = () => {
                                         setShowModal(true);
                                     }}
                                     className={viewMode === 'grid'
-                                        ? `group bg-white p-5 rounded-[1rem] border transition-all cursor-pointer text-center relative ${isActive ? 'z-20 border-emerald-500 shadow-xl' : 'z-10 border-slate-100 shadow-sm hover:border-emerald-200'}`
+                                        ? `group bg-white p-5 rounded-[1rem] border transition-all cursor-pointer text-center relative ${isActive ? 'z-20 border-emerald-500 shadow-xl' : 'z-10 border-slate-100 shadow-sm hover:border-slate-300'}`
                                         : `group grid grid-cols-12 items-center gap-4 px-8 py-4 border-b border-slate-50 relative ${isActive ? 'z-20 bg-emerald-50/50' : 'z-10'}`
                                     }>
 
