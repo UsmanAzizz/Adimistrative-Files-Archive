@@ -94,7 +94,16 @@ const Users = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+
+    // Proteksi Mobile: Jika menekan Enter di Step 1, validasi lalu pindah ke Step 2
+    if (window.innerWidth < 768 && currentStep === 1) {
+      const form = e?.target;
+      if (form && !form.reportValidity()) return;
+      setCurrentStep(2);
+      return;
+    }
+
     try {
       let targetId = currentUser?.id;
 
@@ -167,15 +176,14 @@ const Users = () => {
           </button>
         </div>
 
-        {/* Clean Professional Table with Mobile Scroll */}
+        {/* Clean Professional Table - Responsive */}
         <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left min-w-[600px]">
+            <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-500">
                   <th className="px-6 py-4">Nama Lengkap</th>
-                  <th className="px-6 py-4">Username</th>
-                  <th className="px-6 py-4 text-center">Role</th>
+                  <th className="px-6 py-4 hidden sm:table-cell">Username</th>
+                  <th className="px-6 py-4 text-center hidden sm:table-cell">Role</th>
                   <th className="px-6 py-4 text-center">Aksi</th>
                 </tr>
               </thead>
@@ -187,9 +195,17 @@ const Users = () => {
                 ) : (
                   filteredUsers.map((u) => (
                     <tr key={u.id} onClick={() => handleOpenEdit(u)} className="hover:bg-slate-50 cursor-pointer transition-colors">
-                      <td className="px-6 py-4 font-bold text-slate-700 text-sm">{u.nama}</td>
-                      <td className="px-6 py-4 text-slate-500 text-xs font-medium">@{u.username}</td>
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-slate-700 text-sm">{u.nama}</div>
+                        <div className="sm:hidden flex items-center gap-2 mt-1">
+                          <span className="text-slate-400 text-xs font-medium">@{u.username}</span>
+                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded tracking-widest ${u.role === 'admin' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                            {u.role}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-slate-500 text-xs font-medium hidden sm:table-cell">@{u.username}</td>
+                      <td className="px-6 py-4 text-center hidden sm:table-cell">
                         <span className={`text-[9px] font-black uppercase px-2 py-1 rounded tracking-widest ${u.role === 'admin' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
                           {u.role}
                         </span>
@@ -204,7 +220,6 @@ const Users = () => {
                 )}
               </tbody>
             </table>
-          </div>
         </div>
       </div>
 
@@ -220,7 +235,7 @@ const Users = () => {
           <div className="flex flex-col md:flex-row gap-0">
 
             {/* LEFT SECTION / STEP 1 */}
-            <div className={`flex-1 md:pr-10 ${currentStep !== 1 ? 'hidden md:block' : 'block'} px-2 md:px-0`}>
+            <div className={`md:w-[40%] md:shrink-0 md:pr-8 ${currentStep !== 1 ? 'hidden md:block' : 'block'} px-2 md:px-0`}>
               <div className="border-b border-slate-100 pb-2 mb-4">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800">
                   {currentStep === 1 && <span className="md:hidden text-emerald-600 mr-2">01.</span>}
@@ -280,7 +295,7 @@ const Users = () => {
             <div className="hidden md:block w-px bg-slate-100 self-stretch" />
 
             {/* RIGHT SECTION / STEP 2 */}
-            <div className={`flex-1 md:pl-10 ${currentStep !== 2 ? 'hidden md:block' : 'block'} mt-4 md:mt-0 px-2 md:px-0`}>
+            <div className={`md:flex-1 md:pl-8 ${currentStep !== 2 ? 'hidden md:block' : 'block'} mt-4 md:mt-0 px-0 md:px-0`}>
               <div className="border-b border-slate-100 pb-2 mb-4">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 px-1">
                   {currentStep === 2 && <span className="md:hidden text-emerald-600 mr-2">02.</span>}
@@ -308,51 +323,65 @@ const Users = () => {
             </div>
           </div>
 
-          {/* FOOTER ACTIONS: Consolidated & Symmetrical */}
-          <div className="flex gap-3 pt-4 mt-6 border-t border-slate-100 px-2 md:px-0">
-            {currentStep === 1 ? (
-              <>
-                {/* STEP 1 MOBILE: Batal (Kiri) & Lanjut (Kanan) */}
-                <button
-                  type="button"
-                  onClick={() => { setIsModalOpen(false); setCurrentUser(null); }}
-                  className="flex-1 bg-white text-slate-400 py-4 rounded-xl font-bold text-xs uppercase tracking-widest border border-slate-100 hover:bg-slate-50 transition-all"
-                >
-                  Batal
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(2)}
-                  className="flex-[2] bg-slate-900 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl active:scale-95"
-                >
-                  Lanjut
-                </button>
-              </>
-            ) : (
-              <>
-                {/* STEP 2 MOBILE: Kembali & Tambah in 1 Row (Desktop also uses this) */}
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(1)}
-                  className="flex-1 bg-white text-slate-400 py-4 rounded-xl font-black text-xs uppercase tracking-widest border border-slate-100 md:hidden"
-                >
-                  Kembali
-                </button>
-                <button
-                  type="submit"
-                  className="flex-[2] bg-slate-900 text-white py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-emerald-600 transition-all shadow-xl active:scale-95"
-                >
-                  {currentUser ? 'Simpan' : 'Tambah'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setIsModalOpen(false); setCurrentUser(null); }}
-                  className="hidden md:block flex-1 bg-white text-slate-400 py-4 rounded-xl font-bold text-xs uppercase tracking-widest border border-slate-100 hover:bg-slate-50 transition-all"
-                >
-                  Batal
-                </button>
-              </>
-            )}
+          {/* FOOTER ACTIONS */}
+          <div className="pt-4 mt-6 border-t border-slate-100 px-2 md:px-0">
+
+            {/* MOBILE STEP 1: Batal & Lanjut */}
+            <div className={`flex gap-3 md:hidden ${currentStep !== 1 ? 'hidden' : ''}`}>
+              <button
+                type="button"
+                onClick={() => { setIsModalOpen(false); setCurrentUser(null); }}
+                className="flex-1 bg-white text-slate-400 py-4 rounded-xl font-bold text-xs uppercase tracking-widest border border-slate-100 hover:bg-slate-50 transition-all"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  const form = e.target.closest('form');
+                  if (!form.reportValidity()) return;
+                  setCurrentStep(2);
+                }}
+                className="flex-[2] bg-slate-900 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl active:scale-95"
+              >
+                Lanjut
+              </button>
+            </div>
+
+            {/* MOBILE STEP 2: Kembali & Simpan/Tambah */}
+            <div className={`flex gap-3 md:hidden ${currentStep !== 2 ? 'hidden' : ''}`}>
+              <button
+                type="button"
+                onClick={() => setCurrentStep(1)}
+                className="flex-1 bg-white text-slate-400 py-4 rounded-xl font-black text-xs uppercase tracking-widest border border-slate-100"
+              >
+                Kembali
+              </button>
+              <button
+                type="submit"
+                className="flex-[2] bg-slate-900 text-white py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-emerald-600 transition-all shadow-xl active:scale-95"
+              >
+                {currentUser ? 'Simpan' : 'Tambah'}
+              </button>
+            </div>
+
+            {/* DESKTOP: Selalu tampil Simpan/Tambah + Batal */}
+            <div className="hidden md:flex gap-3">
+              <button
+                type="submit"
+                className="flex-[2] bg-slate-900 text-white py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-emerald-600 transition-all shadow-xl active:scale-95"
+              >
+                {currentUser ? 'Simpan' : 'Tambah'}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setIsModalOpen(false); setCurrentUser(null); }}
+                className="flex-1 bg-white text-slate-400 py-4 rounded-xl font-bold text-xs uppercase tracking-widest border border-slate-100 hover:bg-slate-50 transition-all"
+              >
+                Batal
+              </button>
+            </div>
+
           </div>
         </form>
       </Dialog>

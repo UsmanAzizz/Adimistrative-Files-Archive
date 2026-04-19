@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FiFolder, FiChevronRight, FiHardDrive, FiArrowLeft, FiGrid, FiList } from 'react-icons/fi';
+import { motion } from 'framer-motion';
 import axios from '../../backend/axiosConfig';
 
 const MainArchive = () => {
@@ -44,7 +45,7 @@ const MainArchive = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 px-4 md:px-0">
+        <div className="max-w-7xl mx-auto space-y-8 pb-20 px-4 md:px-0">
             
             {/* --- HEADER SECTION: CONSISTENT STYLE --- */}
             <div className="flex flex-col md:flex-row items-end md:items-center justify-between gap-6">
@@ -89,9 +90,12 @@ const MainArchive = () => {
             {folders.length > 0 ? (
               viewMode === 'grid' ? (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-        {folders.map((folderName) => (
-            <div
+        {folders.map((folderName, idx) => (
+            <motion.div
                 key={folderName}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
                 onClick={() => navigate(`/archive/${tapel}/${folderName.toLowerCase().trim().replace(/\s+/g, "_")}`)}
                 className="group bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-2 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col min-h-[180px] md:min-h-[220px]"
             >
@@ -116,7 +120,7 @@ const MainArchive = () => {
                 <div className="h-12 md:h-14 w-full bg-emerald-500 flex items-center justify-end px-6 md:px-8">
                     <FiChevronRight className="text-white group-hover:translate-x-1 transition-transform" size={20} />
                 </div>
-            </div>
+            </motion.div>
         ))}
     </div>
 ) : (

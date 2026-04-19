@@ -185,13 +185,14 @@
         return (
           <motion.div variants={itemVariants} key={item.id} className="h-full">
             <Card
+              animate={false}
               variant="none"
               onClick={() => {
                 const slug = item.ta.replace(/\//g, '-');
                 navigate(`/archive/${slug}`);
               }}
               onContextMenu={(e) => handleContextMenu(e, item)}
-              className="group flex flex-col h-full bg-white border border-slate-50 rounded-[2.5rem] overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.08)] hover:shadow-[0_0_60px_rgba(0,0,0,0.15)] hover:scale-[1.02] transition-all duration-500 relative cursor-pointer"
+              className="group flex flex-col h-full bg-white border border-slate-50 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.08)] hover:shadow-[0_0_60px_rgba(0,0,0,0.15)] hover:scale-[1.02] transition-all duration-500 relative cursor-pointer"
             >
               {/* Options Menu (Three Dots) - Admin Only */}
               {isAdmin && (
@@ -206,17 +207,17 @@
                 </button>
               )}
 
-              <div className="p-8 flex flex-col items-center text-center flex-1">
+              <div className="p-6 md:p-8 flex flex-col items-center text-center flex-1">
                 {/* Header: Ikon Folder (Centered) */}
-                <div className="relative flex justify-center items-center w-full mb-6">
+                <div className="relative flex justify-center items-center w-full mb-4 md:mb-6">
                   <div className={`${theme.light} transition-transform duration-500 group-hover:scale-110`}>
-                    <FiFolder size={48} className="md:size-14" />
+                    <FiFolder size={40} className="md:size-14" />
                   </div>
                 </div>
 
                 {/* Info Text */}
                 <div className="space-y-1">
-                  <h3 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">
+                  <h3 className="text-lg md:text-2xl font-black text-slate-800 tracking-tight">
                     {item.ta}
                   </h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
@@ -226,7 +227,7 @@
               </div>
 
               {/* Bottom Gradient Block */}
-              <div className={`${theme.gradient} py-5 px-6 mt-auto text-center relative overflow-hidden`}>
+              <div className={`${theme.gradient} py-3.5 md:py-5 px-6 mt-auto text-center relative overflow-hidden`}>
                 <div className="absolute inset-0 bg-black/10" />
                 <div className="relative z-10 flex items-center justify-center gap-2">
                   <div className={`h-1.5 w-1.5 rounded-full ${isCurrentTa ? 'bg-white animate-pulse' : 'bg-white/40'}`} />
@@ -243,10 +244,11 @@
 
     {isAdmin && (
       <motion.div variants={itemVariants} className="h-full">
-      <Card
+        <Card
+        animate={false}
         variant="none"
         onClick={() => setIsDialogOpen(true)}
-        className="h-full bg-white border border-slate-50 rounded-[2.5rem] overflow-hidden group hover:bg-emerald-600 transition-all duration-500 cursor-pointer shadow-[0_0_40px_rgba(0,0,0,0.06)] hover:shadow-[0_0_60px_rgba(0,0,0,0.12)] hover:scale-[1.02] flex flex-col items-center justify-center min-h-[220px] md:min-h-[280px]"
+        className="h-full bg-white border border-slate-50 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden group hover:bg-emerald-600 transition-all duration-500 cursor-pointer shadow-[0_0_40px_rgba(0,0,0,0.06)] hover:shadow-[0_0_60px_rgba(0,0,0,0.12)] hover:scale-[1.02] flex flex-col items-center justify-center min-h-[160px] md:min-h-[280px]"
       >
         <div className="relative w-10 h-10 md:w-14 md:h-14 rounded-full border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300 group-hover:bg-white group-hover:text-emerald-600 group-hover:border-white transition-all duration-300 mb-4">
           <FiPlus className="text-xl md:text-2xl" />

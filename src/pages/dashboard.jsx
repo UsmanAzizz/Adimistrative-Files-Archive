@@ -88,10 +88,6 @@ function Dashboard() {
             
             <div className="relative z-10 h-full flex flex-col justify-between">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
-                  Sistem Aktif
-                </div>
                 <h2 className="text-2xl md:text-4xl font-black leading-tight tracking-tight max-w-md">
                   Mulai unggah & kelola arsip baru hari ini.
                 </h2>

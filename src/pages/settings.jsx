@@ -128,128 +128,138 @@ const handleDeleteColumn = async (name) => {
     if (loading) return <div className="p-20 text-center font-black text-slate-300 animate-pulse tracking-widest uppercase">Initializing Schema...</div>;
 
     return (
-        <div className="max-w-4xl mx-auto space-y-10 pb-20 px-0 select-none">
-
-            {/* HEADER DAFCONFIG */}
-            <header className="flex justify-between items-end border-b-2 border-slate-50 pb-6">
+        <div className="max-w-4xl mx-auto space-y-12 pb-20 px-4 md:px-0 select-none">
+            
+            {/* --- HEADER SECTION --- */}
+            <div className="flex flex-col md:flex-row items-end md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic leading-none">
-                        DAF<span className="text-emerald-500">CONFIG</span>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">
+                        Pengaturan <span className="text-emerald-600">Sistem</span>
                     </h1>
-                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.4em] mt-2">Global Variables & Schema Management</p>
+                    <p className="text-slate-400 text-[10px] font-bold tracking-[0.2em] mt-1 uppercase">
+                        Konfigurasi Global & Skema Jabatan
+                    </p>
                 </div>
-                <div className="bg-slate-100 p-2 rounded-xl text-slate-400">
-                    <FiDatabase size={20} />
-                </div>
-            </header>
+            </div>
 
-            <Card className="p-8 border-none bg-white shadow-xl shadow-slate-200/50 rounded-[2.5rem]">
-                <div className="flex flex-col md:flex-row md:items-end gap-6">
-                    <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
-                                <FiSettings size={18} />
+            {/* --- GLOBAL CONFIG SECTION --- */}
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden">
+                <div className="p-8 space-y-8">
+                    {/* LIST TILE: TAHUN PELAJARAN */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b-2 border-slate-100">
+                        <div className="flex items-center gap-5">
+                            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner">
+                                <FiDatabase size={24} />
                             </div>
-                            <h2 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">
-                                Tahun Pelajaran Aktif
-                            </h2>
+                            <div>
+                                <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">Tahun Pelajaran</h3>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Siklus Akademik Aktif</p>
+                            </div>
                         </div>
-
-                        <select
-                            className="w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl font-bold text-slate-800 outline-none focus:border-emerald-500 transition-all appearance-none cursor-pointer"
-                            value={globalData.active_tahun_pelajaran}
-                            onChange={(e) => setGlobalData({ ...globalData, active_tahun_pelajaran: e.target.value })}
-                        >
-                            {/* Render dinamis di sini */}
-                            {generateTapelOptions().map((tapel) => (
-                                <option key={tapel} value={tapel}>
-                                    {tapel}
-                                </option>
-                            ))}
-                        </select>
+                        <div className="flex items-center gap-3">
+                            <select
+                                className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:border-emerald-500 transition-all appearance-none cursor-pointer min-w-[140px]"
+                                value={globalData.active_tahun_pelajaran}
+                                onChange={(e) => setGlobalData({ ...globalData, active_tahun_pelajaran: e.target.value })}
+                            >
+                                {generateTapelOptions().map((tapel) => (
+                                    <option key={tapel} value={tapel}>{tapel}</option>
+                                ))}
+                            </select>
+                            <button
+                                onClick={handleUpdateTAPEL}
+                                className="p-3.5 bg-slate-900 text-white rounded-xl hover:bg-emerald-600 transition-all shadow-lg active:scale-95"
+                                title="Simpan Perubahan"
+                            >
+                                <FiSave size={18} />
+                            </button>
+                        </div>
                     </div>
 
-                    <button
-                        onClick={handleUpdateTAPEL}
-                        className="px-10 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-emerald-600 transition-all h-[58px] shadow-lg shadow-slate-200"
-                    >
-                        <FiSave className="inline mr-2" /> SIMPAN
-                    </button>
-                </div>
-            </Card>
-
-            {/* SECTION 2: MASTER HAK AKSES (KOLOM) */}
-            <div className="space-y-6">
-                <div className="flex w-full px-2">
-                    <button
-                        onClick={() => setIsColModalOpen(true)}
-                        className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white px-5 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-emerald-100"
-                    >
-                        <FiPlus size={16} /> Tambah Jabatan
-                    </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {availableRoles.map(role => (
-                        <div key={role} className="flex items-center justify-between bg-white p-5 rounded-3xl border-2 border-slate-50 shadow-sm group hover:border-emerald-200 transition-all">
+                    {/* LIST TILE: JABATAN / ROLES SECTION */}
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between px-2">
                             <div>
-                                <span className="text-xs font-black text-slate-800 uppercase tracking-widest">
-                                    {role.replace(/_/g, ' ')}
-                                </span>
-                                <p className="text-[9px] text-slate-400 font-mono mt-1 italic">{role}</p>
+                                <h2 className="text-sm font-black text-slate-900 uppercase tracking-tight">Daftar Jabatan</h2>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Skema Hak Akses</p>
                             </div>
-                            <div className="flex gap-1">
-                                <button
-                                    onClick={() => { setEditCol({ oldName: role, newName: role.replace(/_/g, ' ') }); setIsEditColOpen(true); }}
-                                    className="p-3 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
-                                >
-                                    <FiEdit3 size={16} />
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteColumn(role)}
-                                    className="p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                                >
-                                    <FiTrash2 size={16} />
-                                </button>
-                            </div>
+                            <button
+                                onClick={() => setIsColModalOpen(true)}
+                                className="flex items-center gap-2 bg-slate-900 text-white hover:bg-emerald-600 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95"
+                            >
+                                <FiPlus size={16} /> Tambah Jabatan
+                            </button>
                         </div>
-                    ))}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {availableRoles.map((role) => (
+                                <div 
+                                    key={role} 
+                                    className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-emerald-200 transition-all"
+                                >
+                                    <span className="text-sm font-bold text-slate-700 capitalize">
+                                        {role.replace(/_/g, ' ')}
+                                    </span>
+                                    
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            onClick={() => { setEditCol({ oldName: role, newName: role.replace(/_/g, ' ') }); setIsEditColOpen(true); }}
+                                            className="p-2 text-slate-300 hover:text-emerald-600 rounded-lg transition-colors"
+                                        >
+                                            <FiEdit3 size={15} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteColumn(role)}
+                                            className="p-2 text-slate-300 hover:text-rose-500 rounded-lg transition-colors"
+                                        >
+                                            <FiTrash2 size={15} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
 
             {/* --- MODALS --- */}
 
-            {/* ADD COLUMN */}
-            <Dialog isOpen={isColModalOpen} onClose={() => setIsColModalOpen(false)} title="buat Jabatan Baru">
-                <div className="space-y-6 pt-4 px-2 text-center">
-                    <input
-                        className="w-full p-5 bg-slate-50 border-2 border-slate-200 rounded-[1.5rem] font-black text-slate-900 outline-none focus:border-emerald-500 transition-all text-center uppercase"
-                        placeholder="Nama Jabatan"
-                        value={newColName}
-                        onChange={(e) => setNewColName(e.target.value)}
-                    />
+            <Dialog isOpen={isColModalOpen} onClose={() => setIsColModalOpen(false)} title="Tambah Jabatan Baru">
+                <div className="space-y-6 pt-4 px-2">
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Jabatan</label>
+                        <input
+                            className="w-full p-4.5 bg-slate-50 border border-transparent rounded-2xl font-bold text-slate-900 outline-none focus:bg-white focus:border-emerald-500 transition-all text-sm shadow-inner"
+                            placeholder="Contoh: Kepala Sekolah"
+                            value={newColName}
+                            onChange={(e) => setNewColName(e.target.value)}
+                        />
+                    </div>
                     <button
                         onClick={handleAddColumn}
-                        className="w-full py-5 bg-emerald-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-100"
+                        className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-slate-200 hover:bg-emerald-600 transition-all active:scale-95"
                     >
-                        Tambah
+                        Buat Jabatan
                     </button>
                 </div>
             </Dialog>
 
             {/* EDIT/RENAME COLUMN */}
-            <Dialog isOpen={isEditColOpen} onClose={() => setIsEditColOpen(false)} title="Edit Jabatan">
-                <div className="space-y-6 pt-4 px-2 text-center">
-                    <input
-                        className="w-full p-5 bg-slate-50 border-2 border-slate-200 rounded-[1.5rem] font-black text-slate-900 outline-none focus:border-emerald-500 transition-all text-center uppercase"
-                        value={editCol.newName}
-                        onChange={(e) => setEditCol({ ...editCol, newName: e.target.value })}
-                    />
+            <Dialog isOpen={isEditColOpen} onClose={() => setIsEditColOpen(false)} title="Ubah Nama Jabatan">
+                <div className="space-y-6 pt-4 px-2">
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Jabatan Baru</label>
+                        <input
+                            className="w-full p-4.5 bg-slate-50 border border-transparent rounded-2xl font-bold text-slate-900 outline-none focus:bg-white focus:border-emerald-500 transition-all text-sm shadow-inner"
+                            value={editCol.newName}
+                            onChange={(e) => setEditCol({ ...editCol, newName: e.target.value })}
+                        />
+                    </div>
                     <button
                         onClick={handleRenameColumn}
-                        className="w-full py-5 bg-blue-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] shadow-xl shadow-blue-100"
+                        className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-slate-200 hover:bg-emerald-600 transition-all active:scale-95"
                     >
-                        Konfirmasi
+                        Konfirmasi Perubahan
                     </button>
                 </div>
             </Dialog>

@@ -74,7 +74,7 @@ const Sidebar = () => {
     <NavLink 
       key={item.id} 
       to={item.path} 
-      className="block no-underline group" // Group ini penting
+      className="block no-underline group"
     >
       {({ isActive }) => (
         <div className={`
@@ -84,13 +84,7 @@ const Sidebar = () => {
             : 'hover:bg-slate-800 hover:text-white'}
         `}>
           
-          {/* PEMBUNGKUS IKON - Kita pakai varian motion di sini */}
           <motion.div
-            variants={{
-              hover: { scale: 1.3, rotate: 5 } // Membesar 30% saat group di-hover
-            }}
-            whileHover="hover"
-            // Atau jika ingin otomatis membesar saat menu utamanya di-hover:
             initial={false}
             animate={isActive ? { scale: 1.1 } : { scale: 1 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -116,15 +110,10 @@ const Sidebar = () => {
         onClick={handleLogout} 
         className="group w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-slate-400 transition-all duration-300 hover:bg-rose-50 hover:text-rose-600 active:scale-[0.98] relative overflow-hidden"
     >
-        {/* Ikon dengan animasi rotasi tipis saat hover */}
         <FiLogOut className="text-xl transition-transform duration-300 group-hover:-translate-x-1 group-hover:scale-110" />
-        
-        {/* Teks dengan tracking luas agar konsisten dengan Nav */}
         <span className="text-[10px] font-black uppercase tracking-[0.2em]">
             Keluar Aplikasi
         </span>
-
-        {/* Efek Garis Samping (Indicator) yang muncul saat hover */}
         <div className="absolute left-0 w-1 h-0 bg-rose-500 transition-all duration-300 group-hover:h-1/2" />
     </button>
 </div>
@@ -132,7 +121,6 @@ const Sidebar = () => {
 </aside>
 
       {/* MOBILE BOTTOM NAV */}
-   {/* MOBILE BOTTOM NAV */}
 <motion.nav 
   variants={{
     visible: { y: 0, opacity: 1 },
@@ -144,38 +132,33 @@ const Sidebar = () => {
   className="md:hidden fixed bottom-6 left-6 right-6 bg-slate-900/90 backdrop-blur-lg border border-slate-800 h-16 rounded-[2rem] z-[100] flex justify-around items-center px-2 shadow-2xl"
 >
   {filteredMenu.map((item) => (
- <NavLink key={item.id} to={item.path} className="relative flex-1 flex justify-center">
-  {({ isActive }) => (
-    <div className="relative flex items-center justify-center w-12 h-12">
-      
-      {/* PEMBUNGKUS BACKGROUND (Tetap Lingkaran) */}
-      {isActive && (
-        <motion.div 
-          layoutId="navActive" 
-          className="absolute inset-0 bg-emerald-600/20 rounded-full" 
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        />
+    <NavLink key={item.id} to={item.path} className="relative flex-1 flex justify-center">
+      {({ isActive }) => (
+        <div className="relative flex items-center justify-center w-12 h-12">
+          
+          {isActive && (
+            <motion.div 
+              layoutId="navActive" 
+              className="absolute inset-0 bg-emerald-600/20 rounded-full" 
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            />
+          )}
+          
+          <motion.div 
+            className="relative z-10 flex flex-col items-center"
+            whileHover={{ scale: 1.2 }} 
+            whileTap={{ scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          >
+            <item.icon 
+              size={22} 
+              className={`transition-colors duration-300 ${isActive ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'}`} 
+            />
+          </motion.div>
+          
+        </div>
       )}
-      
-      {/* IKON DENGAN EFEK SCALE */}
-      <motion.div 
-        className="relative z-10 flex flex-col items-center"
-        // Efek saat kursor di atas ikon
-        whileHover={{ scale: 1.2 }} 
-        // Efek saat ikon diklik (opsional, biar mantul)
-        whileTap={{ scale: 0.9 }}
-        // Efek transisi halus
-        transition={{ type: "spring", stiffness: 400, damping: 17 }}
-      >
-        <item.icon 
-          size={22} 
-          className={`transition-colors duration-300 ${isActive ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'}`} 
-        />
-      </motion.div>
-      
-    </div>
-  )}
-</NavLink>
+    </NavLink>
   ))}
   
   <button onClick={handleLogout} className="flex-1 text-rose-500/60 flex justify-center items-center">
