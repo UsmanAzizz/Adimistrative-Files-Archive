@@ -103,21 +103,20 @@ await db.query(`
     WHERE id = 1
     AND active_tahun_pelajaran NOT IN (SELECT ta FROM tahun_akademik);
 `);
+    // 3. Buat Tabel Archives
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS archives (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            isFolder TINYINT(1) DEFAULT 1,
+            size VARCHAR(50) DEFAULT '-',
+            tapel VARCHAR(50),
+            jabatan VARCHAR(100),
+            parent_path TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  
+        ) ENGINE=InnoDB;
+    `);
 };
 
-await db.query(`
-    CREATE TABLE IF NOT EXISTS archives (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        isFolder TINYINT(1) DEFAULT 1,
-        size VARCHAR(50) DEFAULT '-',
-        tapel VARCHAR(50),
-        jabatan VARCHAR(100),
-        parent_path TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  
-    ) ENGINE=InnoDB;
-`);
-
-initializeDatabase();
-
+export { initializeDatabase };
 export default db;

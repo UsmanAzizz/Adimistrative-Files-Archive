@@ -4,7 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 // Import Koneksi DB
-import db from './db_connections.js';
+import db, { initializeDatabase } from './db_connections.js';
 
 // Import Routes
 import globalRoutes from '../routes/globalSettings.js';
@@ -15,6 +15,7 @@ import accessRoutes from '../routes/defineAccess.js';
 import errorMiddleware from './errorMiddleware.js';
 import folderRoutes from '../routes/store.js';
 import fileRoutes from '../routes/crudFile.js';
+import dashboardRoutes from '../routes/dashboard.js';
 
 dotenv.config();
 const app = express();
@@ -45,6 +46,7 @@ app.use('/api/define-access', accessRoutes);
 app.use('/api/archive-years', getArchive); 
 app.use('/api/folders', folderRoutes);
 app.use('/api/files', fileRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // --- 4. ERROR HANDLING ---
 app.use((req, res, next) => {
@@ -56,6 +58,11 @@ app.use((req, res, next) => {
 app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
+initializeDatabase().then(() => {
+    app.listen(PORT, () => {
+        console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
+    });
+}).catch(err => {
+    console.error("Gagal inisialisasi database:", err);
+    process.exit(1);
 });

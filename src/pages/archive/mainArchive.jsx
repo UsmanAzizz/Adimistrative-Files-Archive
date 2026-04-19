@@ -44,44 +44,44 @@ const MainArchive = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 px-2 md:px-0">
+        <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 px-4 md:px-0">
             
-            {/* --- HEADER & NAVIGATION --- */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                <div className="flex items-center gap-5">
-                    <button 
-                        onClick={() => navigate('/archives')} 
-                        className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all duration-300"
-                    >
-                        <FiArrowLeft size={20} />
-                    </button>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            {/* <FiHardDrive className="text-emerald-600" size={18} /> */}
-                            <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
-                                Direktori Utama
-                            </h1>
-                        </div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
-                            Tahun Pelajaran {displayTapel}
-                        </p>
-                    </div>
+            {/* --- HEADER SECTION: CONSISTENT STYLE --- */}
+            <div className="flex flex-col md:flex-row items-end md:items-center justify-between gap-6">
+                <div>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">
+                        Direktori <span className="text-emerald-600">Arsip</span>
+                    </h1>
+                    <p className="text-slate-400 text-[10px] font-bold tracking-[0.2em] mt-1 uppercase">
+                        Tahun Pelajaran {displayTapel}
+                    </p>
                 </div>
 
-                {/* TOGGLE VIEW MODE (Grid vs Table) */}
-                <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 self-end md:self-center">
+                {/* NAVIGATION & VIEW TOGGLE BOX */}
+                <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-slate-100 shadow-sm w-full md:w-auto">
                     <button 
-                        onClick={() => setViewMode('grid')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${viewMode === 'grid' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400'}`}
+                        onClick={() => navigate('/archives')} 
+                        className="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all duration-300"
                     >
-                        <FiGrid size={16} />
+                        <FiArrowLeft size={18} />
                     </button>
-                    <button 
-                        onClick={() => setViewMode('list')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${viewMode === 'list' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400'}`}
-                    >
-                        <FiList size={16} /> 
-                    </button>
+                    
+                    <div className="h-8 w-px bg-slate-100 mx-1" />
+
+                    <div className="flex bg-slate-100 p-1 rounded-xl">
+                        <button 
+                            onClick={() => setViewMode('grid')}
+                            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'grid' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400'}`}
+                        >
+                            <FiGrid size={14} /> Grid
+                        </button>
+                        <button 
+                            onClick={() => setViewMode('list')}
+                            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'list' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400'}`}
+                        >
+                            <FiList size={14} /> List
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -93,36 +93,28 @@ const MainArchive = () => {
             <div
                 key={folderName}
                 onClick={() => navigate(`/archive/${tapel}/${folderName.toLowerCase().trim().replace(/\s+/g, "_")}`)}
-                className="group relative bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-[10px_10px_0px_0px_rgba(16,185,129,1)] transition-all duration-200 cursor-pointer overflow-hidden flex flex-col min-h-[170px] md:min-h-[210px]"
+                className="group bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-2 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col min-h-[180px] md:min-h-[220px]"
             >
-                {/* 80% AREA: CONTENT (Solid White) */}
-                <div className="h-[80%] p-6 md:p-8 flex flex-col justify-between relative">
-                    <div className="z-10">
-                        {/* Ikon Tanpa Background Bulat - Langsung Sharp */}
-                        <FiHardDrive 
-                            size={32} 
-                            className="text-slate-400 group-hover:text-amber-500 transition-colors duration-100" 
-                        />
-                        
-                        <div className="mt-6 md:mt-8">
-                            <h3 className="text-[13px] md:text-[17px] font-black text-slate-900 uppercase tracking-tighter leading-[1.1]">
+                {/* TOP AREA: CONTENT */}
+                <div className="flex-1 p-6 md:p-8 flex flex-col justify-between bg-white">
+                    <FiHardDrive 
+                        size={32} 
+                        className="text-slate-300 group-hover:text-emerald-500 transition-colors duration-300" 
+                    />
+                    
+                        <div className="mt-6">
+                            <h3 className="text-[14px] md:text-[18px] font-black text-slate-900 uppercase tracking-tighter leading-tight">
                                 {folderName.replace(/_/g, " ")}
                             </h3>
-                            <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-[0.2em]">
+                            <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-[0.2em]">
                                 Digital Archive
                             </p>
                         </div>
-                    </div>
-
-                   
                 </div>
 
-                {/* 20% AREA: SOLID EMERALD BASE (Tanpa Transisi Berlebih) */}
-                <div className="h-[20%] w-full bg-emerald-500 flex items-center justify-between px-6 md:px-8 border-t-2 border-emerald-500/20">
-                    <span className="text-[9px] font-black text-white uppercase tracking-widest">
-                        #
-                    </span>
-                    <FiChevronRight className="text-white group-hover:translate-x-1 transition-transform" size={18} />
+                {/* BOTTOM AREA: SOLID EMERALD (Sharp & Seamless) */}
+                <div className="h-12 md:h-14 w-full bg-emerald-500 flex items-center justify-end px-6 md:px-8">
+                    <FiChevronRight className="text-white group-hover:translate-x-1 transition-transform" size={20} />
                 </div>
             </div>
         ))}

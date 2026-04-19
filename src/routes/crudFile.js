@@ -5,7 +5,7 @@ import multer from 'multer';
 import archiver from 'archiver'; // Ubah require jadi import
 
 // Import verifyToken untuk ambil user_id
-import { verifyToken } from '../backend/verifyToken.js';
+import { verifyToken } from '../backend/middlewares/auth.js';
 
 const router = express.Router();
 const upload = multer({ dest: 'temp/' });

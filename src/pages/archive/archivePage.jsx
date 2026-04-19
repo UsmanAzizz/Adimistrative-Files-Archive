@@ -1,9 +1,11 @@
   import React, { useState, useEffect } from 'react';
-  import { FiFolder, FiClock, FiPlus, FiTrash2 } from 'react-icons/fi';
+  import { FiFolder, FiClock, FiPlus, FiTrash2, FiMoreVertical } from 'react-icons/fi';
   import Card from '../../components/card'; 
   import Dialog from '../../components/dialog'; 
-  import axios from 'axios';
+  import axios from '../../backend/axiosConfig';
   import { useNavigate } from 'react-router-dom';
+  import { useToast } from '../../contexts/ToastContext';
+  import { motion } from 'framer-motion';
 
   const ArchivePage = () => {
     const [archiveYears, setArchiveYears] = useState([]);
@@ -13,13 +15,48 @@
     const [newTa, setNewTa] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     
-    // State untuk Dialog Status (Success/Error)
-    const [statusDialog, setStatusDialog] = useState({ isOpen: false, type: 'info', title: '', message: '' });
+    const { showToast } = useToast();
+
+    const containerVariants = {
+      hidden: { opacity: 0 },
+      show: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1 }
+      }
+    };
+  
+    const itemVariants = {
+      hidden: { opacity: 0, y: 20 },
+      show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+    };
     
     // State untuk Dialog Konfirmasi Hapus
     const [deleteConfig, setDeleteConfig] = useState({ isOpen: false, id: null, ta: '' });
+    
+    // State untuk Context Menu (Klik Kanan)
+    const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, item: null });
 
-    const API_URL = import.meta.env.VITE_API_BASE_URL;
+    const handleContextMenu = (e, item) => {
+      if (!isAdmin) return;
+      e.preventDefault();
+      setContextMenu({
+        show: true,
+        x: e.pageX,
+        y: e.pageY,
+        item: item
+      });
+    };
+
+    const closeContextMenu = () => {
+      setContextMenu({ ...contextMenu, show: false });
+    };
+
+    useEffect(() => {
+      window.addEventListener('click', closeContextMenu);
+      return () => window.removeEventListener('click', closeContextMenu);
+    }, []);
+
+
 
     // --- AUTH LOGIC ---
     const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
@@ -35,23 +72,18 @@
   const fetchArchives = async () => {
       try {
         // GET biasanya tidak butuh credentials jika Mas mensetnya public di backend
-        const response = await axios.get(`${API_URL}/archive-years`);
+        const response = await axios.get('/archive-years');
         if (response.data.success) {
           setArchiveYears(response.data.data);
         }
       } catch (error) {
-        showStatus('error', 'Koneksi Gagal', 'Gagal memuat database.');
+        showToast('error', 'Koneksi Gagal', 'Gagal memuat database.');
       } finally {
         setLoading(false);
       }
     };
 
-    const showStatus = (type, title, message) => {
-      setStatusDialog({ isOpen: true, type, title, message });
-      if (type === 'success') {
-        setTimeout(() => setStatusDialog(prev => ({ ...prev, isOpen: false })), 2000);
-      }
-    };
+
 
     // --- FUNGSI CREATE ---
     const handleCreateFolder = async (e) => {
@@ -59,25 +91,23 @@
       if (!newTa) return;
       setIsSubmitting(true);
       try {
-        // TAMBAHKAN withCredentials: true
         const response = await axios.post(
-          `${API_URL}/archive-years`, 
-          { ta: newTa },
-          { withCredentials: true } 
+          '/archive-years', 
+          { ta: newTa }
         );
         
         if (response.data.success) {
           setIsDialogOpen(false);
           setNewTa('');
-          showStatus('success', 'Berhasil', `Direktori berhasil dibuat.`);
+          showToast('success', 'Berhasil', `Direktori berhasil dibuat.`);
           fetchArchives();
         }
       } catch (error) {
         const status = error.response?.status;
         if (status === 401 || status === 403) {
-          showStatus('error', 'Akses Ditolak', 'Sesi berakhir atau Anda bukan Admin.');
+          showToast('error', 'Akses Ditolak', 'Sesi berakhir atau Anda bukan Admin.');
         } else {
-          showStatus('error', 'Gagal', error.response?.data?.message || 'Gagal menyimpan data.');
+          showToast('error', 'Gagal', error.response?.data?.message || 'Gagal menyimpan data.');
         }
       } finally {
         setIsSubmitting(false);
@@ -96,23 +126,21 @@
       // Tahap 2: Eksekusi Hapus (Dari dalam Modal)
       setIsSubmitting(true);
       try {
-        // TAMBAHKAN withCredentials: true
         const response = await axios.delete(
-          `${API_URL}/archive-years/${deleteConfig.id}`, 
-          { withCredentials: true }
+          `/archive-years/${deleteConfig.id}`
         );
 
         if (response.data.success) {
           setDeleteConfig({ isOpen: false, id: null, ta: '' });
-          showStatus('success', 'Dihapus', `Arsip ${deleteConfig.ta} berhasil dihapus.`);
+          showToast('success', 'Dihapus', `Arsip ${deleteConfig.ta} berhasil dihapus.`);
           fetchArchives();
         }
       } catch (error) {
         const status = error.response?.status;
         if (status === 401 || status === 403) {
-          showStatus('error', 'Akses Ditolak', 'Hanya Admin yang diizinkan.');
+          showToast('error', 'Akses Ditolak', 'Hanya Admin yang diizinkan.');
         } else {
-          showStatus('error', 'Gagal Hapus', error.response?.data?.message || 'Data gagal dihapus.');
+          showToast('error', 'Gagal Hapus', error.response?.data?.message || 'Data gagal dihapus.');
         }
         setDeleteConfig(prev => ({ ...prev, isOpen: false }));
       } finally {
@@ -125,10 +153,10 @@
 
     const getTheme = (index) => {
       const themes = [
-        { bg: "bg-emerald-600", light: "text-emerald-600" },
-        { bg: "bg-blue-600", light: "text-blue-600" },
-        { bg: "bg-orange-500", light: "text-orange-500" },
-        { bg: "bg-violet-600", light: "text-violet-600" },
+        { bg: "bg-emerald-600", gradient: "bg-gradient-to-br from-emerald-600 to-teal-500", light: "text-emerald-600" },
+        { bg: "bg-blue-600", gradient: "bg-gradient-to-br from-blue-600 to-indigo-500", light: "text-blue-600" },
+        { bg: "bg-orange-500", gradient: "bg-gradient-to-br from-orange-500 to-amber-400", light: "text-orange-500" },
+        { bg: "bg-violet-600", gradient: "bg-gradient-to-br from-violet-600 to-purple-500", light: "text-violet-600" },
       ];
       return themes[index % themes.length];
     };
@@ -142,95 +170,94 @@
           <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mt-1">Directory Library</p>
         </header>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
     {loading ? (
       <div className="col-span-full py-10 text-center font-black text-slate-300 animate-pulse tracking-widest uppercase">
         Loading Database...
       </div>
     ) : (
       archiveYears.map((item, index) => {
-        const theme = getTheme(index);
         const isCurrentTa = item.ta === currentTa;
+        const theme = isCurrentTa 
+          ? getTheme(index) 
+          : { bg: "bg-slate-900", gradient: "bg-gradient-to-br from-slate-900 to-slate-800", light: "text-slate-900" };
 
         return (
-          <Card
-    key={item.id}
-    variant="none"
-    onClick={() => {
-      const slug = item.ta.replace(/\//g, '-');
-      navigate(`/archive/${slug}`);
-    }}
-    className="group flex flex-col min-h-[200px] md:min-h-[260px] bg-white border border-slate-100 rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden shadow-sm shadow-slate-400/40 hover:shadow-xl hover:shadow-slate-300/30 transition-all duration-500 relative cursor-pointer"
-  >
-    <div className="p-4 md:p-7 flex-1 relative z-10">
-      {/* HEADER CARD: IKON FOLDER & TOMBOL HAPUS SEJAJAR */}
-      <div className="flex justify-between items-start">
-        <div className={`p-2.5 md:p-3 w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-xl md:rounded-2xl bg-slate-50 shadow-inner ${theme.light}`}>
-          <FiFolder size={24} className="md:size-7" />
-        </div>
+          <motion.div variants={itemVariants} key={item.id} className="h-full">
+            <Card
+              variant="none"
+              onClick={() => {
+                const slug = item.ta.replace(/\//g, '-');
+                navigate(`/archive/${slug}`);
+              }}
+              onContextMenu={(e) => handleContextMenu(e, item)}
+              className="group flex flex-col h-full bg-white border border-slate-50 rounded-[2.5rem] overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.08)] hover:shadow-[0_0_60px_rgba(0,0,0,0.15)] hover:scale-[1.02] transition-all duration-500 relative cursor-pointer"
+            >
+              {/* Options Menu (Three Dots) - Admin Only */}
+              {isAdmin && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleContextMenu(e, item);
+                  }}
+                  className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl active:scale-95 transition-all z-20 md:opacity-0 md:group-hover:opacity-100"
+                >
+                  <FiMoreVertical size={20} />
+                </button>
+              )}
 
-        {isAdmin && (
-    <button
-      onClick={(e) => handleDelete(e, item.id, item.ta)}
-      className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-xl md:rounded-2xl 
-                bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 
-                transition-all duration-300 shadow-sm border border-slate-200 
-                opacity-100 md:opacity-40 md:group-hover:opacity-100" // Perubahan di sini
-    >
-      <FiTrash2 size={18} className="md:size-5" />
-    </button>
-  )}
-      </div>
+              <div className="p-8 flex flex-col items-center text-center flex-1">
+                {/* Header: Ikon Folder (Centered) */}
+                <div className="relative flex justify-center items-center w-full mb-6">
+                  <div className={`${theme.light} transition-transform duration-500 group-hover:scale-110`}>
+                    <FiFolder size={48} className="md:size-14" />
+                  </div>
+                </div>
 
-      {/* INFO TEXT */}
-      <div className="mt-4 md:mt-6">
-        <h3 className="text-lg md:text-2xl font-black text-slate-800 tracking-tight leading-tight">
-          TA {item.ta}
-        </h3>
-        <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
-          Daftar Arsip
-        </p>
-      </div>
-    </div>
+                {/* Info Text */}
+                <div className="space-y-1">
+                  <h3 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">
+                    {item.ta}
+                  </h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    Directory Arsip
+                  </p>
+                </div>
+              </div>
 
-    <div className={`p-3 md:p-6 ${theme.bg} relative overflow-hidden`}>
-      <div className="absolute inset-0 bg-black/5 opacity-50" />
-      <div className="relative z-10 flex items-center justify-between text-white">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white shadow-sm border border-white/50">
-    {/* Indikator Dot sesuai status */}
-    <div className="relative flex items-center justify-center">
-      {isCurrentTa && (
-        <span className={`absolute inline-flex h-3 w-3 rounded-full ${theme.light.replace('text', 'bg')} opacity-20 animate-ping`}></span>
-      )}
-      <div className={`h-1.5 w-1.5 rounded-full ${isCurrentTa ? theme.light.replace('text', 'bg') : 'bg-slate-300'}`}></div>
-    </div>
-    
-    <span className={`text-[10px] font-black uppercase tracking-widest ${isCurrentTa ? theme.light : 'text-slate-400'}`}>
-      {isCurrentTa ? 'Aktif' : 'Arsip'}
-    </span>
-  </div>
-      </div>
-    </div>
-  </Card>
+              {/* Bottom Gradient Block */}
+              <div className={`${theme.gradient} py-5 px-6 mt-auto text-center relative overflow-hidden`}>
+                <div className="absolute inset-0 bg-black/10" />
+                <div className="relative z-10 flex items-center justify-center gap-2">
+                  <div className={`h-1.5 w-1.5 rounded-full ${isCurrentTa ? 'bg-white animate-pulse' : 'bg-white/40'}`} />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                    {isCurrentTa ? 'Aktif' : 'Arsip'}
+                  </span>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
         );
       })
     )}
 
     {isAdmin && (
+      <motion.div variants={itemVariants} className="h-full">
       <Card
         variant="none"
         onClick={() => setIsDialogOpen(true)}
-        className="p-4 md:p-7 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 bg-slate-50/10 min-h-[200px] md:min-h-[260px] group hover:bg-white hover:border-emerald-500 transition-all duration-500 rounded-[1.5rem] md:rounded-[2rem] cursor-pointer"
+        className="h-full bg-white border border-slate-50 rounded-[2.5rem] overflow-hidden group hover:bg-emerald-600 transition-all duration-500 cursor-pointer shadow-[0_0_40px_rgba(0,0,0,0.06)] hover:shadow-[0_0_60px_rgba(0,0,0,0.12)] hover:scale-[1.02] flex flex-col items-center justify-center min-h-[220px] md:min-h-[280px]"
       >
-        <div className="relative w-10 h-10 md:w-14 md:h-14 rounded-full border-2 border-slate-200 flex items-center justify-center text-slate-300 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 transition-all duration-300">
+        <div className="relative w-10 h-10 md:w-14 md:h-14 rounded-full border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300 group-hover:bg-white group-hover:text-emerald-600 group-hover:border-white transition-all duration-300 mb-4">
           <FiPlus className="text-xl md:text-2xl" />
         </div>
-        <p className="mt-3 md:mt-4 text-[8px] md:text-[10px] font-black uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 text-center">
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-white text-center">
           Tambah Baru
         </p>
       </Card>
+      </motion.div>
     )}
-  </div>
+  </motion.div>
 
         {/* DIALOG INPUT ARSIP BARU */}
         <Dialog isOpen={isDialogOpen} onClose={() => !isSubmitting && setIsDialogOpen(false)} title="Tambah Arsip" size="md">
@@ -281,17 +308,25 @@
           </div>
         </Dialog>
 
-        {/* DIALOG STATUS (SUCCESS/ERROR) */}
-        <Dialog 
-          isOpen={statusDialog.isOpen} 
-          onClose={() => setStatusDialog(prev => ({ ...prev, isOpen: false }))} 
-          type={statusDialog.type} 
-          title={statusDialog.title}
-        >
-          <div className="text-center font-bold text-slate-600">
-            {statusDialog.message}
+        {/* CUSTOM CONTEXT MENU */}
+        {contextMenu.show && (
+          <div 
+            className="fixed z-[100] bg-white border border-slate-200 shadow-2xl rounded-2xl overflow-hidden min-w-[180px] py-1 animation-in fade-in zoom-in duration-200"
+            style={{ top: contextMenu.y, left: contextMenu.x }}
+          >
+            <div className="px-4 py-2 border-b border-slate-50">
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Opsi Arsip</p>
+            </div>
+            <button 
+              onClick={() => handleDelete(null, contextMenu.item.id, contextMenu.item.ta)}
+              className="w-full flex items-center gap-3 px-4 py-3 text-rose-500 hover:bg-rose-50 transition-colors"
+            >
+              <FiTrash2 size={16} />
+              <span className="text-xs font-black uppercase tracking-widest">Hapus Arsip</span>
+            </button>
           </div>
-        </Dialog>
+        )}
+
       </div>
     );
   };

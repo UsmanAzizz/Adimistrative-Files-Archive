@@ -5,7 +5,7 @@
     import axios from '../backend/axiosConfig'; // Sesuaikan path-nya ke file axiosConfig kamu
     import Input from '../components/input';
     import Button from '../components/button';
-    import Dialog from '../components/dialog';
+    import { useToast } from '../contexts/ToastContext';
     
     function Login() {
         const [username, setUsername] = useState('');
@@ -14,14 +14,9 @@
         const [isLoading, setIsLoading] = useState(false);
 
         const navigate = useNavigate();
-        const API_URL = import.meta.env.VITE_API_BASE_URL;
 
-        const [dialogConfig, setDialogConfig] = useState({
-            isOpen: false,
-            type: 'default',
-            title: '',
-            message: ''
-        });
+
+        const { showToast } = useToast();
 
     const handleLogin = async (e) => {
     e.preventDefault();
@@ -43,19 +38,12 @@
             localStorage.setItem('user_info', JSON.stringify(result.user));
         }
 
-        // 2. Set Konfigurasi Dialog Berhasil
-        setDialogConfig({
-            isOpen: true,
-            type: 'success',
-            title: 'Login Berhasil',
-            message: `Selamat datang kembali, ${result.user?.username || 'User'}.`
-        });
+        // 2. Notifikasi Berhasil
+        showToast('success', 'Login Berhasil', `Selamat datang kembali, ${result.user?.name || result.user?.username || 'User'}.`);
 
         // 3. Eksekusi Navigasi
-        setTimeout(() => {
-            setIsLoading(false);
-            navigate('/dashboard', { replace: true });
-        }, 1200);
+        setIsLoading(false);
+        navigate('/dashboard', { replace: true });
 
     } catch (error) {
         setIsLoading(false);
@@ -63,12 +51,7 @@
         // Menangani error dari Axios (401, 404, 500, dll)
         const errorMsg = error.response?.data?.message || 'Kredensial tidak valid atau masalah koneksi.';
         
-        setDialogConfig({
-            isOpen: true,
-            type: 'error',
-            title: 'Login Gagal',
-            message: errorMsg
-        });
+        showToast('error', 'Login Gagal', errorMsg);
         
         console.error("Login Error:", error);
     }
@@ -132,22 +115,7 @@
                     </p>
                 </motion.div>
 
-                {/* Dialog Alert */}
-                <Dialog
-                    isOpen={dialogConfig.isOpen}
-                    onClose={() => setDialogConfig({ ...dialogConfig, isOpen: false })}
-                    title={dialogConfig.title}
-                    type={dialogConfig.type}
-                >
-                    <div className="text-center">
-                        <p className="text-slate-500 mb-6">{dialogConfig.message}</p>
-                        {dialogConfig.type === 'error' && (
-                            <Button onClick={() => setDialogConfig({ ...dialogConfig, isOpen: false })}>
-                                Coba Lagi
-                            </Button>
-                        )}
-                    </div>
-                </Dialog>
+
             </div>
         );
     }

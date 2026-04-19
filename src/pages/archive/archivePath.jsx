@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../backend/axiosConfig';
-import Dialog from '../../components/dialog'; // Sesuaikan path jika folder components sejajar
+import Dialog from '../../components/dialog';
+import { useToast } from '../../contexts/ToastContext';
 import {
     FiArrowLeft, FiChevronRight, FiHome, FiPlus, FiUploadCloud,
     FiGrid, FiList, FiDownload, FiFolder, FiEdit2, FiTrash2,
@@ -44,6 +45,7 @@ const ArchivePath = () => {
     const { tapel, jabatan } = params;
     const subPath = params['*'] || "";
     const navigate = useNavigate();
+    const { showToast } = useToast();
 
     // --- STATES ---
     const [items, setItems] = useState([]);
@@ -106,7 +108,7 @@ const ArchivePath = () => {
             document.body.appendChild(link);
             link.click();
             link.remove();
-        } catch (err) { alert("Gagal mendownload berkas."); }
+        } catch (err) { showToast('error', 'Gagal Download', "Gagal mendownload berkas."); }
     };
 
     const handleUpload = async (e) => {
@@ -121,7 +123,8 @@ const ArchivePath = () => {
             setLoading(true);
             await axios.post('/files/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             fetchContent();
-        } catch (err) { alert("Gagal upload berkas"); } finally { setLoading(false); }
+            showToast('success', 'Berhasil', 'Berkas berhasil diupload.');
+        } catch (err) { showToast('error', 'Gagal Upload', "Gagal upload berkas."); } finally { setLoading(false); }
     };
 
     const handleFolderAction = async () => {
@@ -135,7 +138,8 @@ const ArchivePath = () => {
             setShowModal(false);
             setFolderNameInput('');
             fetchContent();
-        } catch (err) { alert("Operasi gagal"); }
+            showToast('success', 'Berhasil', 'Operasi folder/berkas berhasil.');
+        } catch (err) { showToast('error', 'Gagal', "Operasi gagal."); }
     };
 
     const handleDelete = async (item) => {
@@ -143,7 +147,8 @@ const ArchivePath = () => {
             try {
                 await axios.post('/files/delete', { tapel, jabatan, subPath, fileName: item.name });
                 fetchContent();
-            } catch (err) { alert("Gagal menghapus"); }
+                showToast('success', 'Berhasil', `Dihapus secara permanen.`);
+            } catch (err) { showToast('error', 'Gagal Hapus', "Gagal menghapus berkas/folder."); }
         }
     };
 
@@ -225,24 +230,24 @@ const ArchivePath = () => {
 
                                         <button
                                             onClick={() => navigate(segment.path)}
-                                           className={`
+                                            className={`
     group flex items-center px-3 py-2 rounded-md transition-all duration-200
-    ${isLast 
-        ? 'text-blue-500 font-black cursor-default' 
-        : 'text-slate-400 hover:text-emerald-600 active:scale-95 font-bold'
-    }
+    ${isLast
+                                                    ? 'text-blue-500 font-black cursor-default'
+                                                    : 'text-slate-400 hover:text-emerald-600 active:scale-95 font-bold'
+                                                }
 `}
->
-    {segment.isHome ? (
-        <FiHome 
-            size={16} 
-            className={`transition-colors ${isLast ? 'text-emerald-600' : 'group-hover:text-emerald-600'}`} 
-        />
-    ) : (
-        <span className="text-[11px] uppercase tracking-widest leading-none">
-            {segment.name}
-        </span>
-    )}
+                                        >
+                                            {segment.isHome ? (
+                                                <FiHome
+                                                    size={16}
+                                                    className={`transition-colors ${isLast ? 'text-emerald-600' : 'group-hover:text-emerald-600'}`}
+                                                />
+                                            ) : (
+                                                <span className="text-[11px] uppercase tracking-widest leading-none">
+                                                    {segment.name}
+                                                </span>
+                                            )}
                                         </button>
                                     </div>
                                 );

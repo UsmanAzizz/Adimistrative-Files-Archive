@@ -7,12 +7,14 @@ import {
 import axios from '../backend/axiosConfig';
 import Card from '../components/card';
 import Dialog from '../components/dialog';
+import { useToast } from '../contexts/ToastContext';
 
 const SettingsPage = () => {
     // API_URL tidak lagi wajib di sini jika sudah ada di axiosConfig.js
     // Namun tetap bisa dipertahankan jika Anda butuh untuk hal lain.
 
     // --- STATES ---
+    const { showToast } = useToast();
     const [globalData, setGlobalData] = useState({ active_tahun_pelajaran: '' });
     const [availableRoles, setAvailableRoles] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -72,11 +74,11 @@ const fetchData = async () => {
 const handleUpdateTAPEL = async () => {
     try {
         const res = await axios.put('/global', globalData);
-        alert(res.data.message || "Tahun Pelajaran berhasil diperbarui.");
+        showToast('success', 'Berhasil', res.data.message || "Tahun Pelajaran berhasil diperbarui.");
     } catch (err) {
         // Ambil pesan dari backend jika ada, jika tidak gunakan pesan default
         const msg = err.response?.data?.message || "Gagal memperbarui TAPEL.";
-        alert(msg);
+        showToast('error', 'Gagal', msg);
     }
 };
 
@@ -86,14 +88,14 @@ const handleAddColumn = async () => {
         const res = await axios.post('/define-access/column', {
             name: newColName // formatString sebaiknya dilakukan di backend, tapi jika ingin di sini juga tidak apa-apa
         });
-        alert(res.data.message); // Memunculkan "Jabatan ... berhasil ditambahkan"
+        showToast('success', 'Berhasil', res.data.message); // Memunculkan "Jabatan ... berhasil ditambahkan"
         setIsColModalOpen(false);
         setNewColName('');
         fetchData();
     } catch (err) {
         // Menangkap error 409 (Duplikasi) atau 500 dari backend
         const msg = err.response?.data?.message || "Gagal menambah kolom jabatan.";
-        alert(msg); 
+        showToast('error', 'Gagal', msg); 
     }
 };
 
@@ -103,12 +105,12 @@ const handleRenameColumn = async () => {
             oldName: editCol.oldName,
             newName: editCol.newName
         });
-        alert(res.data.message);
+        showToast('success', 'Berhasil', res.data.message);
         setIsEditColOpen(false);
         fetchData();
     } catch (err) {
         const msg = err.response?.data?.message || "Gagal mengubah nama kolom.";
-        alert(msg);
+        showToast('error', 'Gagal', msg);
     }
 };
 
@@ -116,11 +118,11 @@ const handleDeleteColumn = async (name) => {
     if (!window.confirm(`HAPUS KOLOM "${name}"?\nIni akan menghapus seluruh data akses terkait untuk semua user.`)) return;
     try {
         const res = await axios.delete(`/define-access/column/${name}`);
-        alert(res.data.message);
+        showToast('success', 'Berhasil dihapus', res.data.message);
         fetchData();
     } catch (err) {
         const msg = err.response?.data?.message || "Gagal menghapus kolom.";
-        alert(msg);
+        showToast('error', 'Gagal Menghapus', msg);
     }
 };
     if (loading) return <div className="p-20 text-center font-black text-slate-300 animate-pulse tracking-widest uppercase">Initializing Schema...</div>;

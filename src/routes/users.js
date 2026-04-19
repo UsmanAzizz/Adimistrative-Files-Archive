@@ -1,8 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import db from '../backend/db_connections.js';
-import { verifyToken } from '../backend/verifyToken.js';
-import { isAdmin } from '../backend/authMiddleware.js';
+import { verifyToken, isAdmin } from '../backend/middlewares/auth.js';
 
 const router = express.Router();
 

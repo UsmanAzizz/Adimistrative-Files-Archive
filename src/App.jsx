@@ -8,13 +8,14 @@ import MainArchive from './pages/archive/mainArchive';
 import ArchivePath from './pages/archive/archivePath'; // 1. Impor komponen ArchivePath
 import Settings from './pages/settings';
 
+import { ToastProvider } from './contexts/ToastContext';
+
 function App() {
 
   const baseName = import.meta.env.VITE_ROUTER_BASE || '/';
   return (
-    
-    // BENAR
-<Router basename={baseName}>
+    <ToastProvider>
+    <Router basename={baseName}>
       <Routes>
         {/* Rute Publik */}
         <Route path="/login" element={<Login />} />
@@ -50,6 +51,7 @@ function App() {
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
+    </ToastProvider>
   );
 }
 
