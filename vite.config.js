@@ -9,17 +9,17 @@ export default defineConfig(({ mode }) => {
 
   return {
     // PENTING: Base path agar aset diarahkan ke subfolder /dafa/ saat produksi
-    base: mode === 'production' ? '/dafa/' : '/',
+    base: mode === 'production' ? '/' : '/',
 
     plugins: [
       react(),
       VitePWA({
         // Strategi registrasi: otomatis update service worker
         registerType: 'autoUpdate',
-        
+
         // Aset yang akan dimasukkan ke cache offline
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
-        
+
         manifest: {
           name: 'DAFA - Digital Archive',
           short_name: 'DAFA',
