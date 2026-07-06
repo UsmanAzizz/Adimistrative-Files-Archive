@@ -52,7 +52,11 @@ router.get('/check-permission', verifyToken, async (req, res) => {
                 ? `${currentYear}/${currentYear + 1}` 
                 : `${currentYear - 1}/${currentYear}`;
 
-            if (activeTapel !== tapel) {
+            // Frontend mengirim tapel via URL menggunakan strip (2026-2027) 
+            // Kita kembalikan ke format garis miring (2026/2027) sebelum mencocokkan
+            const formattedTapel = tapel.replace(/-/g, '/');
+
+            if (activeTapel !== formattedTapel) {
                 return res.json({ can_edit: false });
             }
         }
