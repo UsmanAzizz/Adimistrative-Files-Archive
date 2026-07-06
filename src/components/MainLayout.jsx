@@ -16,13 +16,13 @@ function MainLayout() {
   }, [navigate]);
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* Sidebar tetap fixed */}
       <Sidebar />
 
       {/* Konten Utama */}
       <div className="flex-1 ml-0 md:ml-64 flex flex-col min-w-0 transition-all duration-300">
-        <main className="px-4 pb-4 pt-2 md:px-8 md:pb-8 md:pt-4 flex-1">
+        <main className="px-4 pb-0 pt-2 md:px-8 md:pb-0 md:pt-4 flex-1 flex flex-col min-h-0">
           <Outlet />
         </main>
       </div>

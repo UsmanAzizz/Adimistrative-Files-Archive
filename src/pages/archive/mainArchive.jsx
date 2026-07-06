@@ -62,7 +62,7 @@ const MainArchive = () => {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-1.5rem)] md:h-[calc(100vh-3rem)] max-w-7xl mx-auto px-4 md:px-0">
+        <div className="flex flex-col flex-1 min-h-0 max-w-7xl mx-auto px-4 md:px-0 w-full">
             
             {/* --- HEADER SECTION: CONSISTENT STYLE --- */}
             <div className="shrink-0 pt-2 pb-6 flex flex-col md:flex-row items-end md:items-center justify-between gap-6">

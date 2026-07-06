@@ -84,20 +84,19 @@ const Dialog = ({ isOpen, onClose, title, children, size = 'sm', type = 'default
             )}
 
             <h3 style={{ 
-              margin: '0 0 12px 0', 
-              fontSize: '1.4rem', 
-              fontWeight: '900', 
-              color: '#0f172a',
+              margin: '0 0 16px 0', 
+              fontSize: '1.2rem', 
+              fontWeight: '500', 
+              color: '#1e293b',
               textAlign: 'center'
             }}>
               {title}
             </h3>
 
             <div style={{ 
-              color: '#64748b', 
-              fontSize: '0.95rem', 
-              textAlign: 'center',
-              marginBottom: '8px'
+              width: '100%',
+              color: '#475569', 
+              fontSize: '0.95rem'
             }}>
               {children}
             </div>
