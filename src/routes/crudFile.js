@@ -108,20 +108,38 @@ export const fileController = {
     uploadFile: async (req, res) => {
         try {
             const { tapel, jabatan, subPath } = req.body;
-            const file = req.file;
-            if (!file) return res.status(400).json({ success: false, message: 'File kosong.' });
+            const files = req.files;
+            if (!files || files.length === 0) return res.status(400).json({ success: false, message: 'File kosong.' });
 
             const cleanSubPath = (subPath || "").replace(/^\/+|\/+$/g, "").replace(/\//g, path.sep);
             const targetDir = path.join(ROOT_STORE, tapel, jabatan, cleanSubPath);
 
             await fs.ensureDir(targetDir);
-            const safeFileName = file.originalname.replace(/[<>:"/\\|?*]/g, '_');
-            const finalPath = path.join(targetDir, safeFileName);
-            
-            await fs.move(req.file.path, finalPath, { overwrite: true });
+            for (const file of files) {
+                const safeFileName = file.originalname.replace(/[<>:"/\\|?*]/g, '_');
+                let finalPath = path.join(targetDir, safeFileName);
+                
+                // Generate a unique filename if it already exists
+                if (await fs.pathExists(finalPath)) {
+                    const ext = path.extname(safeFileName);
+                    const baseName = path.basename(safeFileName, ext);
+                    let counter = 1;
+                    
+                    while (await fs.pathExists(finalPath)) {
+                        finalPath = path.join(targetDir, `${baseName} (${counter})${ext}`);
+                        counter++;
+                    }
+                }
+                
+                await fs.move(file.path, finalPath);
+            }
             res.json({ success: true, message: 'Berhasil diarsipkan.' });
         } catch (err) {
-            if (req.file) await fs.remove(req.file.path);
+            if (req.files) {
+                for (const file of req.files) {
+                    await fs.remove(file.path).catch(() => {});
+                }
+            }
             res.status(500).json({ success: false, message: err.message });
         }
     },
@@ -168,7 +186,7 @@ router.get('/download', verifyToken, fileController.downloadFile);
 // Tambahkan Route baru untuk folder
 router.get('/download-compressed', verifyToken, fileController.downloadFolder); 
 
-router.post('/upload', verifyToken, upload.single('file'), fileController.uploadFile);
+router.post('/upload', verifyToken, upload.array('files', 50), fileController.uploadFile);
 router.post('/rename', verifyToken, fileController.renameFile);
 router.post('/delete', verifyToken, fileController.deleteFile);
 

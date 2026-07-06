@@ -221,7 +221,7 @@
                     {item.ta}
                   </h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                    Directory Arsip
+                    Directory Archive
                   </p>
                 </div>
               </div>

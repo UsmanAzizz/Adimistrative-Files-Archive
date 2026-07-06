@@ -22,13 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-*.history
-.env
-# Abaikan semua file hasil upload di lokal maupun produksi
-uploads/
-/uploads/*
-!/uploads/.gitkeep
-
-# Ignore specific project directories
-18_RPP_ASJ_Kelas_XI/
-18_RPP_ASJ_XI_Fix/

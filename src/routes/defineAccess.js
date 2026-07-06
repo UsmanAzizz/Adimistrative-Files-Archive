@@ -32,13 +32,21 @@ router.use(verifyToken);
 // --- 2. RUTE USER ACCESS (Wajib Login) ---
 router.get('/check-permission', verifyToken, async (req, res) => {
     try {
-        const { jabatan } = req.query;
+        const { jabatan, tapel } = req.query;
         const userId = req.user.id;
         const userRole = req.user.role; // Ambil role dari token
 
         // 1. JIKA DIA ADMIN, LANGSUNG LOLOSKAN (BYPASS)
         if (userRole === 'admin') {
             return res.json({ can_edit: true, is_admin: true });
+        }
+
+        // CEK ACTIVE TAHUN PELAJARAN
+        if (tapel) {
+            const [settings] = await db.query('SELECT active_tahun_pelajaran FROM global_settings WHERE id = 1');
+            if (settings.length > 0 && settings[0].active_tahun_pelajaran !== tapel) {
+                return res.json({ can_edit: false });
+            }
         }
 
         if (!jabatan) return res.status(400).json({ message: 'Parameter jabatan diperlukan' });

@@ -21,7 +21,24 @@ const MainArchive = () => {
             // Mengambil struktur kolom jabatan yang sudah dikirim oleh backend
             const res = await axios.get('/define-access');
             if (res.data.status === 'success') {
-                setFolders(res.data.roles || []);
+                const roles = res.data.roles || [];
+                const foldersWithStats = await Promise.all(roles.map(async (role) => {
+                    try {
+                        const fileRes = await axios.get('/files/list', { params: { tapel, jabatan: role, subPath: '' } });
+                        if (fileRes.data.success) {
+                            const items = fileRes.data.data;
+                            return {
+                                name: role,
+                                folderCount: items.filter(i => i.isFolder).length,
+                                fileCount: items.filter(i => !i.isFolder).length
+                            };
+                        }
+                    } catch (e) {
+                        // skip errors
+                    }
+                    return { name: role, folderCount: 0, fileCount: 0 };
+                }));
+                setFolders(foldersWithStats);
             }
         } catch (err) {
             console.error("Gagal memuat struktur arsip:", err);
@@ -45,10 +62,10 @@ const MainArchive = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8 pb-20 px-4 md:px-0">
+        <div className="flex flex-col h-[calc(100vh-1.5rem)] md:h-[calc(100vh-3rem)] max-w-7xl mx-auto px-4 md:px-0">
             
             {/* --- HEADER SECTION: CONSISTENT STYLE --- */}
-            <div className="flex flex-col md:flex-row items-end md:items-center justify-between gap-6">
+            <div className="shrink-0 pt-2 pb-6 flex flex-col md:flex-row items-end md:items-center justify-between gap-6">
                 <div>
                     <h1 className="text-4xl font-black text-slate-900 tracking-tight">
                         Direktori <span className="text-emerald-600">Arsip</span>
@@ -87,16 +104,17 @@ const MainArchive = () => {
             </div>
 
             {/* --- CONTENT AREA --- */}
+            <div className="flex-1 overflow-y-auto pb-10 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent pr-2 flex flex-col">
             {folders.length > 0 ? (
               viewMode === 'grid' ? (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-        {folders.map((folderName, idx) => (
+        {folders.map((folder, idx) => (
             <motion.div
-                key={folderName}
+                key={folder.name}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: idx * 0.05 }}
-                onClick={() => navigate(`/archive/${tapel}/${folderName.toLowerCase().trim().replace(/\s+/g, "_")}`)}
+                onClick={() => navigate(`/archive/${tapel}/${folder.name.toLowerCase().trim().replace(/\s+/g, "_")}`)}
                 className="group bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-2 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col min-h-[180px] md:min-h-[220px]"
             >
                 {/* TOP AREA: CONTENT */}
@@ -108,7 +126,7 @@ const MainArchive = () => {
                     
                         <div className="mt-6">
                             <h3 className="text-[14px] md:text-[18px] font-black text-slate-900 uppercase tracking-tighter leading-tight">
-                                {folderName.replace(/_/g, " ")}
+                                {folder.name.replace(/_/g, " ")}
                             </h3>
                             <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-[0.2em]">
                                 Digital Archive
@@ -117,7 +135,11 @@ const MainArchive = () => {
                 </div>
 
                 {/* BOTTOM AREA: SOLID EMERALD (Sharp & Seamless) */}
-                <div className="h-12 md:h-14 w-full bg-emerald-500 flex items-center justify-end px-6 md:px-8">
+                <div className="h-12 md:h-14 w-full bg-emerald-500 flex items-center justify-between px-6 md:px-8">
+                    <div className="flex gap-4 text-[10px] font-black uppercase text-white/90 tracking-widest">
+                        <span>{folder.folderCount} Folder</span>
+                        <span>{folder.fileCount} File</span>
+                    </div>
                     <FiChevronRight className="text-white group-hover:translate-x-1 transition-transform" size={20} />
                 </div>
             </motion.div>
@@ -125,26 +147,27 @@ const MainArchive = () => {
     </div>
 ) : (
     /* LIST VIEW: FLAT & SHARP */
-    <div className="bg-white rounded-2xl border-2 border-slate-100 overflow-hidden shadow-sm">
+    <div className="bg-white rounded-2xl border-2 border-slate-100 overflow-hidden shadow-sm grow">
         <table className="w-full text-left">
             <tbody className="divide-y-2 divide-slate-50">
-                {folders.map((folderName) => (
+                {folders.map((folder) => (
                     <tr 
-                        key={folderName} 
-                        onClick={() => navigate(`/archive/${tapel}/${folderName.toLowerCase().trim().replace(/\s+/g, "_")}`)}
+                        key={folder.name} 
+                        onClick={() => navigate(`/archive/${tapel}/${folder.name.toLowerCase().trim().replace(/\s+/g, "_")}`)}
                         className="group hover:bg-slate-50 cursor-pointer transition-none"
                     >
-                        <td className="px-8 py-5">
+                        <td className="px-8 py-7">
                             <div className="flex items-center gap-5">
                              
                                 <span className="text-sm md:text-base font-black text-slate-900 uppercase tracking-tight">
-                                    {folderName.replace(/_/g, " ")}
+                                    {folder.name.replace(/_/g, " ")}
                                 </span>
                             </div>
                         </td>
-                        <td className="px-8 py-5 text-right">
-                             <div className="inline-block px-3 py-1 bg-white-600 text-white text-[10px] font-black rounded-md">
-                                 <FiHardDrive size={20} className="text-slate-400 group-hover:text-slate-600" />
+                        <td className="px-8 py-7 text-right">
+                             <div className="flex justify-end gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                 <span>{folder.folderCount} Folder</span>
+                                 <span>{folder.fileCount} File</span>
                              </div>
                         </td>
                     </tr>
@@ -163,6 +186,7 @@ const MainArchive = () => {
                     <p className="text-slate-400 text-sm mt-1">Belum ada departemen yang dikonfigurasi di database.</p>
                 </div>
             )}
+            </div>
         </div>
     );
 };

@@ -63,7 +63,7 @@ const ArchivePath = () => {
     // --- PERMISSION & FETCH ---
     const checkPermission = async () => {
         try {
-            const res = await axios.get('/define-access/check-permission', { params: { jabatan } });
+            const res = await axios.get('/define-access/check-permission', { params: { jabatan, tapel } });
             setCanEdit(res.data.can_edit);
         } catch (err) { setCanEdit(false); }
     };
@@ -112,10 +112,10 @@ const ArchivePath = () => {
     };
 
     const handleUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
         const formData = new FormData();
-        formData.append('file', file);
+        Array.from(files).forEach(file => formData.append('files', file));
         formData.append('tapel', tapel);
         formData.append('jabatan', jabatan);
         formData.append('subPath', subPath);
@@ -180,10 +180,10 @@ const ArchivePath = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#FBFBFB] p-0 md:p-0 space-y-6">
+        <div className="flex flex-col h-[calc(100vh-2rem)] md:h-[calc(100vh-4rem)] bg-[#FBFBFB] p-0 md:p-0">
 
             {/* --- NAVIGATOR BAR --- */}
-            <div className="bg-white/80] flex flex-col gap-4">
+            <div className="shrink-0 bg-[#FBFBFB] pt-2 pb-4 flex flex-col gap-4">
                 <div className="
     
             bg-white/95 
@@ -311,7 +311,7 @@ const ArchivePath = () => {
             ">
                                             <FiUploadCloud size={16} strokeWidth={2} />
                                             <span className="hidden md:block font-bold text-[11px]">Upload</span>
-                                            <input type="file" className="hidden" onChange={handleUpload} />
+                                            <input type="file" multiple className="hidden" onChange={handleUpload} />
                                         </label>
                                     </>
                                 )}
@@ -332,12 +332,13 @@ const ArchivePath = () => {
             </div>
 
             {/* --- EXPLORER SECTION --- */}
-            {loading ? (
-                <div className="py-20 text-center animate-pulse text-slate-300 font-black uppercase text-[10px] tracking-[0.3em]">Memuat...</div>
-            ) : (
-                <div className={viewMode === 'grid' ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" : "bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col"}>
+            <div className="flex-1 overflow-y-auto min-h-0 pb-10 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent pr-1 flex flex-col">
+                {loading ? (
+                    <div className="py-20 text-center animate-pulse text-slate-300 font-black uppercase text-[10px] tracking-[0.3em]">Memuat...</div>
+                ) : (
+                <div className={viewMode === 'grid' ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" : "bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col grow"}>
                     {viewMode === 'list' && (
-                        <div className="hidden md:grid grid-cols-12 gap-4 px-8 py-5 bg-slate-700/50 border-b border-slate-100 text-[10px] font-black text-white uppercase tracking-widest">
+                        <div className="sticky top-0 z-30 hidden md:grid grid-cols-12 gap-4 px-8 py-5 bg-slate-800 border-b border-slate-100 text-[10px] font-black text-white uppercase tracking-widest rounded-t-[1.5rem]">
                             <div className="col-span-6">Nama Berkas</div>
                             <div className="col-span-3 text-center">Ukuran</div>
                             <div className="col-span-3 text-right">Update</div>
@@ -375,7 +376,7 @@ const ArchivePath = () => {
                                     }}
                                     className={viewMode === 'grid'
                                         ? `group bg-white p-5 rounded-[1rem] border transition-all cursor-pointer text-center relative ${isActive ? 'z-20 border-emerald-500 shadow-xl' : 'z-10 border-slate-100 shadow-sm hover:border-slate-300'}`
-                                        : `group grid grid-cols-12 items-center gap-4 px-8 py-4 border-b border-slate-50 relative ${isActive ? 'z-20 bg-emerald-50/50' : 'z-10'}`
+                                        : `group grid grid-cols-12 items-center gap-4 px-8 py-6 border-b border-slate-50 relative ${isActive ? 'z-20 bg-emerald-50/50' : 'z-10'}`
                                     }>
 
                                     {/* TOMBOL TITIK TIGA - Dipasang di layer terpisah agar tidak menggeser layout */}
@@ -421,6 +422,15 @@ const ArchivePath = () => {
                         })}
                 </div>
             )}
+
+            {/* --- EMPTY STATE --- */}
+            {!loading && items.length === 0 && (
+                <div className="py-20 flex flex-col items-center justify-center opacity-40">
+                    <FiFolder size={48} className="text-slate-200 mb-4" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em]">Folder Kosong</p>
+                </div>
+            )}
+            </div>
 
             {/* --- MODAL DIALOG (Luar Konteks Baris) --- */}
             <Dialog
@@ -485,13 +495,7 @@ const ArchivePath = () => {
                 </div>
             </Dialog>
 
-            {/* --- EMPTY STATE --- */}
-            {!loading && items.length === 0 && (
-                <div className="py-20 flex flex-col items-center justify-center opacity-40">
-                    <FiFolder size={48} className="text-slate-200 mb-4" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.4em]">Folder Kosong</p>
-                </div>
-            )}
+            {/* Empty state is moved inside the scrollable container */}
         </div>
     );
 };

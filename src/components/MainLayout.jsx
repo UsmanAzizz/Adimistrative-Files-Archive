@@ -22,7 +22,7 @@ function MainLayout() {
 
       {/* Konten Utama */}
       <div className="flex-1 ml-0 md:ml-64 flex flex-col min-w-0 transition-all duration-300">
-        <main className="p-4 md:p-8 flex-1">
+        <main className="px-4 pb-4 pt-2 md:px-8 md:pb-8 md:pt-4 flex-1">
           <Outlet />
         </main>
       </div>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Use Case Diagram - Hak Akses</title>
+    <!-- Memuat Mermaid.js secara langsung -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'default',
+            flowchart: {
+                htmlLabels: true,
+                curve: 'basis', // Garis lengkung
+                nodeSpacing: 50,
+                rankSpacing: 80
+            }
+        });
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2vh;
+            margin-top: -5vh;
+        }
+        .header h1 {
+            color: #1a202c;
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .header p {
+            color: #718096;
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .diagram-wrapper {
+            width: 95%;
+            height: 75%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .mermaid {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .mermaid svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Use Case Diagram</h1>
+        <p>Hak Akses Pengguna (Role-Based Access Control) - Sistem DAFA</p>
+    </div>
+
+    <div class="diagram-wrapper">
+        <div class="mermaid">
+flowchart TB
+    %% Pengaturan Tema Internal (Warna & Bentuk)
+    classDef actorStyle fill:#2b6cb0,stroke:#2b6cb0,stroke-width:2px,color:#fff,font-weight:bold,rx:50,ry:50,padding:10px;
+    classDef usecaseStyle fill:#ebf4ff,stroke:#3182ce,stroke-width:2px,color:#2b6cb0,font-weight:bold,rx:20,ry:20,padding:10px,text-align:center;
+
+    %% Definisi Aktor (Tanpa Emoji)
+    Admin([Admin]):::actorStyle
+    Client([Client / Pegawai]):::actorStyle
+    
+    %% Definisi Use Case (Dibuat 2 baris dan tanpa emoji)
+    Login(((Login<br/>ke Sistem))):::usecaseStyle
+    KelolaUser(((Kelola Pengguna<br/>& Hak Akses))):::usecaseStyle
+    KelolaSetelan(((Kelola Setelan<br/>& Tahun Akademik))):::usecaseStyle
+    KelolaSemuaArsip(((Kelola Seluruh<br/>Arsip Dokumen))):::usecaseStyle
+    AksesArsipJabatan(((Akses Arsip<br/>Sesuai Jabatan))):::usecaseStyle
+    UnduhDokumen(((Mengunduh /<br/>Melihat Dokumen))):::usecaseStyle
+
+    %% Relasi Admin (Dari Atas ke Tengah)
+    Admin --- Login
+    Admin --- KelolaUser
+    Admin --- KelolaSetelan
+    Admin --- KelolaSemuaArsip
+    Admin --- UnduhDokumen
+
+    %% Relasi Client (Dari Tengah ke Bawah)
+    Login --- Client
+    AksesArsipJabatan --- Client
+    UnduhDokumen --- Client
+        </div>
+    </div>
+
+</body>
+</html>
