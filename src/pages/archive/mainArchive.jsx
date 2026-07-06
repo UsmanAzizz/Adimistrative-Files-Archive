@@ -66,13 +66,16 @@ const MainArchive = () => {
             
             {/* --- HEADER SECTION: CONSISTENT STYLE --- */}
             <div className="shrink-0 pt-2 pb-6 flex flex-col md:flex-row items-end md:items-center justify-between gap-6">
-                <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-                        Direktori <span className="text-emerald-600">Arsip</span>
-                    </h1>
-                    <p className="text-slate-400 text-[10px] font-bold tracking-[0.2em] mt-1 uppercase">
-                        Tahun Pelajaran {displayTapel}
-                    </p>
+                {/* BREADCRUMB */}
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-inner">
+                        <FiFolder size={20} />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold text-slate-800 tracking-tight">
+                            Tahun Pelajaran {displayTapel}
+                        </h2>
+                    </div>
                 </div>
 
                 {/* NAVIGATION & VIEW TOGGLE BOX */}
@@ -89,22 +92,24 @@ const MainArchive = () => {
                     <div className="flex bg-slate-100 p-1 rounded-xl">
                         <button 
                             onClick={() => setViewMode('grid')}
-                            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'grid' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400'}`}
+                            className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === 'grid' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            title="Grid View"
                         >
-                            <FiGrid size={14} /> Grid
+                            <FiGrid size={16} />
                         </button>
                         <button 
                             onClick={() => setViewMode('list')}
-                            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'list' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400'}`}
+                            className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === 'list' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            title="List View"
                         >
-                            <FiList size={14} /> List
+                            <FiList size={16} />
                         </button>
                     </div>
                 </div>
             </div>
 
             {/* --- CONTENT AREA --- */}
-            <div className="flex-1 overflow-y-auto pb-10 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent pr-2 flex flex-col">
+            <div className="flex-1 overflow-y-auto min-h-0 pb-10 pr-2 flex flex-col [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200 hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
             {folders.length > 0 ? (
               viewMode === 'grid' ? (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -115,32 +120,32 @@ const MainArchive = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: idx * 0.05 }}
                 onClick={() => navigate(`/archive/${tapel}/${folder.name.toLowerCase().trim().replace(/\s+/g, "_")}`)}
-                className="group bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-2 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col min-h-[180px] md:min-h-[220px]"
+                className="group bg-white rounded-3xl shadow-lg shadow-slate-200/40 hover:shadow-2xl hover:shadow-emerald-500/10 hover:-translate-y-1.5 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col border border-slate-100"
             >
                 {/* TOP AREA: CONTENT */}
-                <div className="flex-1 p-6 md:p-8 flex flex-col justify-between bg-white">
+                <div className="flex-1 p-5 md:p-6 flex flex-col bg-white">
                     <FiHardDrive 
-                        size={32} 
+                        size={24} 
                         className="text-slate-300 group-hover:text-emerald-500 transition-colors duration-300" 
                     />
                     
-                        <div className="mt-6">
-                            <h3 className="text-[14px] md:text-[18px] font-black text-slate-900 uppercase tracking-tighter leading-tight">
-                                {folder.name.replace(/_/g, " ")}
-                            </h3>
-                            <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-[0.2em]">
-                                Digital Archive
-                            </p>
-                        </div>
+                    <div className="mt-5">
+                        <h3 className="text-[14px] md:text-[16px] font-bold text-slate-800 uppercase tracking-tight leading-snug line-clamp-2">
+                            {folder.name.replace(/_/g, " ")}
+                        </h3>
+                        <p className="text-[9px] font-semibold text-slate-400 mt-1.5 uppercase tracking-widest">
+                            Digital Archive
+                        </p>
+                    </div>
                 </div>
 
-                {/* BOTTOM AREA: SOLID EMERALD (Sharp & Seamless) */}
-                <div className="h-12 md:h-14 w-full bg-emerald-500 flex items-center justify-between px-6 md:px-8">
-                    <div className="flex gap-4 text-[10px] font-black uppercase text-white/90 tracking-widest">
+                {/* BOTTOM AREA: SOLID EMERALD */}
+                <div className="py-3.5 px-5 md:px-6 bg-emerald-500 flex items-center justify-between transition-colors duration-300">
+                    <div className="flex gap-4 text-[10px] font-bold uppercase text-white/95 tracking-wider">
                         <span>{folder.folderCount} Folder</span>
                         <span>{folder.fileCount} File</span>
                     </div>
-                    <FiChevronRight className="text-white group-hover:translate-x-1 transition-transform" size={20} />
+                    <FiChevronRight className="text-white/80 group-hover:text-white group-hover:translate-x-1 transition-all" size={16} />
                 </div>
             </motion.div>
         ))}
@@ -159,13 +164,13 @@ const MainArchive = () => {
                         <td className="px-8 py-7">
                             <div className="flex items-center gap-5">
                              
-                                <span className="text-sm md:text-base font-black text-slate-900 uppercase tracking-tight">
+                                <span className="text-sm md:text-base font-bold text-slate-900 uppercase tracking-tight">
                                     {folder.name.replace(/_/g, " ")}
                                 </span>
                             </div>
                         </td>
                         <td className="px-8 py-7 text-right">
-                             <div className="flex justify-end gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                             <div className="flex justify-end gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                  <span>{folder.folderCount} Folder</span>
                                  <span>{folder.fileCount} File</span>
                              </div>

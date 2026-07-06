@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import Sidebar from './sidebar';
+import Header from './Header';
 
 function MainLayout() {
   const navigate = useNavigate();
@@ -16,13 +17,14 @@ function MainLayout() {
   }, [navigate]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-slate-100/50">
       {/* Sidebar tetap fixed */}
       <Sidebar />
 
       {/* Konten Utama */}
-      <div className="flex-1 ml-0 md:ml-64 flex flex-col min-w-0 transition-all duration-300">
-        <main className="px-4 pb-0 pt-2 md:px-8 md:pb-0 md:pt-4 flex-1 flex flex-col min-h-0">
+      <div className="flex-1 ml-0 md:ml-[18rem] flex flex-col min-w-0 transition-all duration-300">
+        <main className="px-4 pb-0 pt-0 md:pr-8 md:pl-2 md:pb-0 md:pt-0 flex-1 flex flex-col min-h-0">
+          <Header />
           <Outlet />
         </main>
       </div>

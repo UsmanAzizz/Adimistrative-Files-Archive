@@ -142,17 +142,8 @@ const Users = () => {
     .sort((a, b) => a.role === 'admin' ? -1 : 1);
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pt-0 pb-10 px-4 sm:px-6 overflow-x-hidden">
+    <div className="flex-1 overflow-y-auto bg-slate-50/50 pt-2 pb-10 px-4 sm:px-6 overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-            Manajemen <span className="text-emerald-600">User</span>
-          </h1>
-          <p className="text-slate-400 text-[10px] font-bold tracking-[0.2em] mt-1 uppercase">
-            Daftar Pengguna & Hak Akses
-          </p>
-        </div>
-
         {/* Search Bar & Add Button Row */}
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           {/* Search Bar dengan Radius Lebih Besar */}
@@ -169,7 +160,7 @@ const Users = () => {
           {/* Button dengan Radius Senada */}
           <button
             onClick={handleOpenAdd}
-            className="w-full sm:w-auto bg-slate-900 text-white px-8 py-4 rounded-[2rem] font-black flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all shadow-lg active:scale-95"
+            className="w-full sm:w-auto bg-slate-900 text-white px-8 py-4 rounded-[2rem] font-bold flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all shadow-lg active:scale-95"
           >
             <FiUserPlus size={20} />
             <span>Tambah User</span>
@@ -177,10 +168,10 @@ const Users = () => {
         </div>
 
         {/* Clean Professional Table - Responsive */}
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-slate-200 rounded overflow-hidden shadow-sm">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-500">
                   <th className="px-6 py-4">Nama Lengkap</th>
                   <th className="px-6 py-4 hidden sm:table-cell">Username</th>
                   <th className="px-6 py-4 text-center hidden sm:table-cell">Role</th>
@@ -199,14 +190,14 @@ const Users = () => {
                         <div className="font-bold text-slate-700 text-sm">{u.nama}</div>
                         <div className="sm:hidden flex items-center gap-2 mt-1">
                           <span className="text-slate-400 text-xs font-medium">@{u.username}</span>
-                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded tracking-widest ${u.role === 'admin' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                          <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded tracking-widest ${u.role === 'admin' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
                             {u.role}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-slate-500 text-xs font-medium hidden sm:table-cell">@{u.username}</td>
                       <td className="px-6 py-4 text-center hidden sm:table-cell">
-                        <span className={`text-[9px] font-black uppercase px-2 py-1 rounded tracking-widest ${u.role === 'admin' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                        <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded tracking-widest ${u.role === 'admin' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
                           {u.role}
                         </span>
                       </td>
@@ -223,7 +214,7 @@ const Users = () => {
         </div>
       </div>
 
-      <Dialog isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={currentUser ? 'Edit Profil User' : 'Tambah User Baru'} size="lg">
+      <Dialog isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={currentUser ? 'Edit Profil User' : 'Tambah User Baru'} size="xl">
         <form onSubmit={handleSubmit} className="py-2 -mx-2 md:mx-0">
 
           {/* MOBILE ONLY: Minimal Step Indicator */}
@@ -235,9 +226,9 @@ const Users = () => {
           <div className="flex flex-col md:flex-row gap-0">
 
             {/* LEFT SECTION / STEP 1 */}
-            <div className={`md:w-[40%] md:shrink-0 md:pr-8 ${currentStep !== 1 ? 'hidden md:block' : 'block'} px-2 md:px-0`}>
-              <div className="border-b border-slate-100 pb-2 mb-4">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800">
+            <div className={`md:w-[45%] md:shrink-0 md:pr-10 ${currentStep !== 1 ? 'hidden md:block' : 'block'} px-2 md:px-0`}>
+              <div className="border-b border-slate-200 pb-2 mb-4">
+                <h4 className="text-base font-bold text-slate-900">
                   {currentStep === 1 && <span className="md:hidden text-emerald-600 mr-2">01.</span>}
                   Informasi Akun
                 </h4>
@@ -245,42 +236,42 @@ const Users = () => {
 
               <div className="space-y-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Nama Lengkap</label>
+                  <label className="text-xs font-bold text-slate-700 mb-1 block">Nama Lengkap</label>
                   <input
-                    className="w-full p-3.5 bg-slate-50 border border-transparent rounded-xl outline-none focus:bg-white focus:border-emerald-500 transition-all text-sm font-semibold"
+                    className="w-full p-3 bg-white border border-slate-300 rounded-sm outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all text-sm font-medium text-slate-900"
                     value={formData.nama}
                     onChange={e => setFormData({ ...formData, nama: e.target.value })}
                     required
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Username</label>
+                  <label className="text-xs font-bold text-slate-700 mb-1 block">Username</label>
                   <input
-                    className="w-full p-3.5 bg-slate-50 border border-transparent rounded-xl outline-none focus:bg-white focus:border-emerald-500 transition-all text-sm font-semibold"
+                    className="w-full p-3 bg-white border border-slate-300 rounded-sm outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all text-sm font-medium text-slate-900"
                     value={formData.username}
                     onChange={e => setFormData({ ...formData, username: e.target.value })}
                     required
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Password</label>
+                  <label className="text-xs font-bold text-slate-700 mb-1 block">Password</label>
                   <input
                     type="password"
                     placeholder={currentUser ? "Kosongkan jika tidak diubah" : "Password Akun"}
-                    className="w-full p-3.5 bg-slate-50 border border-transparent rounded-xl outline-none focus:bg-white focus:border-emerald-500 transition-all text-sm font-semibold"
+                    className="w-full p-3 bg-white border border-slate-300 rounded-sm outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all text-sm font-medium text-slate-900"
                     onChange={e => setFormData({ ...formData, password: e.target.value })}
                     required={!currentUser}
                   />
                 </div>
-                <div className="space-y-1 pt-3 border-t border-slate-50 mt-3">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Level Akses</label>
+                <div className="space-y-1 pt-3 border-t border-slate-200 mt-3">
+                  <label className="text-xs font-bold text-slate-700 mb-2 block">Level Akses</label>
                   <div className="flex gap-2">
                     {['client', 'admin'].map((r) => (
                       <button
                         key={r}
                         type="button"
                         onClick={() => setFormData({ ...formData, role: r })}
-                        className={`flex-1 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border-2 ${formData.role === r ? 'bg-slate-900 border-slate-900 text-white shadow-sm' : 'bg-white border-slate-100 text-slate-400'
+                        className={`flex-1 py-3 rounded-sm font-bold text-xs uppercase tracking-wide transition-all border ${formData.role === r ? 'bg-slate-900 border-slate-900 text-white shadow-sm' : 'bg-white border-slate-300 text-slate-600 hover:border-slate-400'
                           }`}
                       >
                         {r}
@@ -296,27 +287,37 @@ const Users = () => {
 
             {/* RIGHT SECTION / STEP 2 */}
             <div className={`md:flex-1 md:pl-8 ${currentStep !== 2 ? 'hidden md:block' : 'block'} mt-4 md:mt-0 px-0 md:px-0`}>
-              <div className="border-b border-slate-100 pb-2 mb-4">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 px-1">
+              <div className="border-b border-slate-200 pb-2 mb-4">
+                <h4 className="text-base font-bold text-slate-900 px-1">
                   {currentStep === 2 && <span className="md:hidden text-emerald-600 mr-2">02.</span>}
                   Hak Akses Jabatan
                 </h4>
               </div>
 
-              <div className="border border-slate-100 rounded-xl bg-slate-50/30 overflow-hidden h-[280px] md:h-[310px] flex flex-col mb-4 w-full -mx-0">
-                <div className="flex-1 overflow-y-auto divide-y divide-slate-50 custom-scrollbar">
-                  {Object.keys(rolesData).map(roleName => (
-                    <div
-                      key={roleName}
-                      onClick={() => setRolesData({ ...rolesData, [roleName]: !rolesData[roleName] })}
-                      className="flex items-center justify-between px-6 py-3 hover:bg-white cursor-pointer transition-all"
-                    >
-                      <span className="text-sm md:text-[10px] text-slate-600 uppercase font-bold tracking-wider">{roleName.replace(/_/g, ' ')}</span>
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${rolesData[roleName] ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm' : 'bg-white border-slate-200'}`}>
-                        {rolesData[roleName] && <FiCheck size={12} strokeWidth={4} />}
+              <div className="border border-slate-200 rounded-sm bg-slate-50/50 overflow-hidden h-[280px] md:h-[310px] flex flex-col mb-4 w-full -mx-0">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    {Object.keys(rolesData).map(roleName => (
+                      <div
+                        key={roleName}
+                        className={`p-3 border rounded-sm flex items-center justify-between cursor-pointer transition-all ${
+                          rolesData[roleName] 
+                            ? 'bg-emerald-50 border-emerald-400 shadow-sm' 
+                            : 'bg-white hover:border-slate-300 border-slate-200'
+                        }`}
+                        onClick={() => setRolesData({ ...rolesData, [roleName]: !rolesData[roleName] })}
+                      >
+                        <span className="text-xs font-semibold text-slate-800 break-words pr-2 capitalize">{roleName.replace(/_/g, ' ')}</span>
+                        <div className={`w-5 h-5 rounded-sm border shrink-0 flex items-center justify-center transition-all ${
+                          rolesData[roleName] 
+                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm' 
+                            : 'bg-white border-slate-300'
+                        }`}>
+                          {rolesData[roleName] && <FiCheck size={14} strokeWidth={3} />}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -331,7 +332,7 @@ const Users = () => {
               <button
                 type="button"
                 onClick={() => { setIsModalOpen(false); setCurrentUser(null); }}
-                className="flex-1 bg-white text-slate-400 py-4 rounded-xl font-bold text-xs uppercase tracking-widest border border-slate-100 hover:bg-slate-50 transition-all"
+                className="flex-1 bg-white text-slate-500 py-4 rounded font-medium text-sm border border-slate-200 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all"
               >
                 Batal
               </button>
@@ -342,7 +343,7 @@ const Users = () => {
                   if (!form.reportValidity()) return;
                   setCurrentStep(2);
                 }}
-                className="flex-[2] bg-slate-900 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl active:scale-95"
+                className="flex-[2] bg-slate-900 text-white py-4 rounded font-medium text-sm hover:bg-emerald-600 transition-all shadow-xl active:scale-95"
               >
                 Lanjut
               </button>
@@ -353,13 +354,13 @@ const Users = () => {
               <button
                 type="button"
                 onClick={() => setCurrentStep(1)}
-                className="flex-1 bg-white text-slate-400 py-4 rounded-xl font-black text-xs uppercase tracking-widest border border-slate-100"
+                className="flex-1 bg-white text-slate-400 py-4 rounded font-medium text-sm border border-slate-100"
               >
                 Kembali
               </button>
               <button
                 type="submit"
-                className="flex-[2] bg-slate-900 text-white py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-emerald-600 transition-all shadow-xl active:scale-95"
+                className="flex-[2] bg-slate-900 text-white py-4 rounded font-semibold text-sm hover:bg-emerald-600 transition-all shadow-xl active:scale-95"
               >
                 {currentUser ? 'Simpan' : 'Tambah'}
               </button>
@@ -369,14 +370,14 @@ const Users = () => {
             <div className="hidden md:flex gap-3">
               <button
                 type="submit"
-                className="flex-[2] bg-slate-900 text-white py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] hover:bg-emerald-600 transition-all shadow-xl active:scale-95"
+                className="flex-[2] bg-slate-900 text-white py-4 rounded font-semibold text-sm hover:bg-emerald-600 transition-all shadow-xl active:scale-95"
               >
                 {currentUser ? 'Simpan' : 'Tambah'}
               </button>
               <button
                 type="button"
                 onClick={() => { setIsModalOpen(false); setCurrentUser(null); }}
-                className="flex-1 bg-white text-slate-400 py-4 rounded-xl font-bold text-xs uppercase tracking-widest border border-slate-100 hover:bg-slate-50 transition-all"
+                className="flex-1 bg-white text-slate-500 py-4 rounded font-medium text-sm border border-slate-200 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all"
               >
                 Batal
               </button>
@@ -390,7 +391,7 @@ const Users = () => {
       <Dialog isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Hapus User" type="error" size="sm">
         <p className="text-slate-500 text-sm">Hapus permanen <span className="font-bold text-slate-900">{currentUser?.nama}</span>?</p>
         <div className="flex flex-col gap-2 mt-6">
-          <button onClick={handleDelete} className="bg-rose-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest">Ya, Hapus</button>
+          <button onClick={handleDelete} className="bg-rose-500 text-white py-4 rounded font-medium text-sm">Ya, Hapus</button>
           <button onClick={() => setIsDeleteOpen(false)} className="text-slate-400 font-bold text-xs uppercase py-2">Batal</button>
         </div>
       </Dialog>

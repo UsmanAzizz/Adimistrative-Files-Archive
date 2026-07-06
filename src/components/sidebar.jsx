@@ -48,28 +48,28 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* DESKTOP SIDEBAR */}
-      <aside className="hidden md:flex w-64 h-screen bg-slate-900 text-slate-300 flex-col fixed left-0 top-0 z-50 border-r border-slate-800">
+      {/* DESKTOP SIDEBAR - FLOATING STYLE */}
+      <aside className="hidden md:flex w-64 h-screen bg-slate-900 text-slate-400 flex-col fixed left-0 top-0 z-50 rounded-none border-r border-slate-800 shadow-2xl shadow-slate-900/50">
   
   {/* HEADER LOGO */}
   <div className="p-6 flex items-center gap-3">
- <div className="relative w-10 h-10 bg-white rounded-[10px] flex items-center justify-center shadow-sm border border-emerald-400 overflow-hidden">
+ <div className="relative w-10 h-10 bg-slate-800 rounded-[12px] flex items-center justify-center shadow-sm border border-slate-700 overflow-hidden">
       <img 
         src={logoDafa} 
         alt="Logo DAFA" 
-        className="w-6 h-6 object-contain" 
+        className="w-5 h-5 object-contain" 
       />
     </div>
     <div>
-      <h1 className="text-white font-bold leading-none tracking-tight">DAFA</h1>
-      <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-semibold">
+      <h1 className="text-white font-bold leading-none tracking-tight text-lg">DAFA</h1>
+      <p className="text-[9px] text-slate-400 mt-1 uppercase tracking-widest font-semibold">
         Dipo Archive System
       </p>
     </div>
   </div>
 
   {/* NAVIGATION */}
-<nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto custom-scrollbar">
+<nav className="flex-1 px-4 py-2 space-y-1.5 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-700 hover:[&::-webkit-scrollbar-thumb]:bg-slate-600">
   {filteredMenu.map((item) => (
     <NavLink 
       key={item.id} 
@@ -78,10 +78,10 @@ const Sidebar = () => {
     >
       {({ isActive }) => (
         <div className={`
-          flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200
+          flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 cursor-pointer
           ${isActive 
-            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' 
-            : 'hover:bg-slate-800 hover:text-white'}
+            ? 'bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20' 
+            : 'hover:bg-slate-800 text-slate-400 hover:text-white'}
         `}>
           
           <motion.div
@@ -91,13 +91,13 @@ const Sidebar = () => {
             className="flex items-center justify-center"
           >
             <item.icon 
-              className={`text-xl transition-colors duration-200 
-                ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-emerald-400'}
+              className={`text-xl transition-colors duration-300 
+                ${isActive ? 'text-emerald-400' : 'text-slate-500 group-hover:text-slate-300'}
               `} 
             />
           </motion.div>
 
-          <span className="text-sm font-bold">{item.label}</span>
+          <span className={`text-sm ${isActive ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
         </div>
       )}
     </NavLink>
@@ -105,16 +105,15 @@ const Sidebar = () => {
 </nav>
 
   {/* FOOTER / LOGOUT */}
- <div className="p-4 border-t border-slate-100/50">
+ <div className="p-4 border-t border-slate-800">
     <button 
         onClick={handleLogout} 
-        className="group w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-slate-400 transition-all duration-300 hover:bg-rose-50 hover:text-rose-600 active:scale-[0.98] relative overflow-hidden"
+        className="group w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-slate-400 transition-all duration-300 hover:bg-white hover:text-rose-600 active:scale-[0.98] cursor-pointer shadow-sm"
     >
-        <FiLogOut className="text-xl transition-transform duration-300 group-hover:-translate-x-1 group-hover:scale-110" />
-        <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+        <FiLogOut className="text-xl text-slate-500 group-hover:text-rose-600 transition-transform duration-300 group-hover:-translate-x-1" />
+        <span className="text-[11px] font-bold uppercase tracking-widest">
             Keluar Aplikasi
         </span>
-        <div className="absolute left-0 w-1 h-0 bg-rose-500 transition-all duration-300 group-hover:h-1/2" />
     </button>
 </div>
 

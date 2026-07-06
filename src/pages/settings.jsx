@@ -125,23 +125,12 @@ const handleDeleteColumn = async (name) => {
         showToast('error', 'Gagal Menghapus', msg);
     }
 };
-    if (loading) return <div className="p-20 text-center font-black text-slate-300 animate-pulse tracking-widest uppercase">Initializing Schema...</div>;
+    if (loading) return <div className="p-20 text-center font-bold text-slate-300 animate-pulse tracking-widest uppercase">Initializing Schema...</div>;
 
     return (
-        <div className="max-w-4xl mx-auto space-y-12 pb-20 px-4 md:px-0 select-none">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="max-w-4xl mx-auto space-y-12 px-4 md:px-0 select-none pt-2">
             
-            {/* --- HEADER SECTION --- */}
-            <div className="flex flex-col md:flex-row items-end md:items-center justify-between gap-6">
-                <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-                        Pengaturan <span className="text-emerald-600">Sistem</span>
-                    </h1>
-                    <p className="text-slate-400 text-[10px] font-bold tracking-[0.2em] mt-1 uppercase">
-                        Konfigurasi Global & Skema Jabatan
-                    </p>
-                </div>
-            </div>
-
             {/* --- GLOBAL CONFIG SECTION --- */}
             <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden">
                 <div className="p-8 space-y-8">
@@ -152,7 +141,7 @@ const handleDeleteColumn = async (name) => {
                                 <FiDatabase size={24} />
                             </div>
                             <div>
-                                <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">Tahun Pelajaran</h3>
+                                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-tight">Tahun Pelajaran</h3>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Siklus Akademik Aktif</p>
                             </div>
                         </div>
@@ -180,12 +169,12 @@ const handleDeleteColumn = async (name) => {
                     <div className="space-y-6">
                         <div className="flex items-center justify-between px-2">
                             <div>
-                                <h2 className="text-sm font-black text-slate-900 uppercase tracking-tight">Daftar Jabatan</h2>
+                                <h2 className="text-sm font-bold text-slate-900 uppercase tracking-tight">Daftar Jabatan</h2>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Skema Hak Akses</p>
                             </div>
                             <button
                                 onClick={() => setIsColModalOpen(true)}
-                                className="flex items-center gap-2 bg-slate-900 text-white hover:bg-emerald-600 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95"
+                                className="flex items-center gap-2 bg-slate-900 text-white hover:bg-emerald-600 px-6 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95"
                             >
                                 <FiPlus size={16} /> Tambah Jabatan
                             </button>
@@ -227,7 +216,7 @@ const handleDeleteColumn = async (name) => {
             <Dialog isOpen={isColModalOpen} onClose={() => setIsColModalOpen(false)} title="Tambah Jabatan Baru">
                 <div className="space-y-6 pt-4 px-2">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Jabatan</label>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Nama Jabatan</label>
                         <input
                             className="w-full p-4.5 bg-slate-50 border border-transparent rounded-2xl font-bold text-slate-900 outline-none focus:bg-white focus:border-emerald-500 transition-all text-sm shadow-inner"
                             placeholder="Contoh: Kepala Sekolah"
@@ -237,7 +226,7 @@ const handleDeleteColumn = async (name) => {
                     </div>
                     <button
                         onClick={handleAddColumn}
-                        className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-slate-200 hover:bg-emerald-600 transition-all active:scale-95"
+                        className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-slate-200 hover:bg-emerald-600 transition-all active:scale-95"
                     >
                         Buat Jabatan
                     </button>
@@ -248,7 +237,7 @@ const handleDeleteColumn = async (name) => {
             <Dialog isOpen={isEditColOpen} onClose={() => setIsEditColOpen(false)} title="Ubah Nama Jabatan">
                 <div className="space-y-6 pt-4 px-2">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Jabatan Baru</label>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Nama Jabatan Baru</label>
                         <input
                             className="w-full p-4.5 bg-slate-50 border border-transparent rounded-2xl font-bold text-slate-900 outline-none focus:bg-white focus:border-emerald-500 transition-all text-sm shadow-inner"
                             value={editCol.newName}
@@ -257,13 +246,14 @@ const handleDeleteColumn = async (name) => {
                     </div>
                     <button
                         onClick={handleRenameColumn}
-                        className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-slate-200 hover:bg-emerald-600 transition-all active:scale-95"
+                        className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-slate-200 hover:bg-emerald-600 transition-all active:scale-95"
                     >
                         Konfirmasi Perubahan
                     </button>
                 </div>
             </Dialog>
 
+        </div>
         </div>
     );
 };

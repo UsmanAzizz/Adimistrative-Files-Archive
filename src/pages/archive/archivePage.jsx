@@ -163,16 +163,9 @@
 
     return (
       <div className="space-y-8 select-none">
-        <header>
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight">
-            Arsip <span className="text-emerald-600">Dokumen</span>
-          </h1>
-          <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mt-1">Directory Library</p>
-        </header>
-
-      <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 pt-4">
     {loading ? (
-      <div className="col-span-full py-10 text-center font-black text-slate-300 animate-pulse tracking-widest uppercase">
+      <div className="col-span-full py-10 text-center font-bold text-slate-300 animate-pulse tracking-widest uppercase">
         Loading Database...
       </div>
     ) : (
@@ -217,7 +210,7 @@
 
                 {/* Info Text */}
                 <div className="space-y-1">
-                  <h3 className="text-lg md:text-2xl font-black text-slate-800 tracking-tight">
+                  <h3 className="text-lg md:text-2xl font-bold text-slate-800 tracking-tight">
                     {item.ta}
                   </h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
@@ -231,7 +224,7 @@
                 <div className="absolute inset-0 bg-black/10" />
                 <div className="relative z-10 flex items-center justify-center gap-2">
                   <div className={`h-1.5 w-1.5 rounded-full ${isCurrentTa ? 'bg-white animate-pulse' : 'bg-white/40'}`} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">
                     {isCurrentTa ? 'Aktif' : 'Arsip'}
                   </span>
                 </div>
@@ -253,7 +246,7 @@
         <div className="relative w-10 h-10 md:w-14 md:h-14 rounded-full border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300 group-hover:bg-white group-hover:text-emerald-600 group-hover:border-white transition-all duration-300 mb-4">
           <FiPlus className="text-xl md:text-2xl" />
         </div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-white text-center">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-white text-center">
           Tambah Baru
         </p>
       </Card>
@@ -273,8 +266,8 @@
               onChange={(e) => setNewTa(e.target.value)}
             />
             <div className="grid grid-cols-2 gap-3 mt-6">
-              <button type="button" onClick={() => setIsDialogOpen(false)} className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-200">Batal</button>
-              <button type="submit" disabled={isSubmitting} className="py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-emerald-600 disabled:opacity-50">{isSubmitting ? 'Proses...' : 'Buat Folder'}</button>
+              <button type="button" onClick={() => setIsDialogOpen(false)} className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200">Batal</button>
+              <button type="submit" disabled={isSubmitting} className="py-4 bg-slate-900 text-white rounded-2xl font-bold uppercase tracking-widest text-[10px] hover:bg-emerald-600 disabled:opacity-50">{isSubmitting ? 'Proses...' : 'Buat Folder'}</button>
             </div>
           </form>
         </Dialog>
@@ -287,7 +280,7 @@
         >
           <div className="text-center py-2">
             <p className="text-slate-600 font-medium">
-              Hapus arsip <span className="font-black text-slate-900">TA {deleteConfig.ta}</span>?
+              Hapus arsip <span className="font-bold text-slate-900">TA {deleteConfig.ta}</span>?
             </p>
             <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest mt-2">Tindakan ini permanen!</p>
             
@@ -295,14 +288,14 @@
               <button 
                 type="button" 
                 onClick={() => setDeleteConfig({ ...deleteConfig, isOpen: false })} 
-                className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-200"
+                className="py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-200"
               >
                 Batal
               </button>
               <button 
                 onClick={() => handleDelete()} 
                 disabled={isSubmitting} 
-                className="py-4 bg-rose-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-rose-600 shadow-lg shadow-rose-500/20 disabled:opacity-50"
+                className="py-4 bg-rose-500 text-white rounded-2xl font-bold uppercase tracking-widest text-[10px] hover:bg-rose-600 shadow-lg shadow-rose-500/20 disabled:opacity-50"
               >
                 {isSubmitting ? 'Proses...' : 'Ya, Hapus'}
               </button>
@@ -317,14 +310,14 @@
             style={{ top: contextMenu.y, left: contextMenu.x }}
           >
             <div className="px-4 py-2 border-b border-slate-50">
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Opsi Arsip</p>
+               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Opsi Arsip</p>
             </div>
             <button 
               onClick={() => handleDelete(null, contextMenu.item.id, contextMenu.item.ta)}
               className="w-full flex items-center gap-3 px-4 py-3 text-rose-500 hover:bg-rose-50 transition-colors"
             >
               <FiTrash2 size={16} />
-              <span className="text-xs font-black uppercase tracking-widest">Hapus Arsip</span>
+              <span className="text-xs font-bold uppercase tracking-widest">Hapus Arsip</span>
             </button>
           </div>
         )}

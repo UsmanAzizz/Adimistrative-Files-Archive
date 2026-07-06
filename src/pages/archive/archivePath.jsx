@@ -183,7 +183,7 @@ const ArchivePath = () => {
         <div className="flex flex-col flex-1 bg-[#FBFBFB] p-0 md:p-0 min-h-0">
 
             {/* --- NAVIGATOR BAR --- */}
-            <div className="shrink-0 bg-[#FBFBFB] pt-2 pb-4 flex flex-col gap-4">
+            <div className="shrink-0 bg-[#FBFBFB] pt-6 md:pt-8 pb-4 flex flex-col gap-4">
                 <div className="
     
             bg-white/95 
@@ -200,7 +200,7 @@ const ArchivePath = () => {
                         {/* Tombol Back - Sedikit lebih tegas */}
                         <button
                             onClick={handleBack}
-                            className="w-11 h-11 flex items-center justify-center bg-slate-50 hover:bg-slate-900 rounded-2xl transition-all duration-300 text-slate-700 hover:text-white active:scale-90 shrink-0 border border-slate-200/50"
+                            className="w-11 h-11 flex items-center justify-center bg-slate-50 hover:bg-slate-900 rounded-2xl transition-all duration-300 text-slate-700 hover:text-white active:scale-90 shrink-0 border border-slate-200/50 cursor-pointer"
                         >
                             <FiArrowLeft size={20} />
                         </button>
@@ -231,10 +231,10 @@ const ArchivePath = () => {
                                         <button
                                             onClick={() => navigate(segment.path)}
                                             className={`
-    group flex items-center px-3 py-2 rounded-md transition-all duration-200
+    group flex items-center px-3 py-2 rounded-md transition-all duration-200 cursor-pointer
     ${isLast
-                                                    ? 'text-blue-500 font-black cursor-default'
-                                                    : 'text-slate-400 hover:text-emerald-600 active:scale-95 font-bold'
+                                                    ? 'text-blue-600 font-semibold'
+                                                    : 'text-slate-500 hover:text-emerald-600 active:scale-95 font-medium'
                                                 }
 `}
                                         >
@@ -244,7 +244,7 @@ const ArchivePath = () => {
                                                     className={`transition-colors ${isLast ? 'text-emerald-600' : 'group-hover:text-emerald-600'}`}
                                                 />
                                             ) : (
-                                                <span className="text-[11px] uppercase tracking-widest leading-none">
+                                                <span className="text-[12px] uppercase tracking-wider leading-none">
                                                     {segment.name}
                                                 </span>
                                             )}
@@ -280,7 +280,6 @@ const ArchivePath = () => {
                             <div className="flex items-center gap-1.5 shrink-0">
                                 {canEdit && (
                                     <>
-                                        {/* Tombol Folder - Simple Slate */}
                                         <button
                                             onClick={() => { setModalType('create'); setFolderNameInput(''); setShowModal(true); }}
                                             className="
@@ -291,7 +290,7 @@ const ArchivePath = () => {
                  
                     flex items-center gap-2 
                     transition-colors duration-200
-                    active:scale-95
+                    active:scale-95 cursor-pointer
                 "
                                         >
                                             <FiPlus size={16} strokeWidth={2.5} />
@@ -319,10 +318,10 @@ const ArchivePath = () => {
 
                             {/* View Toggle - Compact */}
                             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/30">
-                                <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}>
+                                <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === 'grid' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}>
                                     <FiGrid size={16} />
                                 </button>
-                                <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}>
+                                <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === 'list' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-400'}`}>
                                     <FiList size={16} />
                                 </button>
                             </div>
@@ -332,9 +331,9 @@ const ArchivePath = () => {
             </div>
 
             {/* --- EXPLORER SECTION --- */}
-            <div className="flex-1 overflow-y-auto min-h-0 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent pr-1 flex flex-col">
+            <div className="flex-1 overflow-y-auto min-h-0 pr-1 flex flex-col [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200 hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
                 {loading ? (
-                    <div className="py-20 text-center animate-pulse text-slate-300 font-black uppercase text-[10px] tracking-[0.3em]">Memuat...</div>
+                    <div className="py-20 text-center animate-pulse text-slate-300 font-bold uppercase text-[10px] tracking-[0.3em]">Memuat...</div>
                 ) : (
                 <div className={viewMode === 'grid' ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 p-3" : "bg-white rounded-b-3xl rounded-t-none border border-slate-100 shadow-sm flex flex-col grow shrink-0"}>
                     {viewMode === 'list' && (
@@ -376,7 +375,7 @@ const ArchivePath = () => {
                                     }}
                                     className={viewMode === 'grid'
                                         ? `group p-5 rounded-[1.25rem] transition-all cursor-pointer text-center relative ${isActive ? 'z-20 bg-white ring-2 ring-emerald-500 shadow-lg' : 'z-10 hover:bg-white hover:shadow-xl hover:ring-1 hover:ring-slate-200 hover:-translate-y-1'}`
-                                        : `group grid grid-cols-12 items-center gap-4 px-8 py-6 border-b border-slate-50 relative transition-colors ${isActive ? 'z-20 bg-emerald-50/50' : 'z-10 hover:bg-slate-50/50'}`
+                                        : `group grid grid-cols-12 items-center gap-4 px-8 py-6 border-b border-slate-50 relative transition-colors cursor-pointer ${isActive ? 'z-20 bg-emerald-50/50' : 'z-10 hover:bg-slate-50/50'}`
                                     }>
 
                                     {/* TOMBOL TITIK TIGA - Dipasang di layer terpisah agar tidak menggeser layout */}
@@ -429,17 +428,17 @@ const ArchivePath = () => {
                                 </div>
                             );
                         })}
-                </div>
-            )}
 
-            {/* --- EMPTY STATE --- */}
-            {!loading && items.length === 0 && (
-                <div className="flex flex-col items-center justify-center grow pb-10">
-                    <div className="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center mb-6 shadow-sm border border-slate-100/50">
-                        <FiFolder size={40} className="text-slate-300" />
-                    </div>
-                    <p className="text-slate-700 font-bold text-sm tracking-tight mb-1">Folder Kosong</p>
-                    <p className="text-slate-400 text-[11px] font-medium">Belum ada berkas atau folder di sini.</p>
+                    {/* --- EMPTY STATE --- */}
+                    {!loading && items.length === 0 && (
+                        <div className="flex flex-col items-center justify-center grow py-20 md:py-32">
+                            <div className="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center mb-6 shadow-sm border border-slate-100/50">
+                                <FiFolder size={40} className="text-slate-300" />
+                            </div>
+                            <p className="text-slate-700 font-bold text-sm tracking-tight mb-1">Folder Kosong</p>
+                            <p className="text-slate-400 text-[11px] font-medium">Belum ada berkas atau folder di sini.</p>
+                        </div>
+                    )}
                 </div>
             )}
             </div>
@@ -499,8 +498,8 @@ const ArchivePath = () => {
                                 placeholder="Masukkan nama..." value={folderNameInput} onChange={(e) => setFolderNameInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleFolderAction()} />
                             <div className="grid grid-cols-2 gap-3">
-                                <button onClick={() => setShowModal(false)} className="py-4 font-black text-[10px] uppercase text-slate-400 bg-slate-50 rounded-2xl">Batal</button>
-                                <button onClick={handleFolderAction} className="py-4 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase shadow-md shadow-emerald-100">Simpan</button>
+                                <button onClick={() => setShowModal(false)} className="py-4 font-bold text-[10px] uppercase text-slate-400 bg-slate-50 rounded-2xl">Batal</button>
+                                <button onClick={handleFolderAction} className="py-4 bg-emerald-600 text-white rounded-2xl font-bold text-[10px] uppercase shadow-md shadow-emerald-100">Simpan</button>
                             </div>
                         </div>
                     )}
@@ -515,14 +514,14 @@ const ArchivePath = () => {
 const ActionMenu = ({ item, canEdit, handleDownload, handleDelete, ...props }) => (
     <div className="w-48 bg-white rounded-xl shadow-2xl border border-slate-100 py-2 animate-in fade-in zoom-in-95">
         <button onClick={(e) => { e.stopPropagation(); handleDownload(item); props.setActiveMenu(null); }}
-            className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 flex items-center gap-3"><FiDownload size={16} /> Download</button>
+            className="w-full px-4 py-2.5 text-left text-[10px] font-bold uppercase text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 flex items-center gap-3"><FiDownload size={16} /> Download</button>
         {canEdit && (
             <>
                 <div className="h-px bg-slate-50 my-1 mx-2" />
                 <button onClick={(e) => { e.stopPropagation(); props.setModalType('edit'); props.setSelectedItem(item); props.setFolderNameInput(item.name); props.setShowModal(true); props.setActiveMenu(null); }}
-                    className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase text-slate-600 hover:bg-slate-50 flex items-center gap-3"><FiEdit2 size={16} /> Ubah Nama</button>
+                    className="w-full px-4 py-2.5 text-left text-[10px] font-bold uppercase text-slate-600 hover:bg-slate-50 flex items-center gap-3"><FiEdit2 size={16} /> Ubah Nama</button>
                 <button onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
-                    className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase text-red-500 hover:bg-red-50 flex items-center gap-3"><FiTrash2 size={16} /> Hapus</button>
+                    className="w-full px-4 py-2.5 text-left text-[10px] font-bold uppercase text-red-500 hover:bg-red-50 flex items-center gap-3"><FiTrash2 size={16} /> Hapus</button>
             </>
         )}
     </div>

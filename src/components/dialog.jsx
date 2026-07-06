@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiCheckCircle, FiAlertCircle, FiInfo, FiAlertTriangle } from 'react-icons/fi';
 
 const Dialog = ({ isOpen, onClose, title, children, size = 'sm', type = 'default' }) => {
-  const maxWidths = { sm: '340px', md: '400px', lg: '500px' };
+  const maxWidths = { sm: '340px', md: '400px', lg: '500px', xl: '700px' };
 
   const statusConfig = {
     success: { icon: FiCheckCircle, color: '#10b981', bg: '#ecfdf5' },
@@ -54,7 +54,7 @@ const Dialog = ({ isOpen, onClose, title, children, size = 'sm', type = 'default
               width: '100%',
               maxWidth: maxWidths[size], 
               backgroundColor: '#ffffff',
-              borderRadius: '2rem', 
+              borderRadius: '0', 
               boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)',
               overflow: 'hidden',
               display: 'flex',
