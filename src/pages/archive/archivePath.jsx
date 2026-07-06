@@ -208,17 +208,7 @@ const ArchivePath = () => {
                         {/* Bar Navigasi dengan Custom Scrollbar Modern */}
                         <nav className="
             flex items-center gap-1 bg-[#F8FAFC] p-1 rounded-xl flex-1
-            overflow-x-auto border border-slate-200/40 shadow-inner
-            /* MODERN SCROLLBAR LOGIC */
-            scrollbar-thin 
-            scrollbar-thumb-slate-300 
-            scrollbar-track-transparent
-            hover:scrollbar-thumb-slate-400
-            [&::-webkit-scrollbar]:h-1
-            [&::-webkit-scrollbar-track]:bg-transparent
-            [&::-webkit-scrollbar-thumb]:rounded-full
-            [&::-webkit-scrollbar-thumb]:bg-slate-200
-            hover:[&::-webkit-scrollbar-thumb]:bg-slate-300
+            overflow-x-auto border border-slate-200/40 shadow-inner custom-scrollbar
         ">
                             {pathSegments.map((segment, i) => {
                                 const isLast = i === pathSegments.length - 1;
@@ -331,7 +321,7 @@ const ArchivePath = () => {
             </div>
 
             {/* --- EXPLORER SECTION --- */}
-            <div className="flex-1 overflow-y-auto min-h-0 pr-1 flex flex-col [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200 hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
+            <div className="flex-1 overflow-y-auto min-h-0 pr-1 flex flex-col custom-scrollbar">
                 {loading ? (
                     <div className="py-20 text-center animate-pulse text-slate-300 font-bold uppercase text-[10px] tracking-[0.3em]">Memuat...</div>
                 ) : (
@@ -431,7 +421,7 @@ const ArchivePath = () => {
 
                     {/* --- EMPTY STATE --- */}
                     {!loading && items.length === 0 && (
-                        <div className="flex flex-col items-center justify-center grow py-20 md:py-32">
+                        <div className="col-span-full flex flex-col items-center justify-center grow py-20 md:py-32">
                             <div className="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center mb-6 shadow-sm border border-slate-100/50">
                                 <FiFolder size={40} className="text-slate-300" />
                             </div>
