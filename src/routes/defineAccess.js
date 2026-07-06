@@ -41,10 +41,18 @@ router.get('/check-permission', verifyToken, async (req, res) => {
             return res.json({ can_edit: true, is_admin: true });
         }
 
-        // CEK ACTIVE TAHUN PELAJARAN
+        // CEK ACTIVE TAHUN PELAJARAN (OTOMATIS GANTI SETIAP 1 JULI)
         if (tapel) {
-            const [settings] = await db.query('SELECT active_tahun_pelajaran FROM global_settings WHERE id = 1');
-            if (settings.length > 0 && settings[0].active_tahun_pelajaran !== tapel) {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1; // 1-12
+            
+            // Jika bulan Juli (7) atau lebih, masuk tahun ajaran baru
+            const activeTapel = currentMonth >= 7 
+                ? `${currentYear}/${currentYear + 1}` 
+                : `${currentYear - 1}/${currentYear}`;
+
+            if (activeTapel !== tapel) {
                 return res.json({ can_edit: false });
             }
         }

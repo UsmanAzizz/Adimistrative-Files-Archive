@@ -134,36 +134,6 @@ const handleDeleteColumn = async (name) => {
             {/* --- GLOBAL CONFIG SECTION --- */}
             <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden">
                 <div className="p-8 space-y-8">
-                    {/* LIST TILE: TAHUN PELAJARAN */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b-2 border-slate-100">
-                        <div className="flex items-center gap-5">
-                            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner">
-                                <FiDatabase size={24} />
-                            </div>
-                            <div>
-                                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-tight">Tahun Pelajaran</h3>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Siklus Akademik Aktif</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <select
-                                className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:border-emerald-500 transition-all appearance-none cursor-pointer min-w-[140px]"
-                                value={globalData.active_tahun_pelajaran}
-                                onChange={(e) => setGlobalData({ ...globalData, active_tahun_pelajaran: e.target.value })}
-                            >
-                                {generateTapelOptions().map((tapel) => (
-                                    <option key={tapel} value={tapel}>{tapel}</option>
-                                ))}
-                            </select>
-                            <button
-                                onClick={handleUpdateTAPEL}
-                                className="p-3.5 bg-slate-900 text-white rounded-xl hover:bg-emerald-600 transition-all shadow-lg active:scale-95"
-                                title="Simpan Perubahan"
-                            >
-                                <FiSave size={18} />
-                            </button>
-                        </div>
-                    </div>
 
                     {/* LIST TILE: JABATAN / ROLES SECTION */}
                     <div className="space-y-6">

@@ -65,7 +65,7 @@
     // --- LOGIKA TA AKTIF ---
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
-    const currentTa = currentMonth > 7 
+    const currentTa = currentMonth >= 7 
       ? `${currentYear}/${currentYear + 1}` 
       : `${currentYear - 1}/${currentYear}`;
 
@@ -313,7 +313,10 @@
                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Opsi Arsip</p>
             </div>
             <button 
-              onClick={() => handleDelete(null, contextMenu.item.id, contextMenu.item.ta)}
+              onClick={() => {
+                setDeleteConfig({ isOpen: true, id: contextMenu.item.id, ta: contextMenu.item.ta });
+                setContextMenu({ ...contextMenu, show: false });
+              }}
               className="w-full flex items-center gap-3 px-4 py-3 text-rose-500 hover:bg-rose-50 transition-colors"
             >
               <FiTrash2 size={16} />
